@@ -406,9 +406,19 @@
         <div id="otpModalTeacher" style="position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:2000;">
           <div style="background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);width:90%;max-width:420px;padding:20px;">
             <h3 style=\"margin-bottom:10px;color:#1D1D1F;\">Reset password</h3>
+            <div style=\"display:flex;gap:8px;margin-bottom:8px;\">
+              <button id=\"tSelEmail\" style=\"padding:6px 10px;border-radius:8px;border:1px solid #E5E5E7;background:#5856D6;color:#fff;\">Email</button>
+              <button id=\"tSelPhone\" style=\"padding:6px 10px;border-radius:8px;border:1px solid #E5E5E7;background:#fff;\">Phone</button>
+            </div>
             <div id="tOtpStep1">
-              <label style="display:block;margin:8px 0 6px;">Email</label>
-              <input id="tOtpEmail" type="email" style="width:100%;padding:12px;border:2px solid #E5E5E7;border-radius:10px;">
+              <div id=\"tEmailRow\"> 
+                <label style=\"display:block;margin:8px 0 6px;\">Email</label>
+                <input id=\"tOtpEmail\" type=\"email\" style=\"width:100%;padding:12px;border:2px solid #E5E5E7;border-radius:10px;\"> 
+              </div>
+              <div id=\"tPhoneRow\" style=\"display:none;\"> 
+                <label style=\"display:block;margin:8px 0 6px;\">Phone (E.164, e.g. +15551234567)</label>
+                <input id=\"tOtpPhone\" type=\"tel\" style=\"width:100%;padding:12px;border:2px solid #E5E5E7;border-radius:10px;\"> 
+              </div>
               <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
                 <button id="tOtpCancel1" style="padding:10px 14px;border-radius:10px;border:1px solid #E5E5E7;background:#fff;">Cancel</button>
                 <button id="tOtpRequest" style="padding:10px 14px;border-radius:10px;border:none;background:#5856D6;color:#fff;">Send OTP</button>
@@ -434,36 +444,71 @@
           const step1 = document.getElementById('tOtpStep1');
           const step2 = document.getElementById('tOtpStep2');
           const emailInput = document.getElementById('tOtpEmail');
+          const phoneInput = document.getElementById('tOtpPhone');
+          const emailRow = document.getElementById('tEmailRow');
+          const phoneRow = document.getElementById('tPhoneRow');
           const codeInput = document.getElementById('tOtpCode');
           const newPassInput = document.getElementById('tOtpNewPass');
+          const selEmail = document.getElementById('tSelEmail');
+          const selPhone = document.getElementById('tSelPhone');
+          let mode = 'email';
           document.getElementById('tOtpCancel1').onclick = () => modal.remove();
           document.getElementById('tOtpBack').onclick = () => { step2.style.display='none'; step1.style.display='block'; };
+          selEmail.onclick = () => { mode='email'; selEmail.style.background='#5856D6'; selEmail.style.color='#fff'; selPhone.style.background='#fff'; selPhone.style.color='#000'; emailRow.style.display='block'; phoneRow.style.display='none'; };
+          selPhone.onclick = () => { mode='phone'; selPhone.style.background='#5856D6'; selPhone.style.color='#fff'; selEmail.style.background='#fff'; selEmail.style.color='#000'; emailRow.style.display='none'; phoneRow.style.display='block'; };
           document.getElementById('tOtpRequest').onclick = async () => {
             const email = emailInput.value.trim();
-            if (!email) return alert('Enter your email');
+            const phone = phoneInput.value.trim();
+            if (mode==='email' && !email) return alert('Enter your email');
+            if (mode==='phone' && !phone) return alert('Enter your phone number');
             try {
               const r = await fetch('http://localhost:5050/password-reset/request/teacher', {
-                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email })
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mode==='email' ? { email } : { phone })
               });
               const d = await r.json();
               if (!r.ok) return alert(d.message||'Failed to send OTP');
-              alert('OTP sent to your email' + (d.devCode ? ` (dev: ${d.devCode})` : ''));
+              if (mode==='email') {
+                const hint = document.createElement('div');
+                hint.style.cssText = 'margin-top:10px;color:#1D1D1F;font-size:0.9rem;word-break:break-all;';
+                hint.innerHTML = `OTP sent to your email.${d.devCode ? ` Demo OTP: <b>${d.devCode}</b>.` : ''} ${d.previewUrl ? `Preview: <a href="${d.previewUrl}" target="_blank">open</a>` : ''}`;
+                step1.appendChild(hint);
+              } else {
+                const hint = document.createElement('div');
+                hint.style.cssText = 'margin-top:10px;color:#1D1D1F;font-size:0.9rem;word-break:break-all;';
+                hint.innerHTML = `OTP sent to your phone.${d.devCode ? ` Demo OTP: <b>${d.devCode}</b>.` : ''}`;
+                step1.appendChild(hint);
+              }
               step1.style.display='none'; step2.style.display='block';
+              try {
+                const existing = document.getElementById('tOtpDevHint');
+                if (existing) existing.remove();
+                const dev = document.createElement('div');
+                dev.id = 'tOtpDevHint';
+                dev.style.cssText = 'margin-bottom:10px;color:#1D1D1F;font-size:0.9rem;word-break:break-all;';
+                dev.innerHTML = `${d.devCode ? `Demo OTP: <b>${d.devCode}</b>. ` : ''}${d.previewUrl ? `Preview: <a href="${d.previewUrl}" target="_blank">open</a>` : ''}`;
+                if (dev.textContent.trim() !== '' || dev.innerText.trim() !== '' || dev.innerHTML.replace(/<[^>]*>/g,'').trim() !== '') {
+                  step2.insertBefore(dev, step2.firstChild);
+                }
+                if (d.devCode) {
+                  document.getElementById('tOtpCode').value = d.devCode;
+                }
+              } catch (_) {}
             } catch(e){ alert('Network error'); }
           };
           document.getElementById('tOtpReset').onclick = async () => {
             const email = emailInput.value.trim();
+            const phone = phoneInput.value.trim();
             const otp = codeInput.value.trim();
             const newPassword = newPassInput.value;
             if (!otp || !newPassword) return alert('Enter OTP and new password');
             try {
               const v = await fetch('http://localhost:5050/password-reset/verify/teacher', {
-                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, otp })
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mode==='email' ? { email, otp } : { phone, otp })
               });
               const vd = await v.json();
               if (!v.ok) return alert(vd.message||'Invalid or expired OTP');
               const r = await fetch('http://localhost:5050/password-reset/reset/teacher', {
-                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, otp, newPassword })
+                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mode==='email' ? { email, otp, newPassword } : { phone, otp, newPassword })
               });
               const d = await r.json();
               if (!r.ok) return alert(d.message||'Failed to reset password');
@@ -511,12 +556,12 @@
         // Forgot password
         document.getElementById('forgotTeacher').addEventListener('click', function(e){ e.preventDefault(); openOtpModalTeacher(); });
 
-        // Social placeholders
+        // Social buttons -> backend OAuth routes
         document.getElementById('googleTeacher').addEventListener('click', function(){
-            alert('Google sign-in not yet configured. Backend OAuth needed.');
+            window.location.href = 'http://localhost:5050/auth/google';
         });
         document.getElementById('microsoftTeacher').addEventListener('click', function(){
-            alert('Microsoft sign-in not yet configured. Backend OAuth needed.');
+            window.location.href = 'http://localhost:5050/auth/microsoft';
         });
     </script>
 </body>

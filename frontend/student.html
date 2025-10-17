@@ -127,6 +127,7 @@
             margin-bottom: 0.5rem;
             transition: all 0.2s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .nav-item:hover, .nav-item.active {
@@ -338,6 +339,11 @@
             margin-bottom: 2rem;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
         }
 
         .dashboard-section:hover {
@@ -375,6 +381,7 @@
             align-items: center;
             gap: 0.5rem;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .view-all:hover {
@@ -702,6 +709,167 @@
             font-size: 0.85rem;
         }
 
+        /* Course Detail Pages */
+        .course-detail {
+            display: none;
+        }
+
+        .course-detail.active {
+            display: block;
+        }
+
+        .course-header-detail {
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            border-radius: 16px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .course-info {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .course-sidebar {
+            width: 300px;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .course-main {
+            flex: 1;
+        }
+
+        .module-item {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .module-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .module-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .content-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .content-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .content-info {
+            flex: 1;
+        }
+
+        .content-title {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .content-meta {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        /* Resources Page */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .resource-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .resource-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .resource-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .resource-card p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
         /* Notifications Panel */
         .notifications-panel {
             position: fixed;
@@ -856,6 +1024,14 @@
             .forum-container {
                 flex-direction: column;
             }
+
+            .course-info {
+                flex-direction: column;
+            }
+
+            .course-sidebar {
+                width: 100%;
+            }
         }
 
         @media (max-width: 768px) {
@@ -920,38 +1096,38 @@
         </div>
         
         <nav class="nav-menu">
-            <a href="#" class="nav-item active">
+            <div class="nav-item active" data-section="dashboard">
                 <i class="fas fa-home"></i>
                 Dashboard
-            </a>
-            <a href="#my-courses" class="nav-item">
+            </div>
+            <div class="nav-item" data-section="my-courses">
                 <i class="fas fa-book"></i>
                 My Courses
-            </a>
-            <a href="#available-courses" class="nav-item">
+            </div>
+            <div class="nav-item" data-section="available-courses">
                 <i class="fas fa-plus-circle"></i>
                 Available Courses
-            </a>
-            <a href="#assignments" class="nav-item">
+            </div>
+            <div class="nav-item" data-section="assignments">
                 <i class="fas fa-tasks"></i>
                 Assignments
-            </a>
-            <a href="#grades" class="nav-item">
+            </div>
+            <div class="nav-item" data-section="grades">
                 <i class="fas fa-chart-bar"></i>
                 Grades
-            </a>
-            <a href="#forum" class="nav-item">
+            </div>
+            <div class="nav-item" data-section="forum">
                 <i class="fas fa-comments"></i>
                 Discussion Forum
-            </a>
-            <a href="#settings" class="nav-item">
+            </div>
+            <div class="nav-item" data-section="settings">
                 <i class="fas fa-cog"></i>
                 Settings
-            </a>
+            </div>
         </nav>
         
         <div style="padding: 0 1.5rem; margin-top: auto;">
-            <a href="index.html" class="btn btn-outline" style="width: 100%; justify-content: center; color: white; border-color: rgba(255,255,255,0.3);">
+            <a href="student-login.html" class="btn btn-outline" style="width: 100%; justify-content: center; color: white; border-color: rgba(255,255,255,0.3);">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout
             </a>
@@ -960,14 +1136,16 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Dashboard Section -->
+        <section class="dashboard-section active" id="dashboard">
             <header class="header">
                 <h1>Student Dashboard</h1>
                 <div class="header-actions">
-                <div class="search-bar">
+                    <div class="search-bar">
                         <i class="fas fa-search"></i>
                         <input type="text" placeholder="Search courses, assignments...">
                     </div>
-                <button class="notification-btn" id="notificationBtn">
+                    <button class="notification-btn" id="notificationBtn">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge">5</span>
                     </button>
@@ -976,28 +1154,28 @@
 
             <!-- Statistics -->
             <div class="stats-grid">
-            <div class="stat-card">
+                <div class="stat-card">
                     <div class="stat-value">3</div>
                     <div class="stat-label">Enrolled Courses</div>
                     <div class="stat-icon">
                         <i class="fas fa-book-open"></i>
                     </div>
                 </div>
-            <div class="stat-card warning">
+                <div class="stat-card warning">
                     <div class="stat-value">2</div>
                     <div class="stat-label">Pending Assignments</div>
                     <div class="stat-icon">
                         <i class="fas fa-tasks"></i>
                     </div>
                 </div>
-            <div class="stat-card success">
-                    <div class="stat-value">3.75</div>
+                <div class="stat-card success">
+                    <div class="stat-value">8.89</div>
                     <div class="stat-label">Current GPA</div>
                     <div class="stat-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
                 </div>
-            <div class="stat-card danger">
+                <div class="stat-card danger">
                     <div class="stat-value">1</div>
                     <div class="stat-label">Overdue Assignments</div>
                     <div class="stat-icon">
@@ -1006,18 +1184,18 @@
                 </div>
             </div>
 
-            <!-- My Courses Section -->
-        <section class="dashboard-section" id="my-courses">
+            <!-- My Courses Preview -->
+            <div class="dashboard-section">
                 <div class="section-header">
                     <h2><i class="fas fa-book"></i> My Courses</h2>
-                    <a href="#" class="view-all">
+                    <div class="view-all" data-section="my-courses">
                         View All
                         <i class="fas fa-arrow-right"></i>
-                    </a>
+                    </div>
                 </div>
                 <div class="courses-grid">
                     <!-- Course 1 -->
-                <div class="course-card">
+                    <div class="course-card">
                         <div class="course-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
                             <i class="fas fa-laptop-code"></i>
                             <span class="course-category">Programming</span>
@@ -1039,14 +1217,14 @@
                                 </div>
                             </div>
                             <div class="course-actions">
-                                <button class="btn btn-primary">Enter Course</button>
-                                <button class="btn btn-outline">Resources</button>
+                                <button class="btn btn-primary enter-course-btn" data-course="web-dev">Enter Course</button>
+                                <button class="btn btn-outline resources-btn" data-course="web-dev">Resources</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Course 2 -->
-                <div class="course-card">
+                    <div class="course-card">
                         <div class="course-header" style="background: linear-gradient(135deg, #10b981, #059669);">
                             <i class="fas fa-brain"></i>
                             <span class="course-category">Data Science</span>
@@ -1068,125 +1246,26 @@
                                 </div>
                             </div>
                             <div class="course-actions">
-                                <button class="btn btn-primary">Enter Course</button>
-                                <button class="btn btn-outline">Resources</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Course 3 -->
-                <div class="course-card">
-                        <div class="course-header" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                            <i class="fas fa-palette"></i>
-                            <span class="course-category">Design</span>
-                        </div>
-                        <div class="course-content">
-                            <h3 class="course-title">UI/UX Design Principles</h3>
-                            <div class="course-meta">
-                                <span>DE201</span>
-                                <span>Prof. Lisa Rodriguez</span>
-                            </div>
-                            <div class="course-stats">
-                                <div class="stat">
-                                    <i class="fas fa-tasks"></i>
-                                    <span>1 Assignment</span>
-                                </div>
-                                <div class="stat">
-                                    <i class="fas fa-users"></i>
-                                    <span>15 Students</span>
-                                </div>
-                            </div>
-                            <div class="course-actions">
-                                <button class="btn btn-primary">Enter Course</button>
-                                <button class="btn btn-outline">Resources</button>
+                                <button class="btn btn-primary enter-course-btn" data-course="ml">Enter Course</button>
+                                <button class="btn btn-outline resources-btn" data-course="ml">Resources</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-        <!-- Available Courses Section -->
-        <section class="dashboard-section" id="available-courses">
+            <!-- Recent Assignments Preview -->
+            <div class="dashboard-section">
                 <div class="section-header">
-                <h2><i class="fas fa-plus-circle"></i> Available Courses</h2>
-                    <a href="#" class="view-all">
-                    Browse All
+                    <h2><i class="fas fa-tasks"></i> Recent Assignments</h2>
+                    <div class="view-all" data-section="assignments">
+                        View All
                         <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-                <div class="courses-grid">
-                    <!-- Available Course 1 -->
-                <div class="course-card">
-                        <div class="course-header" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
-                            <i class="fas fa-database"></i>
-                            <span class="course-category">Database</span>
-                        </div>
-                        <div class="course-content">
-                            <h3 class="course-title">Database Systems</h3>
-                            <div class="course-meta">
-                                <span>CS350</span>
-                                <span>Dr. Robert Williams</span>
-                            </div>
-                            <div class="course-stats">
-                                <div class="stat">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Starts: Nov 1</span>
-                                </div>
-                                <div class="stat">
-                                    <i class="fas fa-users"></i>
-                                    <span>12/25 Enrolled</span>
-                                </div>
-                            </div>
-                            <div class="course-actions">
-                                <button class="btn btn-success">Enroll Now</button>
-                                <button class="btn btn-outline">Details</button>
-                            </div>
-                        </div>
                     </div>
-
-                    <!-- Available Course 2 -->
-                <div class="course-card">
-                        <div class="course-header" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                            <i class="fas fa-shield-alt"></i>
-                            <span class="course-category">Security</span>
-                        </div>
-                        <div class="course-content">
-                            <h3 class="course-title">Cybersecurity Principles</h3>
-                            <div class="course-meta">
-                                <span>CS455</span>
-                                <span>Prof. David Miller</span>
-                            </div>
-                            <div class="course-stats">
-                                <div class="stat">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Starts: Nov 15</span>
-                                </div>
-                                <div class="stat">
-                                    <i class="fas fa-users"></i>
-                                    <span>8/20 Enrolled</span>
-                                </div>
-                            </div>
-                            <div class="course-actions">
-                                <button class="btn btn-success">Enroll Now</button>
-                                <button class="btn btn-outline">Details</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-        <!-- Assignments Section -->
-        <section class="dashboard-section" id="assignments">
-                <div class="section-header">
-                    <h2><i class="fas fa-tasks"></i> My Assignments</h2>
-                <a href="#" class="view-all">
-                    View All
-                    <i class="fas fa-arrow-right"></i>
-                </a>
                 </div>
                 <div class="assignments-list">
                     <!-- Assignment 1 -->
-                <div class="assignment-item">
+                    <div class="assignment-item">
                         <div class="assignment-info">
                             <h4>Web Development Project - E-commerce Site</h4>
                             <div class="assignment-meta">
@@ -1199,7 +1278,7 @@
                     </div>
 
                     <!-- Assignment 2 -->
-                <div class="assignment-item">
+                    <div class="assignment-item">
                         <div class="assignment-info">
                             <h4>Machine Learning Model Implementation</h4>
                             <div class="assignment-meta">
@@ -1210,114 +1289,385 @@
                         </div>
                         <div class="submission-status status-pending">Pending</div>
                     </div>
+                </div>
+            </div>
+        </section>
 
-                    <!-- Assignment 3 -->
-                <div class="assignment-item">
-                        <div class="assignment-info">
-                            <h4>UI Design Portfolio</h4>
-                            <div class="assignment-meta">
-                                <span>Course: UI/UX Design</span>
-                                <span>Due: Oct 18, 2024</span>
-                                <span>Weight: 15%</span>
+        <!-- My Courses Section -->
+        <section class="dashboard-section" id="my-courses">
+            <div class="section-header">
+                <h2><i class="fas fa-book"></i> My Courses</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            </div>
+            <div class="courses-grid">
+                <!-- Course 1 -->
+                <div class="course-card">
+                    <div class="course-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                        <i class="fas fa-laptop-code"></i>
+                        <span class="course-category">Programming</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Advanced Web Development</h3>
+                        <div class="course-meta">
+                            <span>CS401</span>
+                            <span>Dr. Sarah Johnson</span>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-tasks"></i>
+                                <span>3 Assignments</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>18 Students</span>
                             </div>
                         </div>
-                        <div class="submission-status status-overdue">Overdue</div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary enter-course-btn" data-course="web-dev">Enter Course</button>
+                            <button class="btn btn-outline resources-btn" data-course="web-dev">Resources</button>
+                        </div>
                     </div>
                 </div>
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button class="btn btn-primary" id="submitAssignmentBtn">
-                        <i class="fas fa-upload"></i>
-                        Submit New Assignment
-                    </button>
+
+                <!-- Course 2 -->
+                <div class="course-card">
+                    <div class="course-header" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-brain"></i>
+                        <span class="course-category">Data Science</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Machine Learning Fundamentals</h3>
+                        <div class="course-meta">
+                            <span>DS301</span>
+                            <span>Prof. Michael Chen</span>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-tasks"></i>
+                                <span>2 Assignments</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>22 Students</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary enter-course-btn" data-course="ml">Enter Course</button>
+                            <button class="btn btn-outline resources-btn" data-course="ml">Resources</button>
+                        </div>
+                    </div>
                 </div>
-            </section>
+
+                <!-- Course 3 -->
+                <div class="course-card">
+                    <div class="course-header" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="fas fa-palette"></i>
+                        <span class="course-category">Design</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">UI/UX Design Principles</h3>
+                        <div class="course-meta">
+                            <span>DE201</span>
+                            <span>Prof. Lisa Rodriguez</span>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-tasks"></i>
+                                <span>1 Assignment</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>15 Students</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary enter-course-btn" data-course="design">Enter Course</button>
+                            <button class="btn btn-outline resources-btn" data-course="design">Resources</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Available Courses Section -->
+        <section class="dashboard-section" id="available-courses">
+            <div class="section-header">
+                <h2><i class="fas fa-plus-circle"></i> Available Courses</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;">
+                <div>
+                    <label style="display:block;margin-bottom:6px;color:#64748b;font-size:0.9rem;">Enroll with Code</label>
+                    <input id="enrollCodeInput" type="text" placeholder="Enter 6-char code" style="padding:10px;border:1px solid var(--border);border-radius:8px;">
+                </div>
+                <button class="btn btn-success" id="enrollByCodeBtn">Enroll</button>
+            </div>
+            <div class="courses-grid">
+                <!-- Available Course 1 -->
+                <div class="course-card">
+                    <div class="course-header" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                        <i class="fas fa-database"></i>
+                        <span class="course-category">Database</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Database Systems</h3>
+                        <div class="course-meta">
+                            <span>CS350</span>
+                            <span>Dr. Robert Williams</span>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>Starts: Nov 1</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>12/25 Enrolled</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-success enroll-btn" data-course="database">Enroll Now</button>
+                            <button class="btn btn-outline course-details-btn" data-course="database">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Course 2 -->
+                <div class="course-card">
+                    <div class="course-header" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                        <i class="fas fa-shield-alt"></i>
+                        <span class="course-category">Security</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Cybersecurity Principles</h3>
+                        <div class="course-meta">
+                            <span>CS455</span>
+                            <span>Prof. David Miller</span>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>Starts: Nov 15</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>8/20 Enrolled</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-success enroll-btn" data-course="cybersecurity">Enroll Now</button>
+                            <button class="btn btn-outline course-details-btn" data-course="cybersecurity">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Course 3 -->
+                <div class="course-card">
+                    <div class="course-header" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span class="course-category">Mobile</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Mobile App Development</h3>
+                        <div class="course-meta">
+                            <span>CS420</span>
+                            <span>Prof. Jennifer Lee</span>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>Starts: Dec 1</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>5/15 Enrolled</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-success enroll-btn" data-course="mobile">Enroll Now</button>
+                            <button class="btn btn-outline course-details-btn" data-course="mobile">Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Assignments Section -->
+        <section class="dashboard-section" id="assignments">
+            <div class="section-header">
+                <h2><i class="fas fa-tasks"></i> My Assignments</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            </div>
+            <div class="assignments-list" id="assignmentsList">
+                <!-- Assignment 1 -->
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Web Development Project - E-commerce Site</h4>
+                        <div class="assignment-meta">
+                            <span>Course: Advanced Web Development</span>
+                            <span>Due: Oct 25, 2024</span>
+                            <span>Weight: 20%</span>
+                        </div>
+                    </div>
+                    <div class="submission-status status-submitted">Submitted</div>
+                </div>
+
+                <!-- Assignment 2 -->
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Machine Learning Model Implementation</h4>
+                        <div class="assignment-meta">
+                            <span>Course: Machine Learning</span>
+                            <span>Due: Oct 30, 2024</span>
+                            <span>Weight: 25%</span>
+                        </div>
+                    </div>
+                    <div class="submission-status status-pending">Pending</div>
+                </div>
+
+                <!-- Assignment 3 -->
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>UI Design Portfolio</h4>
+                        <div class="assignment-meta">
+                            <span>Course: UI/UX Design</span>
+                            <span>Due: Oct 18, 2024</span>
+                            <span>Weight: 15%</span>
+                        </div>
+                    </div>
+                    <div class="submission-status status-overdue">Overdue</div>
+                </div>
+
+                <!-- Assignment 4 -->
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Research Paper - AI Ethics</h4>
+                        <div class="assignment-meta">
+                            <span>Course: Machine Learning</span>
+                            <span>Due: Nov 5, 2024</span>
+                            <span>Weight: 10%</span>
+                        </div>
+                    </div>
+                    <div class="submission-status status-pending">Pending</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <button class="btn btn-primary" id="submitAssignmentBtn">
+                    <i class="fas fa-upload"></i>
+                    Submit New Assignment
+                </button>
+            </div>
+        </section>
 
         <!-- Grades Section -->
         <section class="dashboard-section" id="grades">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-bar"></i> My Grades</h2>
-                    <a href="#" class="view-all">
-                        View Full Transcript
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> My Grades</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
                 </div>
-                <table class="grades-table">
-                    <thead>
-                        <tr>
-                            <th>Course</th>
-                            <th>Assignment</th>
-                            <th>Grade</th>
-                            <th>Weight</th>
-                            <th>Feedback</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Advanced Web Development</td>
-                            <td>HTML/CSS Portfolio</td>
-                            <td><span class="grade-badge grade-a">A (92%)</span></td>
-                            <td>15%</td>
-                            <td>Excellent work on responsive design</td>
-                        </tr>
-                        <tr>
-                            <td>Machine Learning</td>
-                            <td>Linear Regression Project</td>
-                            <td><span class="grade-badge grade-b">B+ (88%)</span></td>
-                            <td>20%</td>
-                            <td>Good implementation, improve documentation</td>
-                        </tr>
-                        <tr>
-                            <td>UI/UX Design</td>
-                            <td>Wireframe Design</td>
-                            <td><span class="grade-badge grade-a">A- (90%)</span></td>
-                            <td>10%</td>
-                            <td>Creative approach, strong user flow</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+            </div>
+            <table class="grades-table" id="gradesTable">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Assignment</th>
+                        <th>Grade</th>
+                        <th>Weight</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody id="gradesTbody">
+                    <tr>
+                        <td>Advanced Web Development</td>
+                        <td>HTML/CSS Portfolio</td>
+                        <td><span class="grade-badge grade-a">A (92%)</span></td>
+                        <td>15%</td>
+                        <td>Excellent work on responsive design</td>
+                    </tr>
+                    <tr>
+                        <td>Machine Learning</td>
+                        <td>Linear Regression Project</td>
+                        <td><span class="grade-badge grade-b">B+ (88%)</span></td>
+                        <td>20%</td>
+                        <td>Good implementation, improve documentation</td>
+                    </tr>
+                    <tr>
+                        <td>UI/UX Design</td>
+                        <td>Wireframe Design</td>
+                        <td><span class="grade-badge grade-a">A- (90%)</span></td>
+                        <td>10%</td>
+                        <td>Creative approach, strong user flow</td>
+                    </tr>
+                    <tr>
+                        <td>Advanced Web Development</td>
+                        <td>JavaScript Quiz</td>
+                        <td><span class="grade-badge grade-b">B (85%)</span></td>
+                        <td>5%</td>
+                        <td>Good understanding of concepts</td>
+                    </tr>
+                    <tr>
+                        <td>Machine Learning</td>
+                        <td>Midterm Exam</td>
+                        <td><span class="grade-badge grade-a">A (95%)</span></td>
+                        <td>25%</td>
+                        <td>Excellent performance, thorough understanding</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
         <!-- Discussion Forum Section -->
         <section class="dashboard-section" id="forum">
-                <div class="section-header">
-                    <h2><i class="fas fa-comments"></i> Discussion Forum</h2>
-                    <button class="btn btn-primary" id="newThreadBtn">
-                        <i class="fas fa-plus"></i>
-                        New Thread
-                    </button>
+            <div class="section-header">
+                <h2><i class="fas fa-comments"></i> Discussion Forum</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
                 </div>
-                <div class="forum-container">
-                    <div class="forum-topics">
-                        <h3 style="margin-bottom: 1rem;">Course Topics</h3>
-                        <div class="topic-item active">Advanced Web Development</div>
-                        <div class="topic-item">Machine Learning</div>
-                        <div class="topic-item">UI/UX Design</div>
-                        <div class="topic-item">General Questions</div>
-                    </div>
-                    <div class="forum-threads">
-                        <h3 style="margin-bottom: 1rem;">Recent Threads</h3>
+            </div>
+            <div class="forum-container">
+                <div class="forum-topics">
+                    <h3 style="margin-bottom: 1rem;">Course Topics</h3>
+                    <div class="topic-item active">Advanced Web Development</div>
+                    <div class="topic-item">Machine Learning</div>
+                    <div class="topic-item">UI/UX Design</div>
+                    <div class="topic-item">General Questions</div>
+                </div>
+                <div class="forum-threads">
+                    <h3 style="margin-bottom: 1rem;">Recent Threads</h3>
                     <div class="thread-item">
-                            <div class="thread-header">
-                                <div class="thread-author">Emma Smith</div>
-                                <div class="thread-date">2 hours ago</div>
-                            </div>
-                            <h4>Question about React state management</h4>
-                            <div class="thread-content">
-                                I'm having trouble understanding when to use useState vs useReducer for complex state. Can anyone explain the key differences?
-                            </div>
-                            <div class="thread-actions">
-                                <button class="reply-btn">
-                                    <i class="fas fa-reply"></i>
-                                    Reply
-                                </button>
-                                <button class="reply-btn">
-                                    <i class="fas fa-thumbs-up"></i>
-                                    Like (5)
-                                </button>
-                            </div>
+                        <div class="thread-header">
+                            <div class="thread-author">Emma Smith</div>
+                            <div class="thread-date">2 hours ago</div>
                         </div>
+                        <h4>Question about React state management</h4>
+                        <div class="thread-content">
+                            I'm having trouble understanding when to use useState vs useReducer for complex state. Can anyone explain the key differences?
+                        </div>
+                        <div class="thread-actions">
+                            <button class="reply-btn">
+                                <i class="fas fa-reply"></i>
+                                Reply
+                                </button>
+                            <button class="reply-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                Like (5)
+                            </button>
+                        </div>
+                    </div>
                     <div class="thread-item">
-                            <div class="thread-header">
+                        <div class="thread-header">
                             <div class="thread-author">Michael Johnson</div>
                             <div class="thread-date">1 day ago</div>
                         </div>
@@ -1336,9 +1686,288 @@
                             </button>
                         </div>
                     </div>
+                    <div class="thread-item">
+                        <div class="thread-header">
+                            <div class="thread-author">Dr. Sarah Johnson</div>
+                            <div class="thread-date">2 days ago</div>
+                        </div>
+                        <h4>Important: Web Development Project Guidelines</h4>
+                        <div class="thread-content">
+                            I've updated the project guidelines document with additional requirements for the e-commerce site. Please review before submitting your final projects.
+                        </div>
+                        <div class="thread-actions">
+                            <button class="reply-btn">
+                                <i class="fas fa-reply"></i>
+                                Reply
+                            </button>
+                            <button class="reply-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                Like (12)
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <button class="btn btn-primary" id="newThreadBtn">
+                    <i class="fas fa-plus"></i>
+                    New Thread
+                </button>
+            </div>
         </section>
+
+        <!-- Settings Section -->
+        <section class="dashboard-section" id="settings">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            </div>
+            <div style="max-width: 600px;">
+                <h3 style="margin-bottom: 1.5rem;">Account Settings</h3>
+                <div class="form-group">
+                    <label for="studentName">Full Name</label>
+                    <input type="text" id="studentName" value="John Student">
+                </div>
+                <div class="form-group">
+                    <label for="studentEmail">Email Address</label>
+                    <input type="email" id="studentEmail" value="john.student@university.edu">
+                </div>
+                <div class="form-group">
+                    <label for="studentProgram">Program</label>
+                    <input type="text" id="studentProgram" value="Computer Science">
+                </div>
+                <div class="form-group">
+                    <label for="notifications">Notification Preferences</label>
+                    <select id="notifications">
+                        <option value="all">All Notifications</option>
+                        <option value="important">Important Only</option>
+                        <option value="none">No Notifications</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </section>
+
+        <!-- Course Detail Pages -->
+        <div class="course-detail" id="course-web-dev">
+            <div class="course-header-detail" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                <button class="back-btn" data-section="my-courses">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <i class="fas fa-laptop-code"></i>
+            </div>
+            <div class="course-info">
+                <div class="course-sidebar">
+                    <h3>Advanced Web Development</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">CS401 - Dr. Sarah Johnson</p>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="margin-bottom: 0.5rem;">Course Progress</h4>
+                        <div style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: var(--primary); height: 100%; width: 65%;"></div>
+                        </div>
+                        <p style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem;">65% Complete</p>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem;">Upcoming</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">Next Assignment: Oct 25</p>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">Next Quiz: Nov 2</p>
+                    </div>
+                </div>
+                <div class="course-main">
+                    <h3 style="margin-bottom: 1.5rem;">Course Content</h3>
+                    <div class="module-item">
+                        <div class="module-header">
+                            <div class="module-title">Module 1: HTML & CSS Fundamentals</div>
+                        </div>
+                        <div class="module-content">
+                            <div class="content-item">
+                                <div class="content-icon">
+                                    <i class="fas fa-file-video"></i>
+                                </div>
+                                <div class="content-info">
+                                    <div class="content-title">Introduction to HTML</div>
+                                    <div class="content-meta">Video • 15 min</div>
+                                </div>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Watch</button>
+                            </div>
+                            <div class="content-item">
+                                <div class="content-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div class="content-info">
+                                    <div class="content-title">CSS Basics</div>
+                                    <div class="content-meta">PDF • Reading material</div>
+                                </div>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Read</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="module-item">
+                        <div class="module-header">
+                            <div class="module-title">Module 2: JavaScript Essentials</div>
+                        </div>
+                        <div class="module-content">
+                            <div class="content-item">
+                                <div class="content-icon">
+                                    <i class="fas fa-file-video"></i>
+                                </div>
+                                <div class="content-info">
+                                    <div class="content-title">JavaScript Variables & Functions</div>
+                                    <div class="content-meta">Video • 20 min</div>
+                                </div>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Watch</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="course-detail" id="course-ml">
+            <div class="course-header-detail" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <button class="back-btn" data-section="my-courses">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="course-info">
+                <div class="course-sidebar">
+                    <h3>Machine Learning Fundamentals</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">DS301 - Prof. Michael Chen</p>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="margin-bottom: 0.5rem;">Course Progress</h4>
+                        <div style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: var(--secondary); height: 100%; width: 45%;"></div>
+                        </div>
+                        <p style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem;">45% Complete</p>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem;">Upcoming</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">Next Assignment: Oct 30</p>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">Research Paper: Nov 5</p>
+                    </div>
+                </div>
+                <div class="course-main">
+                    <h3 style="margin-bottom: 1.5rem;">Course Content</h3>
+                    <div class="module-item">
+                        <div class="module-header">
+                            <div class="module-title">Module 1: Introduction to Machine Learning</div>
+                        </div>
+                        <div class="module-content">
+                            <div class="content-item">
+                                <div class="content-icon">
+                                    <i class="fas fa-file-video"></i>
+                                </div>
+                                <div class="content-info">
+                                    <div class="content-title">What is Machine Learning?</div>
+                                    <div class="content-meta">Video • 25 min</div>
+                                </div>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Watch</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources Pages -->
+        <div class="course-detail" id="resources-web-dev">
+            <div class="course-header-detail" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                <button class="back-btn" data-section="my-courses">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <div class="section-header">
+                <h2><i class="fas fa-folder-open"></i> Web Development Resources</h2>
+            </div>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4>Course Syllabus</h4>
+                    <p>Complete course outline and schedule</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Download</button>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <h4>Project Templates</h4>
+                    <p>Starter code for assignments</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Download</button>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h4>Recommended Books</h4>
+                    <p>Additional reading materials</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View List</button>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h4>Useful Links</h4>
+                    <p>Online resources and tutorials</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Browse</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="course-detail" id="resources-ml">
+            <div class="course-header-detail" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <button class="back-btn" data-section="my-courses">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <div class="section-header">
+                <h2><i class="fas fa-folder-open"></i> Machine Learning Resources</h2>
+            </div>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4>Course Syllabus</h4>
+                    <p>Complete course outline and schedule</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Download</button>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h4>Datasets</h4>
+                    <p>Practice datasets for projects</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Download</button>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h4>Research Papers</h4>
+                    <p>Important ML research</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Browse</button>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h4>Code Examples</h4>
+                    <p>Implementation examples</p>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Notifications Panel -->
@@ -1445,271 +2074,405 @@
     </div>
 
     <script>
-        // Session bootstrap + populate profile and load data
-        (async function initSession() {
-            const raw = localStorage.getItem('istruzioneF_user');
-            if (!raw) { window.location.href = 'student-login.html'; return; }
-            let user;
-            try { user = JSON.parse(raw); } catch { localStorage.removeItem('istruzioneF_user'); window.location.href='student-login.html'; return; }
-            if (user.role !== 'student') { window.location.href = 'student-login.html'; return; }
-
-            // Populate profile
-            const nameEl = document.querySelector('.user-name');
-            if (nameEl && user.firstName) nameEl.textContent = user.firstName;
-            const roleEl = document.querySelector('.user-role');
-            if (roleEl) roleEl.textContent = user.program || 'Student';
-
-            // Load enrolled courses
-            let enrolledCourses = [];
-            try {
-                const enrolledRes = await fetch(`http://localhost:5050/enrollments?studentId=${encodeURIComponent(user.id)}`);
-                enrolledCourses = await enrolledRes.json();
-                renderMyCourses(enrolledCourses);
-            } catch (e) { console.error('Failed to load enrolled', e); }
-
-            // Load available courses
-            try {
-                const availRes = await fetch(`http://localhost:5050/courses/available?studentId=${encodeURIComponent(user.id)}`);
-                const availableCourses = await availRes.json();
-                renderAvailableCourses(availableCourses, user);
-            } catch (e) { console.error('Failed to load available', e); }
-
-            // Load assignments for enrolled courses
-            try {
-                await loadAssignmentsForCourses(enrolledCourses);
-                populateAssignmentCourseSelect(enrolledCourses);
-            } catch (e) { console.error('Failed to load assignments', e); }
-        })();
-
-        async function loadAssignmentsForCourses(courses) {
-            const container = document.querySelector('#assignments .assignments-list');
-            if (!container) return;
-            container.innerHTML = '';
-            for (const c of courses) {
-                const res = await fetch(`http://localhost:5050/assignments?courseId=${encodeURIComponent(c._id)}`);
-                const list = await res.json();
-                list.forEach(a => container.appendChild(renderAssignmentItem(c, a)));
-            }
-        }
-
-        function renderAssignmentItem(course, assignment) {
-            const item = document.createElement('div');
-            item.className = 'assignment-item';
-            const info = document.createElement('div');
-            info.className = 'assignment-info';
-            info.innerHTML = `
-                <h4>${assignment.title}</h4>
-                <div class="assignment-meta">
-                    <span>Course: ${course.title}</span>
-                    <span>Due: ${assignment.dueDate ? new Date(assignment.dueDate).toDateString() : '—'}</span>
-                </div>
-            `;
-            const status = document.createElement('div');
-            status.className = 'submission-status status-pending';
-            status.textContent = 'Pending';
-            item.appendChild(info); item.appendChild(status);
-            return item;
-        }
-
-        function populateAssignmentCourseSelect(courses) {
-            const select = document.getElementById('assignmentCourse');
-            if (!select) return;
-            select.innerHTML = '<option value="">Select a course</option>' + courses.map(c => `<option value="${c._id}">${c.title}</option>`).join('');
-        }
-
-        function createCourseCard(course, options = {}) {
-            const { showEnroll = false, onEnroll } = options;
-            const card = document.createElement('div');
-            card.className = 'course-card';
-            const header = document.createElement('div');
-            header.className = 'course-header';
-            header.innerHTML = `<i class="fas fa-book"></i>`;
-            const content = document.createElement('div');
-            content.className = 'course-content';
-            content.innerHTML = `
-                <h3 class="course-title">${course.title}</h3>
-                <div class="course-meta">
-                    <span>${course.code || ''}</span>
-                    <span>${course.term || ''}</span>
-                </div>
-            `;
-            const actions = document.createElement('div');
-            actions.className = 'course-actions';
-            if (showEnroll) {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-success';
-                btn.textContent = 'Enroll Now';
-                btn.onclick = () => onEnroll && onEnroll(course, btn);
-                actions.appendChild(btn);
-            } else {
-                const enter = document.createElement('button');
-                enter.className = 'btn btn-primary';
-                enter.textContent = 'Enter Course';
-                actions.appendChild(enter);
-                const resBtn = document.createElement('button');
-                resBtn.className = 'btn btn-outline';
-                resBtn.textContent = 'Resources';
-                actions.appendChild(resBtn);
-            }
-            card.appendChild(header);
-            card.appendChild(content);
-            card.appendChild(actions);
-            return card;
-        }
-
-        function renderMyCourses(courses) {
-            const grid = document.querySelector('#my-courses .courses-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            courses.forEach(c => grid.appendChild(createCourseCard(c)));
-        }
-
-        function renderAvailableCourses(courses, user) {
-            const grid = document.querySelector('#available-courses .courses-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            courses.forEach(c => grid.appendChild(createCourseCard(c, {
-                showEnroll: true,
-                onEnroll: async (course, btn) => {
-                    try {
-                        const res = await fetch('http://localhost:5050/enroll', {
-                            method: 'POST', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ studentId: user.id, courseId: course._id })
-                        });
-                        const data = await res.json();
-                        if (!res.ok) { alert(data.message || 'Enroll failed'); return; }
-                        btn.textContent = 'Enrolled'; btn.disabled = true; btn.classList.remove('btn-success'); btn.classList.add('btn-outline');
-                        // Move to my courses
-                        const myGrid = document.querySelector('#my-courses .courses-grid');
-                        if (myGrid) myGrid.appendChild(createCourseCard(course));
-                    } catch (e) { console.error(e); alert('Error enrolling'); }
-                }
-            })));
-        }
-
-        // Navigation and other existing handlers remain
+        // Navigation functionality
         document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
+            item.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                
+                // Update active nav item
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 this.classList.add('active');
-                const targetId = this.getAttribute('href').substring(1);
-                document.querySelectorAll('.dashboard-section').forEach(section => { section.style.display = 'none'; });
-                const target = document.getElementById(targetId); if (target) target.style.display = 'block';
+                
+                // Hide all sections
+                document.querySelectorAll('.dashboard-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.course-detail').forEach(detail => {
+                    detail.classList.remove('active');
+                });
+                
+                // Show selected section
+                document.getElementById(sectionId).classList.add('active');
             });
         });
 
+        // View All buttons
+        document.querySelectorAll('.view-all').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelector(`.nav-item[data-section="${sectionId}"]`).classList.add('active');
+                
+                // Hide all sections
+                document.querySelectorAll('.dashboard-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.course-detail').forEach(detail => {
+                    detail.classList.remove('active');
+                });
+                
+                // Show selected section
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        // Enter Course buttons
+        document.querySelectorAll('.enter-course-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const courseId = this.getAttribute('data-course');
+                
+                // Hide all sections
+                document.querySelectorAll('.dashboard-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.course-detail').forEach(detail => {
+                    detail.classList.remove('active');
+                });
+                
+                // Show course detail
+                document.getElementById(`course-${courseId}`).classList.add('active');
+            });
+        });
+
+        // Resources buttons
+        document.querySelectorAll('.resources-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const courseId = this.getAttribute('data-course');
+                
+                // Hide all sections
+                document.querySelectorAll('.dashboard-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.course-detail').forEach(detail => {
+                    detail.classList.remove('active');
+                });
+                
+                // Show resources
+                document.getElementById(`resources-${courseId}`).classList.add('active');
+            });
+        });
+
+        // Back buttons in course details
+        document.querySelectorAll('.back-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                
+                // Hide all sections
+                document.querySelectorAll('.dashboard-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.course-detail').forEach(detail => {
+                    detail.classList.remove('active');
+                });
+                
+                // Show selected section
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelector(`.nav-item[data-section="${sectionId}"]`).classList.add('active');
+            });
+        });
+
+        // Enroll buttons
+        document.querySelectorAll('.enroll-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const courseName = this.getAttribute('data-course');
+                alert(`Successfully enrolled in ${courseName} course!`);
+                this.textContent = 'Enrolled';
+                this.disabled = true;
+                this.classList.remove('btn-success');
+                this.classList.add('btn-outline');
+            });
+        });
+
+        // Course details buttons
+        document.querySelectorAll('.course-details-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const courseName = this.getAttribute('data-course');
+                alert(`Showing details for ${courseName} course`);
+            });
+        });
+
+        // Notifications panel
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const closeNotifications = document.getElementById('closeNotifications');
+
+        notificationBtn.addEventListener('click', () => {
+            notificationsPanel.classList.add('active');
+        });
+
+        closeNotifications.addEventListener('click', () => {
+            notificationsPanel.classList.remove('active');
+        });
+
+        // Submit Assignment Modal
+        const submitAssignmentBtn = document.getElementById('submitAssignmentBtn');
+        const submitAssignmentModal = document.getElementById('submitAssignmentModal');
+        const closeAssignmentModal = document.getElementById('closeAssignmentModal');
+
+        submitAssignmentBtn.addEventListener('click', () => {
+            submitAssignmentModal.classList.add('active');
+        });
+
+        closeAssignmentModal.addEventListener('click', () => {
+            submitAssignmentModal.classList.remove('active');
+        });
+
+        // New Thread Modal
+        const newThreadBtn = document.getElementById('newThreadBtn');
+        const newThreadModal = document.getElementById('newThreadModal');
+        const closeThreadModal = document.getElementById('closeThreadModal');
+
+        newThreadBtn.addEventListener('click', () => {
+            newThreadModal.classList.add('active');
+        });
+
+        closeThreadModal.addEventListener('click', () => {
+            newThreadModal.classList.remove('active');
+        });
+
+        // Form submissions
+        document.getElementById('assignmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Assignment submitted successfully!');
+            submitAssignmentModal.classList.remove('active');
+            this.reset();
+        });
+
+        document.getElementById('threadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thread created successfully!');
+            newThreadModal.classList.remove('active');
+            this.reset();
+        });
+
+        // File upload interaction
+        const fileUpload = document.getElementById('fileUpload');
+        fileUpload.addEventListener('click', function() {
+            alert('File upload dialog would open here');
+        });
+
+        // Topic selection in forum
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.topic-item').forEach(topic => {
+                    topic.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // In a real app, this would load the selected course's threads
+                const courseName = this.textContent;
+                alert(`Loading discussions for: ${courseName}`);
+            });
+        });
+
+        // Reply functionality
+        document.querySelectorAll('.reply-btn').forEach(button => {
+            if (button.textContent.includes('Reply')) {
+                button.addEventListener('click', function() {
+                    const threadTitle = this.closest('.thread-item').querySelector('h4').textContent;
+                    alert(`Replying to: ${threadTitle}`);
+                });
+            }
+        });
+
+        // Like functionality
+        document.querySelectorAll('.reply-btn').forEach(button => {
+            if (button.textContent.includes('Like')) {
+                button.addEventListener('click', function() {
+                    const likeCount = parseInt(this.textContent.match(/\((\d+)\)/)[1]);
+                    this.innerHTML = `<i class="fas fa-thumbs-up"></i> Like (${likeCount + 1})`;
+                    this.style.color = 'var(--primary)';
+                });
+            }
+        });
+
+        // Initialize dashboard as active
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.nav-item.active').click();
+            document.getElementById('dashboard').classList.add('active');
+            initBackendSync();
         });
 
-        // Logout clears storage and redirects
-        const logoutBtn = document.querySelector('a.btn.btn-outline');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('istruzioneF_user');
-                window.location.href = 'student-login.html';
-            });
+        // ===== Backend sync (courses/enrollments/materials/assignments/grades) =====
+        const BACKEND_BASE = 'http://localhost:5050';
+        function getCurrentUser() { try { return JSON.parse(localStorage.getItem('istruzioneF_user')) || {}; } catch { return {}; } }
+
+        async function fetchJSON(url, opts) {
+            const res = await fetch(url, opts);
+            if (!res.ok) throw new Error((await res.json()).message || 'Request failed');
+            return res.json();
         }
-    </script>
-    <script>
-        async function loadGrades(studentId) {
+
+        async function renderAvailableCourses() {
+            const user = getCurrentUser();
+            if (!user.id) return;
+            const grid = document.querySelector('#available-courses .courses-grid');
             try {
-                const res = await fetch(`http://localhost:5050/grades?studentId=${encodeURIComponent(studentId)}`);
-                const grades = await res.json();
-                const tbody = document.querySelector('#grades table tbody');
-                if (!tbody) return;
-                tbody.innerHTML = '';
-                grades.forEach(g => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${g.courseTitle || ''}</td>
-                        <td>${g.assignmentTitle || ''}</td>
-                        <td><span class="grade-badge ${Number(g.grade) >= 90 ? 'grade-a' : Number(g.grade) >= 80 ? 'grade-b' : 'grade-c'}">${g.grade ?? '-'}</span></td>
-                        <td>-</td>
-                        <td>${g.feedback || ''}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (e) {
-                console.error('Failed to load grades', e);
-            }
-        }
-
-        // Discussions UI (dynamic controls)
-        async function setupDiscussions(enrolledCourses, user) {
-            const forumSection = document.getElementById('forum');
-            if (!forumSection) return;
-            // Clear static placeholders
-            const forumContainer = forumSection.querySelector('.forum-container');
-            if (forumContainer) forumContainer.innerHTML = '';
-
-            const controls = document.createElement('div');
-            controls.style.marginBottom = '1rem';
-            const select = document.createElement('select');
-            select.className = 'btn btn-outline';
-            select.innerHTML = '<option value="">Select course</option>' + enrolledCourses.map(c => `<option value="${c._id}">${c.title}</option>`).join('');
-            controls.appendChild(select);
-            forumSection.querySelector('.section-header').appendChild(controls);
-
-            const list = document.createElement('div');
-            list.className = 'thread-list';
-            forumContainer.appendChild(list);
-
-            const formWrap = document.createElement('div');
-            formWrap.className = 'reply-form';
-            formWrap.innerHTML = `
-                <textarea id="discussionInput" class="reply-input" placeholder="Write a message..."></textarea>
-                <button id="discussionPost" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
-            `;
-            forumContainer.appendChild(formWrap);
-
-            async function loadMessages(courseId) {
-                list.innerHTML = '';
-                if (!courseId) return;
-                const res = await fetch(`http://localhost:5050/discussions?courseId=${encodeURIComponent(courseId)}`);
-                const msgs = await res.json();
-                msgs.forEach(m => {
-                    const item = document.createElement('div');
-                    item.className = 'thread-item';
-                    const when = m.createdAt ? new Date(m.createdAt).toLocaleString() : '';
-                    item.innerHTML = `
-                        <div class="thread-header">
-                            <div class="thread-author">${m.authorRole === 'teacher' ? 'Teacher' : 'Student'}</div>
-                            <div class="thread-date">${when}</div>
+                const courses = await fetchJSON(`${BACKEND_BASE}/courses/available?studentId=${user.id}`);
+                grid.innerHTML = courses.map(c => `
+                    <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                            <i class="fas fa-book"></i>
+                            <span class="course-category">${(c.category||'Course')}</span>
                         </div>
-                        <div class="thread-content">${m.content}</div>
-                    `;
-                    list.appendChild(item);
-                });
+                        <div class="course-content">
+                            <h3 class="course-title">${c.title||''}</h3>
+                            <div class="course-meta">
+                                <span>${c.code||''}</span>
+                                <span>${c.term||''}</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat"><i class="fas fa-clock"></i><span>${c.duration||''}</span></div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-success dyn-enroll" data-courseid="${c._id}">Enroll Now</button>
+                                <button class="btn btn-outline" onclick="alert('${(c.description||'No description').replace(/'/g, "&#39;")}')">Details</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') || '<div style="color:#64748b">No available courses</div>';
+            } catch (e) {
+                console.error(e);
             }
-
-            select.addEventListener('change', () => loadMessages(select.value));
-            document.getElementById('discussionPost').addEventListener('click', async () => {
-                const courseId = select.value; const content = document.getElementById('discussionInput').value.trim();
-                if (!courseId || !content) return;
-                const res = await fetch('http://localhost:5050/discussions', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ courseId, authorId: user.id, authorRole: 'student', content })
-                });
-                if (res.ok) { document.getElementById('discussionInput').value = ''; await loadMessages(courseId); }
-            });
         }
 
-        // Extend existing init by observing DOM ready and loaded user to call grades and discussions
-        (async function afterInit() {
-            const raw = localStorage.getItem('istruzioneF_user');
-            if (!raw) return; let user; try { user = JSON.parse(raw);} catch { return; }
-            if (user.role !== 'student') return;
-            // fetch enrolled again for discussions/grades setup
+        async function renderMyCourses() {
+            const user = getCurrentUser();
+            if (!user.id) return;
+            const grid = document.querySelector('#my-courses .courses-grid');
             try {
-                const enrolledRes = await fetch(`http://localhost:5050/enrollments?studentId=${encodeURIComponent(user.id)}`);
-                const enrolledCourses = await enrolledRes.json();
-                await loadGrades(user.id);
-                await setupDiscussions(enrolledCourses, user);
-            } catch {}
-        })();
+                const courses = await fetchJSON(`${BACKEND_BASE}/enrollments?studentId=${user.id}`);
+                grid.innerHTML = courses.map(c => `
+                    <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                            <i class="fas fa-chalkboard"></i>
+                            <span class="course-category">${(c.category||'Course')}</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">${c.title||''}</h3>
+                            <div class="course-meta">
+                                <span>${c.code||''}</span>
+                                <span>${c.term||''}</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat"><i class="fas fa-clock"></i><span>${c.duration||''}</span></div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary enter-course-dyn" data-courseid="${c._id}">Enter Course</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') || '<div style="color:#64748b">You are not enrolled in any course yet</div>';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function renderAssignmentsAll() {
+            const user = getCurrentUser(); if (!user.id) return;
+            const listEl = document.getElementById('assignmentsList'); if (!listEl) return;
+            try {
+                const courses = await fetchJSON(`${BACKEND_BASE}/enrollments?studentId=${user.id}`);
+                let items = [];
+                for (const c of courses) {
+                    try {
+                        const a = await fetchJSON(`${BACKEND_BASE}/assignments?courseId=${c._id}`);
+                        items = items.concat(a.map(x => ({ courseTitle: c.title, title: x.title, dueDate: x.dueDate })));
+                    } catch (_) {}
+                }
+                listEl.innerHTML = items.map(it => `
+                    <div class="assignment-item">
+                        <div class="assignment-info">
+                            <h4>${it.title}</h4>
+                            <div class="assignment-meta">
+                                <span>Course: ${it.courseTitle||''}</span>
+                                <span>Due: ${it.dueDate ? new Date(it.dueDate).toLocaleDateString() : '—'}</span>
+                            </div>
+                        </div>
+                        <div class="submission-status status-pending">Pending</div>
+                    </div>
+                `).join('') || '<div style="color:#64748b">No assignments yet</div>';
+            } catch (e) { console.error(e); }
+        }
+
+        async function renderGrades() {
+            const user = getCurrentUser(); if (!user.id) return;
+            const tbody = document.getElementById('gradesTbody'); if (!tbody) return;
+            try {
+                const rows = await fetchJSON(`${BACKEND_BASE}/grades?studentId=${user.id}`);
+                tbody.innerHTML = rows.map(r => `
+                    <tr>
+                        <td>${r.courseTitle||''}</td>
+                        <td>${r.assignmentTitle||''}</td>
+                        <td><span class="grade-badge ${r.grade>=90?'grade-a':(r.grade>=80?'grade-b':(r.grade>=70?'grade-c':'grade-d'))}">${r.grade ?? '—'}</span></td>
+                        <td>—</td>
+                        <td>${r.feedback||''}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="5" style="color:#64748b">No grades yet</td></tr>';
+            } catch (e) { console.error(e); }
+        }
+
+        function bindDynamicHandlers() {
+            // Enroll buttons (event delegation)
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.dyn-enroll');
+                if (!btn) return;
+                const courseId = btn.getAttribute('data-courseid');
+                const user = getCurrentUser();
+                try {
+                    await fetchJSON(`${BACKEND_BASE}/enroll`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId: user.id, courseId })
+                    });
+                    await renderAvailableCourses();
+                    await renderMyCourses();
+                    alert('Enrolled successfully');
+                } catch (err) { alert(err.message||'Enroll failed'); }
+            });
+
+            // Enter dynamic course
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.enter-course-dyn');
+                if (!btn) return;
+                // Switch to My Courses section (reusing existing handlers)
+                document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+                document.getElementById('my-courses').classList.add('active');
+            });
+            // Enroll by code
+            const enrollBtn = document.getElementById('enrollByCodeBtn');
+            if (enrollBtn) {
+                enrollBtn.addEventListener('click', async () => {
+                    const code = (document.getElementById('enrollCodeInput')?.value||'').trim();
+                    const user = getCurrentUser();
+                    if (!code) { alert('Enter enrollment code'); return; }
+                    try {
+                        await fetchJSON(`${BACKEND_BASE}/enroll`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ studentId: user.id, enrollCode: code }) });
+                        await renderAvailableCourses();
+                        await renderMyCourses();
+                        alert('Enrolled via code');
+                    } catch(err){ alert(err.message||'Enroll failed'); }
+                });
+            }
+        }
+
+        function initBackendSync() {
+            bindDynamicHandlers();
+            renderAvailableCourses();
+            renderMyCourses();
+            renderAssignmentsAll();
+            renderGrades();
+            // light polling every 12s
+            setInterval(() => {
+                renderAvailableCourses();
+                renderMyCourses();
+                renderAssignmentsAll();
+                renderGrades();
+            }, 12000);
+        }
     </script>
 </body>
 </html>

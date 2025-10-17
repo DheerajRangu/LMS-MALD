@@ -5,6 +5,15 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
+const twilio = require('twilio');
+const session = require('express-session');
+const passport = require('passport');
+const path = require('path');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const MicrosoftStrategy = require('passport-microsoft').Strategy;
+const multer = require('multer');
+const fs = require('fs');
+
 
 dotenv.config();
 
@@ -14,6 +23,15 @@ const PORT = 5050;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(session({ secret: process.env.SESSION_SECRET || 'devsecret', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+// Serve frontend statically (for OAuth success redirects)
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Ensure uploads directory exists and serve it
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+app.use('/uploads', express.static(uploadsDir));
 
 // Connect to MongoDB Atlas (hardcoded for now)
 const mongoURI = process.env.MONGO_URI || 'mongodb+srv://dino123:dino123@cluster0.efxiixb.mongodb.net/istruzioneF?retryWrites=true&w=majority&appName=Cluster0';
@@ -63,6 +81,93 @@ const teacherSchema = new mongoose.Schema({
 });
 
 const Teacher = mongoose.model('Teacher', teacherSchema);
+
+// ===== Passport serialization (demo: store minimal profile) =====
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+passport.deserializeUser((obj, done) => {
+    done(null, obj);
+});
+
+// ===== Google OAuth Strategy =====
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5050/auth/google/callback'
+    }, (accessToken, refreshToken, profile, done) => {
+        const user = { provider: 'google', id: profile.id, displayName: profile.displayName, email: profile.emails?.[0]?.value };
+        return done(null, user);
+    }));
+}
+
+// ===== Microsoft OAuth Strategy =====
+if (process.env.MS_CLIENT_ID && process.env.MS_CLIENT_SECRET) {
+    passport.use(new MicrosoftStrategy({
+        clientID: process.env.MS_CLIENT_ID,
+        clientSecret: process.env.MS_CLIENT_SECRET,
+        callbackURL: process.env.MS_CALLBACK_URL || 'http://localhost:5050/auth/microsoft/callback',
+        scope: ['user.read']
+    }, (accessToken, refreshToken, profile, done) => {
+        const user = { provider: 'microsoft', id: profile.id, displayName: profile.displayName, email: profile.emails?.[0]?.value };
+        return done(null, user);
+    }));
+}
+
+// ===== OAuth Routes =====
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/auth/failure' }), (req, res) => {
+    res.redirect('/auth/success');
+});
+
+app.get('/auth/microsoft', passport.authenticate('microsoft'));
+app.get('/auth/microsoft/callback', passport.authenticate('microsoft', { failureRedirect: '/auth/failure' }), (req, res) => {
+    res.redirect('/auth/success');
+});
+
+app.get('/auth/success', async (req, res) => {
+    const user = req.user || {};
+    const email = user.email;
+    let role = 'student';
+    let target = '/student.html';
+    try {
+        if (email) {
+            const teacher = await Teacher.findOne({ email });
+            if (teacher) { role = 'teacher'; target = '/teacher.html'; }
+        }
+    } catch (e) { /* ignore, fall back to defaults */ }
+    const safe = JSON.stringify({
+        provider: user.provider,
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+        role,
+        target
+    });
+    res.send(`<!doctype html><html><body style="font-family:system-ui;padding:24px;">
+<h2>Signed in successfully</h2>
+<script>
+  (function(){
+    try {
+      var u = ${safe};
+      var payload = { role: u.role, id: u.id, firstName: u.displayName, email: u.email };
+      localStorage.setItem('istruzioneF_user', JSON.stringify(payload));
+      window.location.href = u.target;
+    } catch(e) {
+      document.body.innerHTML += '<p>Failed to store session. '+ (e && e.message ? e.message : '') +'</p>';
+    }
+  })();
+</script>
+<pre>${safe}</pre>
+<p><a id="cont" href="${target}">Continue</a> · <a href="/auth/logout">Logout</a></p>
+</body></html>`);
+});
+app.get('/auth/failure', (req, res) => res.status(401).send('OAuth failed'));
+app.get('/auth/logout', (req, res) => {
+    req.logout?.(() => {});
+    res.redirect('/');
+});
 
 // API endpoint to register student
 app.post('/register-student', async (req, res) => {
@@ -171,38 +276,88 @@ app.post('/login-teacher', async (req, res) => {
 function generateOtp() {
     return (Math.floor(100000 + Math.random() * 900000)).toString(); // 6-digit
 }
+function generateEnrollCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+}
 
 // Email transporter (SMTP)
 let transporter = null;
-if (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS) {
+const forceTest = process.env.FORCE_TEST_SMTP === 'true';
+const demo2fa = process.env.DEMO_2FA === 'true';
+const hasSmtp = (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const forceTestSms = process.env.FORCE_TEST_SMS === 'true';
+if (hasSmtp && !forceTest) {
     transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT),
         secure: Number(process.env.SMTP_PORT) === 465,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        logger: process.env.SMTP_DEBUG === 'true',
+        debug: process.env.SMTP_DEBUG === 'true'
     });
 }
 
+async function ensureTestTransporterWhenMissing() {
+    if (transporter || hasSmtp) return;
+    try {
+        const testAccount = await nodemailer.createTestAccount();
+        transporter = nodemailer.createTransport({
+            host: testAccount.smtp.host,
+            port: testAccount.smtp.port,
+            secure: testAccount.smtp.secure,
+            auth: { user: testAccount.user, pass: testAccount.pass },
+            logger: process.env.SMTP_DEBUG === 'true',
+            debug: process.env.SMTP_DEBUG === 'true'
+        });
+        console.log('Using Ethereal test SMTP account for emails.');
+    } catch (e) {
+        console.error('Failed to create test SMTP account', e);
+    }
+}
+
 async function sendOtpEmail(to, code) {
-    if (!transporter) return false;
+    if (!transporter && (!hasSmtp || forceTest)) {
+        await ensureTestTransporterWhenMissing();
+    }
+    if (!transporter) return { sent: false };
     const appName = 'IstruzioneF';
     const mailOptions = {
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        from: process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@istruzionef.test',
         to,
         subject: `${appName} Password Reset OTP`,
         text: `Your OTP is ${code}. It expires in 10 minutes.`,
         html: `<p>Your OTP is <b>${code}</b>. It expires in 10 minutes.</p>`
     };
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    const previewUrl = nodemailer.getTestMessageUrl ? nodemailer.getTestMessageUrl(info) : undefined;
+    if (previewUrl) {
+        console.log('Preview email at:', previewUrl);
+    }
+    return { sent: true, previewUrl };
+}
+
+// Twilio SMS setup
+let twilioClient = null;
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+}
+
+async function sendOtpSms(toPhone, code) {
+    if (!twilioClient || !process.env.TWILIO_FROM_NUMBER) return false;
+    const body = `IstruzioneF OTP: ${code}. Expires in 10 minutes.`;
+    await twilioClient.messages.create({ from: process.env.TWILIO_FROM_NUMBER, to: toPhone, body });
     return true;
 }
 
 // Request OTP for student
 app.post('/password-reset/request/student', async (req, res) => {
     try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ message: 'email is required' });
-        const user = await Student.findOne({ email });
+        const { email, phone } = req.body;
+        if (!email && !phone) return res.status(400).json({ message: 'email or phone is required' });
+        const user = email ? await Student.findOne({ email }) : await Student.findOne({ phone });
         if (!user) return res.status(200).json({ message: 'If account exists, OTP sent' });
 
         const code = generateOtp();
@@ -211,13 +366,24 @@ app.post('/password-reset/request/student', async (req, res) => {
         user.resetOtpExpiresAt = expires;
         await user.save();
 
-        let sent = false;
-        try { sent = await sendOtpEmail(email, code); } catch (e) { console.error('Email send failed', e); }
-        if (sent) {
-            return res.json({ message: 'OTP sent to email' });
+        let result = { sent: false };
+        if (email) {
+            try { result = await sendOtpEmail(email, code); } catch (e) { console.error('Email send failed', e); }
+        } else if (phone) {
+            if (!forceTestSms) {
+                try { const ok = await sendOtpSms(phone, code); result = { sent: ok }; } catch (e) { console.error('SMS send failed', e); }
+            }
         }
-        // fallback for development if SMTP not configured
-        res.json({ message: 'OTP generated (dev mode)', devCode: code, expiresAt: expires });
+        if (result.sent) {
+            return res.json({
+                message: email ? 'OTP sent to email' : 'OTP sent to phone',
+                previewUrl: result.previewUrl,
+                devCode: ((email && forceTest) || (phone && forceTestSms) || demo2fa) ? code : undefined,
+                expiresAt: expires
+            });
+        }
+        // fallback for development if delivery not configured or failed
+        res.json({ message: 'OTP generated (dev mode)', devCode: code, previewUrl: result.previewUrl, expiresAt: expires });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -227,9 +393,9 @@ app.post('/password-reset/request/student', async (req, res) => {
 // Verify OTP for student
 app.post('/password-reset/verify/student', async (req, res) => {
     try {
-        const { email, otp } = req.body;
-        if (!email || !otp) return res.status(400).json({ message: 'email and otp are required' });
-        const user = await Student.findOne({ email });
+        const { email, phone, otp } = req.body;
+        if ((!email && !phone) || !otp) return res.status(400).json({ message: 'email or phone and otp are required' });
+        const user = email ? await Student.findOne({ email }) : await Student.findOne({ phone });
         if (!user || !user.resetOtpCode || !user.resetOtpExpiresAt) {
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
@@ -246,9 +412,9 @@ app.post('/password-reset/verify/student', async (req, res) => {
 // Reset password for student
 app.post('/password-reset/reset/student', async (req, res) => {
     try {
-        const { email, otp, newPassword } = req.body;
-        if (!email || !otp || !newPassword) return res.status(400).json({ message: 'email, otp and newPassword are required' });
-        const user = await Student.findOne({ email });
+        const { email, phone, otp, newPassword } = req.body;
+        if ((!email && !phone) || !otp || !newPassword) return res.status(400).json({ message: 'email or phone, otp and newPassword are required' });
+        const user = email ? await Student.findOne({ email }) : await Student.findOne({ phone });
         if (!user || !user.resetOtpCode || !user.resetOtpExpiresAt) {
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
@@ -269,30 +435,34 @@ app.post('/password-reset/reset/student', async (req, res) => {
 // Request OTP for teacher
 app.post('/password-reset/request/teacher', async (req, res) => {
     try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ message: 'email is required' });
-        const user = await Teacher.findOne({ email });
+        const { email, phone } = req.body;
+        if (!email && !phone) return res.status(400).json({ message: 'email or phone is required' });
+        const user = email ? await Teacher.findOne({ email }) : await Teacher.findOne({ phone });
         if (!user) return res.status(200).json({ message: 'If account exists, OTP sent' });
         const code = generateOtp();
         const expires = new Date(Date.now() + 10 * 60 * 1000);
         user.resetOtpCode = code;
         user.resetOtpExpiresAt = expires;
         await user.save();
-        let sent = false;
-        try { sent = await sendOtpEmail(email, code); } catch (e) { console.error('Email send failed', e); }
-        if (sent) {
-            return res.json({ message: 'OTP sent to email' });
+        let result = { sent: false };
+        if (email) {
+            try { result = await sendOtpEmail(email, code); } catch (e) { console.error('Email send failed', e); }
+        } else if (phone) {
+            try { const ok = await sendOtpSms(phone, code); result = { sent: ok }; } catch (e) { console.error('SMS send failed', e); }
         }
-        res.json({ message: 'OTP generated (dev mode)', devCode: code, expiresAt: expires });
+        if (result.sent) {
+            return res.json({ message: 'OTP sent to email', previewUrl: result.previewUrl, devCode: forceTest ? code : undefined, expiresAt: expires });
+        }
+        res.json({ message: 'OTP generated (dev mode)', devCode: code, previewUrl: result.previewUrl, expiresAt: expires });
     } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
 
 // Verify OTP for teacher
 app.post('/password-reset/verify/teacher', async (req, res) => {
     try {
-        const { email, otp } = req.body;
-        if (!email || !otp) return res.status(400).json({ message: 'email and otp are required' });
-        const user = await Teacher.findOne({ email });
+        const { email, phone, otp } = req.body;
+        if ((!email && !phone) || !otp) return res.status(400).json({ message: 'email or phone and otp are required' });
+        const user = email ? await Teacher.findOne({ email }) : await Teacher.findOne({ phone });
         if (!user || !user.resetOtpCode || !user.resetOtpExpiresAt) return res.status(400).json({ message: 'Invalid or expired OTP' });
         if (user.resetOtpCode !== otp || user.resetOtpExpiresAt < new Date()) return res.status(400).json({ message: 'Invalid or expired OTP' });
         res.json({ message: 'OTP verified' });
@@ -302,9 +472,9 @@ app.post('/password-reset/verify/teacher', async (req, res) => {
 // Reset password for teacher
 app.post('/password-reset/reset/teacher', async (req, res) => {
     try {
-        const { email, otp, newPassword } = req.body;
-        if (!email || !otp || !newPassword) return res.status(400).json({ message: 'email, otp and newPassword are required' });
-        const user = await Teacher.findOne({ email });
+        const { email, phone, otp, newPassword } = req.body;
+        if ((!email && !phone) || !otp || !newPassword) return res.status(400).json({ message: 'email or phone, otp and newPassword are required' });
+        const user = email ? await Teacher.findOne({ email }) : await Teacher.findOne({ phone });
         if (!user || !user.resetOtpCode || !user.resetOtpExpiresAt) return res.status(400).json({ message: 'Invalid or expired OTP' });
         if (user.resetOtpCode !== otp || user.resetOtpExpiresAt < new Date()) return res.status(400).json({ message: 'Invalid or expired OTP' });
         user.password = await bcrypt.hash(newPassword, 10);
@@ -318,9 +488,12 @@ app.post('/password-reset/reset/teacher', async (req, res) => {
 // ===== Learning Models =====
 const courseSchema = new mongoose.Schema({
     title: { type: String, required: true },
+    description: { type: String, default: '' },
+    duration: { type: String, default: '' },
     code: String,
     category: String,
     term: String,
+    enrollCode: { type: String, default: '' },
     teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true },
     createdAt: { type: Date, default: Date.now }
 });
@@ -362,12 +535,68 @@ const discussionSchema = new mongoose.Schema({
 });
 const DiscussionMessage = mongoose.model('DiscussionMessage', discussionSchema);
 
+// ===== Course Material (Files) =====
+const materialSchema = new mongoose.Schema({
+    courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+    title: { type: String, required: true },
+    type: { type: String, enum: ['pdf', 'video', 'other'], default: 'other' },
+    filename: { type: String, required: true },
+    filepath: { type: String, required: true },
+    mimetype: { type: String, required: true },
+    size: { type: Number, required: true },
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+const Material = mongoose.model('Material', materialSchema);
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) { cb(null, uploadsDir); },
+    filename: function (req, file, cb) {
+        const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        cb(null, unique + ext);
+    }
+});
+const upload = multer({ storage });
+
+// Upload material (PDF/video/other)
+app.post('/materials/upload', upload.single('file'), async (req, res) => {
+    try {
+        const { courseId, title, type, teacherId } = req.body;
+        if (!req.file || !courseId || !title || !teacherId) {
+            return res.status(400).json({ message: 'file, courseId, title, teacherId are required' });
+        }
+        const mat = await Material.create({
+            courseId,
+            title,
+            type: ['pdf', 'video'].includes(type) ? type : 'other',
+            filename: req.file.filename,
+            filepath: '/uploads/' + req.file.filename,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            uploadedBy: teacherId
+        });
+        res.json(mat);
+    } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// List materials for a course
+app.get('/materials', async (req, res) => {
+    try {
+        const { courseId } = req.query;
+        if (!courseId) return res.status(400).json({ message: 'courseId is required' });
+        const list = await Material.find({ courseId }).sort({ createdAt: -1 });
+        res.json(list);
+    } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
 // ===== Course Endpoints =====
 app.post('/courses', async (req, res) => {
     try {
-        const { title, code, category, term, teacherId } = req.body;
+        const { title, description, duration, code, category, term, teacherId } = req.body;
         if (!title || !teacherId) return res.status(400).json({ message: 'title and teacherId are required' });
-        const course = await Course.create({ title, code, category, term, teacherId });
+        const enrollCode = generateEnrollCode();
+        const course = await Course.create({ title, description, duration, code, category, term, teacherId, enrollCode });
         res.json(course);
     } catch (err) {
         console.error(err); res.status(500).json({ message: 'Server error' });
@@ -396,11 +625,18 @@ app.get('/courses/available', async (req, res) => {
 // ===== Enrollment Endpoints =====
 app.post('/enroll', async (req, res) => {
     try {
-        const { studentId, courseId } = req.body;
-        if (!studentId || !courseId) return res.status(400).json({ message: 'studentId and courseId are required' });
-        const exists = await Enrollment.findOne({ studentId, courseId });
+        const { studentId, courseId, enrollCode } = req.body;
+        if (!studentId) return res.status(400).json({ message: 'studentId is required' });
+        let targetCourseId = courseId;
+        if (!targetCourseId && enrollCode) {
+            const course = await Course.findOne({ enrollCode });
+            if (!course) return res.status(400).json({ message: 'Invalid enrollment code' });
+            targetCourseId = course._id;
+        }
+        if (!targetCourseId) return res.status(400).json({ message: 'courseId or enrollCode is required' });
+        const exists = await Enrollment.findOne({ studentId, courseId: targetCourseId });
         if (exists) return res.status(400).json({ message: 'Already enrolled' });
-        const enr = await Enrollment.create({ studentId, courseId });
+        const enr = await Enrollment.create({ studentId, courseId: targetCourseId });
         res.json(enr);
     } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
@@ -491,6 +727,7 @@ app.get('/course-students', async (req, res) => {
         const { courseId } = req.query;
         if (!courseId) return res.status(400).json({ message: 'courseId is required' });
         const enrollments = await Enrollment.find({ courseId }).populate('studentId');
+        const course = await Course.findById(courseId).lean();
         const students = enrollments.map(e => ({
             id: e.studentId?._id,
             firstName: e.studentId?.firstName,
@@ -499,7 +736,7 @@ app.get('/course-students', async (req, res) => {
             studentId: e.studentId?.studentId,
             program: e.studentId?.program
         }));
-        res.json(students);
+        res.json({ enrollCode: course?.enrollCode, students });
     } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
 

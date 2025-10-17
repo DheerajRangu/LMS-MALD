@@ -696,8 +696,10 @@
       <div style="background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);width:90%;max-width:420px;padding:20px;">
         <h3 style="margin-bottom:10px;color:#1E293B;">Reset password</h3>
         <div id="otpStep1">
-          <label style="display:block;margin:8px 0 6px;">Email</label>
-          <input id="otpEmail" type="email" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;">
+          <div> 
+            <label style=\"display:block;margin:8px 0 6px;\">Email</label> 
+            <input id=\"otpEmail\" type=\"email\" style=\"width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;\"> 
+          </div>
           <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
             <button id="otpCancel1" style="padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;">Cancel</button>
             <button id="otpRequest" style="padding:10px 14px;border-radius:10px;border:none;background:#6A0DAD;color:#fff;">Send OTP</button>
@@ -736,8 +738,25 @@
           });
           const d = await r.json();
           if (!r.ok) return alert(d.message||'Failed to send OTP');
-          alert('OTP sent to your email' + (d.devCode ? ` (dev: ${d.devCode})` : ''));
+          const hint = document.createElement('div');
+          hint.style.cssText = 'margin-top:10px;color:#1E293B;font-size:0.9rem;word-break:break-all;';
+          hint.innerHTML = `OTP sent to your email.${d.devCode ? ` Demo OTP: <b>${d.devCode}</b>.` : ''} ${d.previewUrl ? `Preview: <a href="${d.previewUrl}" target="_blank">open</a>` : ''}`;
+          step1.appendChild(hint);
           step1.style.display='none'; step2.style.display='block';
+          try {
+            const existing = document.getElementById('otpDevHint');
+            if (existing) existing.remove();
+            const dev = document.createElement('div');
+            dev.id = 'otpDevHint';
+            dev.style.cssText = 'margin-bottom:10px;color:#1E293B;font-size:0.9rem;word-break:break-all;';
+            dev.innerHTML = `${d.devCode ? `Demo OTP: <b>${d.devCode}</b>. ` : ''}${d.previewUrl ? `Preview: <a href="${d.previewUrl}" target="_blank">open</a>` : ''}`;
+            if (dev.textContent.trim() !== '' || dev.innerText.trim() !== '' || dev.innerHTML.replace(/<[^>]*>/g,'').trim() !== '') {
+              step2.insertBefore(dev, step2.firstChild);
+            }
+            if (d.devCode) {
+              document.getElementById('otpCode').value = d.devCode;
+            }
+          } catch (_) {}
         } catch(e){ alert('Network error'); }
       };
       document.getElementById('otpReset').onclick = async () => {
@@ -746,7 +765,6 @@
         const newPassword = newPassInput.value;
         if (!otp || !newPassword) return alert('Enter OTP and new password');
         try {
-          // optional: verify step
           const v = await fetch('http://localhost:5050/password-reset/verify/student', {
             method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, otp })
           });
@@ -842,12 +860,12 @@
     // Forgot password flow
     document.getElementById('forgotStudent').addEventListener('click', function(e){ e.preventDefault(); openOtpModalStudent(); });
 
-    // Social buttons placeholders
+    // Social buttons -> backend OAuth routes
     document.getElementById('googleStudent').addEventListener('click', function(){
-        alert('Google sign-in not yet configured. Backend OAuth needed.');
+        window.location.href = 'http://localhost:5050/auth/google';
     });
     document.getElementById('microsoftStudent').addEventListener('click', function(){
-        alert('Microsoft sign-in not yet configured. Backend OAuth needed.');
+        window.location.href = 'http://localhost:5050/auth/microsoft';
     });
 </script>
 
