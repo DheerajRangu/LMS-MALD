@@ -1,7 +1,16 @@
 // student-api.js - API functions for student interface
 
-// API Base URL
-const API_BASE_URL = 'http://localhost:3000/api';
+// API Base URL (configurable for production)
+const DEFAULT_LOCAL_API = 'http://localhost:3000/api';
+const CONFIG_API =
+    localStorage.getItem('API_BASE') ||
+    (window.APP_CONFIG && window.APP_CONFIG.API_BASE) ||
+    null;
+const isProdHost = /netlify\.app$/.test(window.location.hostname);
+const API_BASE_URL = CONFIG_API || DEFAULT_LOCAL_API;
+if (isProdHost && !CONFIG_API) {
+    console.warn('Production host detected; set localStorage.API_BASE to your backend URL (e.g., https://your-backend.onrender.com/api).');
+}
 
 // Get user ID from localStorage (set during login)
 const currentUserId = localStorage.getItem('userId') || '123456'; // Fallback for testing
