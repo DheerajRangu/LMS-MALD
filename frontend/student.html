@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Istruzione F</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --sidebar: #1e293b;
+            --card: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar);
+            color: white;
+            padding: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .logo-text span {
+            color: var(--secondary);
+        }
+
+        .user-info {
+            padding: 0 1.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-role {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1rem 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--secondary);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: var(--background);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--sidebar);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus-within {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            border-color: var(--primary);
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            padding: 0 0.75rem;
+            font-size: 1rem;
+            width: 300px;
+            background: transparent;
+        }
+
+        .notification-btn {
+            background: var(--card);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            transition: all 0.2s ease;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 1.8rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--accent);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--secondary);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            align-self: flex-end;
+            font-size: 1.8rem;
+            opacity: 0.8;
+        }
+
+        .stat-card .stat-icon {
+            color: var(--primary);
+        }
+
+        .stat-card.warning .stat-icon {
+            color: var(--accent);
+        }
+
+        .stat-card.success .stat-icon {
+            color: var(--secondary);
+        }
+
+        .stat-card.danger .stat-icon {
+            color: var(--danger);
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-section:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--sidebar);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header h2 i {
+            color: var(--primary);
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .view-all:hover {
+            gap: 0.7rem;
+            color: var(--primary-dark);
+        }
+
+        /* Courses Grid */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .course-card {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .course-header {
+            height: 140px;
+            background: var(--primary);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .course-category {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        .course-content {
+            padding: 1.5rem;
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .course-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 0.7rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            background: #0d9c6d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Assignments List */
+        .assignments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .assignment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--background);
+            border-radius: 12px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .assignment-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .assignment-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .assignment-meta {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .submission-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+        }
+
+        .status-submitted {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .status-overdue {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Grades Table */
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .grades-table th,
+        .grades-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .grades-table th {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .grades-table tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .grade-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .grade-a {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .grade-b {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+
+        .grade-c {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+        }
+
+        .grade-d {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .grade-f {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Discussion Forum */
+        .forum-container {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .forum-topics {
+            flex: 1;
+        }
+
+        .forum-threads {
+            flex: 2;
+        }
+
+        .topic-item {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            background: var(--background);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .topic-item:hover, .topic-item.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .thread-item {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            background: var(--background);
+            border-left: 4px solid var(--primary);
+        }
+
+        .thread-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .thread-author {
+            font-weight: 600;
+        }
+
+        .thread-date {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .thread-content {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .thread-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .reply-btn {
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        /* Notifications Panel */
+        .notifications-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background: var(--card);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .notifications-panel.active {
+            right: 0;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: var(--background);
+            border-left: 4px solid var(--primary);
+        }
+
+        .notification-item.new {
+            border-left-color: var(--secondary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .nav-menu {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-item {
+                flex: 1;
+                min-width: 160px;
+                justify-content: center;
+            }
+
+            .forum-container {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .search-bar input {
+                width: 200px;
+            }
+            
+            .assignment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .notifications-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="logo-text">Istruzione<span>F</span></div>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="user-name">John Student</div>
+            <div class="user-role">Computer Science</div>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="#my-courses" class="nav-item">
+                <i class="fas fa-book"></i>
+                My Courses
+            </a>
+            <a href="#available-courses" class="nav-item">
+                <i class="fas fa-plus-circle"></i>
+                Available Courses
+            </a>
+            <a href="#assignments" class="nav-item">
+                <i class="fas fa-tasks"></i>
+                Assignments
+            </a>
+            <a href="#grades" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                Grades
+            </a>
+            <a href="#forum" class="nav-item">
+                <i class="fas fa-comments"></i>
+                Discussion Forum
+            </a>
+            <a href="#settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+        </nav>
+        
+        <div style="padding: 0 1.5rem; margin-top: auto;">
+            <a href="index.html" class="btn btn-outline" style="width: 100%; justify-content: center; color: white; border-color: rgba(255,255,255,0.3);">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+            <header class="header">
+                <h1>Student Dashboard</h1>
+                <div class="header-actions">
+                <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search courses, assignments...">
+                    </div>
+                <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+            <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Enrolled Courses</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                </div>
+            <div class="stat-card warning">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Pending Assignments</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                </div>
+            <div class="stat-card success">
+                    <div class="stat-value">3.75</div>
+                    <div class="stat-label">Current GPA</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            <div class="stat-card danger">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">Overdue Assignments</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Courses Section -->
+        <section class="dashboard-section" id="my-courses">
+                <div class="section-header">
+                    <h2><i class="fas fa-book"></i> My Courses</h2>
+                    <a href="#" class="view-all">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="courses-grid">
+                    <!-- Course 1 -->
+                <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                            <i class="fas fa-laptop-code"></i>
+                            <span class="course-category">Programming</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Advanced Web Development</h3>
+                            <div class="course-meta">
+                                <span>CS401</span>
+                                <span>Dr. Sarah Johnson</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat">
+                                    <i class="fas fa-tasks"></i>
+                                    <span>3 Assignments</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>18 Students</span>
+                                </div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary">Enter Course</button>
+                                <button class="btn btn-outline">Resources</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course 2 -->
+                <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-brain"></i>
+                            <span class="course-category">Data Science</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Machine Learning Fundamentals</h3>
+                            <div class="course-meta">
+                                <span>DS301</span>
+                                <span>Prof. Michael Chen</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat">
+                                    <i class="fas fa-tasks"></i>
+                                    <span>2 Assignments</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>22 Students</span>
+                                </div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary">Enter Course</button>
+                                <button class="btn btn-outline">Resources</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course 3 -->
+                <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-palette"></i>
+                            <span class="course-category">Design</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">UI/UX Design Principles</h3>
+                            <div class="course-meta">
+                                <span>DE201</span>
+                                <span>Prof. Lisa Rodriguez</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat">
+                                    <i class="fas fa-tasks"></i>
+                                    <span>1 Assignment</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>15 Students</span>
+                                </div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary">Enter Course</button>
+                                <button class="btn btn-outline">Resources</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- Available Courses Section -->
+        <section class="dashboard-section" id="available-courses">
+                <div class="section-header">
+                <h2><i class="fas fa-plus-circle"></i> Available Courses</h2>
+                    <a href="#" class="view-all">
+                    Browse All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="courses-grid">
+                    <!-- Available Course 1 -->
+                <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                            <i class="fas fa-database"></i>
+                            <span class="course-category">Database</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Database Systems</h3>
+                            <div class="course-meta">
+                                <span>CS350</span>
+                                <span>Dr. Robert Williams</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Starts: Nov 1</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>12/25 Enrolled</span>
+                                </div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-success">Enroll Now</button>
+                                <button class="btn btn-outline">Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available Course 2 -->
+                <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="course-category">Security</span>
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Cybersecurity Principles</h3>
+                            <div class="course-meta">
+                                <span>CS455</span>
+                                <span>Prof. David Miller</span>
+                            </div>
+                            <div class="course-stats">
+                                <div class="stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Starts: Nov 15</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>8/20 Enrolled</span>
+                                </div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-success">Enroll Now</button>
+                                <button class="btn btn-outline">Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- Assignments Section -->
+        <section class="dashboard-section" id="assignments">
+                <div class="section-header">
+                    <h2><i class="fas fa-tasks"></i> My Assignments</h2>
+                <a href="#" class="view-all">
+                    View All
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                </div>
+                <div class="assignments-list">
+                    <!-- Assignment 1 -->
+                <div class="assignment-item">
+                        <div class="assignment-info">
+                            <h4>Web Development Project - E-commerce Site</h4>
+                            <div class="assignment-meta">
+                                <span>Course: Advanced Web Development</span>
+                                <span>Due: Oct 25, 2024</span>
+                                <span>Weight: 20%</span>
+                            </div>
+                        </div>
+                        <div class="submission-status status-submitted">Submitted</div>
+                    </div>
+
+                    <!-- Assignment 2 -->
+                <div class="assignment-item">
+                        <div class="assignment-info">
+                            <h4>Machine Learning Model Implementation</h4>
+                            <div class="assignment-meta">
+                                <span>Course: Machine Learning</span>
+                                <span>Due: Oct 30, 2024</span>
+                                <span>Weight: 25%</span>
+                            </div>
+                        </div>
+                        <div class="submission-status status-pending">Pending</div>
+                    </div>
+
+                    <!-- Assignment 3 -->
+                <div class="assignment-item">
+                        <div class="assignment-info">
+                            <h4>UI Design Portfolio</h4>
+                            <div class="assignment-meta">
+                                <span>Course: UI/UX Design</span>
+                                <span>Due: Oct 18, 2024</span>
+                                <span>Weight: 15%</span>
+                            </div>
+                        </div>
+                        <div class="submission-status status-overdue">Overdue</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button class="btn btn-primary" id="submitAssignmentBtn">
+                        <i class="fas fa-upload"></i>
+                        Submit New Assignment
+                    </button>
+                </div>
+            </section>
+
+        <!-- Grades Section -->
+        <section class="dashboard-section" id="grades">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> My Grades</h2>
+                    <a href="#" class="view-all">
+                        View Full Transcript
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <table class="grades-table">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Assignment</th>
+                            <th>Grade</th>
+                            <th>Weight</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Advanced Web Development</td>
+                            <td>HTML/CSS Portfolio</td>
+                            <td><span class="grade-badge grade-a">A (92%)</span></td>
+                            <td>15%</td>
+                            <td>Excellent work on responsive design</td>
+                        </tr>
+                        <tr>
+                            <td>Machine Learning</td>
+                            <td>Linear Regression Project</td>
+                            <td><span class="grade-badge grade-b">B+ (88%)</span></td>
+                            <td>20%</td>
+                            <td>Good implementation, improve documentation</td>
+                        </tr>
+                        <tr>
+                            <td>UI/UX Design</td>
+                            <td>Wireframe Design</td>
+                            <td><span class="grade-badge grade-a">A- (90%)</span></td>
+                            <td>10%</td>
+                            <td>Creative approach, strong user flow</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        <!-- Discussion Forum Section -->
+        <section class="dashboard-section" id="forum">
+                <div class="section-header">
+                    <h2><i class="fas fa-comments"></i> Discussion Forum</h2>
+                    <button class="btn btn-primary" id="newThreadBtn">
+                        <i class="fas fa-plus"></i>
+                        New Thread
+                    </button>
+                </div>
+                <div class="forum-container">
+                    <div class="forum-topics">
+                        <h3 style="margin-bottom: 1rem;">Course Topics</h3>
+                        <div class="topic-item active">Advanced Web Development</div>
+                        <div class="topic-item">Machine Learning</div>
+                        <div class="topic-item">UI/UX Design</div>
+                        <div class="topic-item">General Questions</div>
+                    </div>
+                    <div class="forum-threads">
+                        <h3 style="margin-bottom: 1rem;">Recent Threads</h3>
+                    <div class="thread-item">
+                            <div class="thread-header">
+                                <div class="thread-author">Emma Smith</div>
+                                <div class="thread-date">2 hours ago</div>
+                            </div>
+                            <h4>Question about React state management</h4>
+                            <div class="thread-content">
+                                I'm having trouble understanding when to use useState vs useReducer for complex state. Can anyone explain the key differences?
+                            </div>
+                            <div class="thread-actions">
+                                <button class="reply-btn">
+                                    <i class="fas fa-reply"></i>
+                                    Reply
+                                </button>
+                                <button class="reply-btn">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    Like (5)
+                                </button>
+                            </div>
+                        </div>
+                    <div class="thread-item">
+                            <div class="thread-header">
+                            <div class="thread-author">Michael Johnson</div>
+                            <div class="thread-date">1 day ago</div>
+                        </div>
+                        <h4>Help with assignment deadline extension</h4>
+                        <div class="thread-content">
+                            Due to technical issues, I need to request an extension for the ML project. Has anyone gone through this process before?
+                        </div>
+                        <div class="thread-actions">
+                            <button class="reply-btn">
+                                <i class="fas fa-reply"></i>
+                                Reply
+                            </button>
+                            <button class="reply-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                Like (3)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+        <div class="modal-header">
+            <h3>Notifications</h3>
+            <button class="close-modal" id="closeNotifications">&times;</button>
+        </div>
+        <div class="notification-item new">
+            <h4>New Assignment Posted</h4>
+            <p>Machine Learning: Final Project requirements have been posted</p>
+            <small>2 hours ago</small>
+        </div>
+        <div class="notification-item new">
+            <h4>Grade Available</h4>
+            <p>Your grade for Web Development Assignment 2 is now available</p>
+            <small>5 hours ago</small>
+        </div>
+        <div class="notification-item">
+            <h4>Course Update</h4>
+            <p>UI/UX Design: New reading materials added for Week 5</p>
+            <small>1 day ago</small>
+        </div>
+        <div class="notification-item">
+            <h4>Forum Response</h4>
+            <p>Dr. Johnson replied to your question about React components</p>
+            <small>2 days ago</small>
+        </div>
+    </div>
+
+    <!-- Submit Assignment Modal -->
+    <div class="modal" id="submitAssignmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Submit Assignment</h3>
+                <button class="close-modal" id="closeAssignmentModal">&times;</button>
+            </div>
+            <form id="assignmentForm">
+                <div class="form-group">
+                    <label for="assignmentCourse">Course</label>
+                    <select id="assignmentCourse" required>
+                        <option value="">Select a course</option>
+                        <option value="web-dev">Advanced Web Development</option>
+                        <option value="ml">Machine Learning</option>
+                        <option value="design">UI/UX Design</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assignmentTitle">Assignment Title</label>
+                    <input type="text" id="assignmentTitle" placeholder="Enter assignment title" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignmentDescription">Description/Comments</label>
+                    <textarea id="assignmentDescription" placeholder="Add any comments about your submission..." rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload Files</label>
+                    <div class="file-upload" id="fileUpload">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 1rem; color: var(--text-light);"></i>
+                        <p>Drag and drop files here or click to browse</p>
+                        <small>Maximum file size: 50MB</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Assignment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Thread Modal -->
+    <div class="modal" id="newThreadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Thread</h3>
+                <button class="close-modal" id="closeThreadModal">&times;</button>
+            </div>
+            <form id="threadForm">
+                <div class="form-group">
+                    <label for="threadTopic">Topic</label>
+                    <select id="threadTopic" required>
+                        <option value="">Select a topic</option>
+                        <option value="web-dev">Advanced Web Development</option>
+                        <option value="ml">Machine Learning</option>
+                        <option value="design">UI/UX Design</option>
+                        <option value="general">General Questions</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="threadTitle">Thread Title</label>
+                    <input type="text" id="threadTitle" placeholder="Enter a descriptive title" required>
+                </div>
+                <div class="form-group">
+                    <label for="threadContent">Content</label>
+                    <textarea id="threadContent" placeholder="Write your question or discussion topic..." rows="6" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-plus"></i>
+                    Create Thread
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Session bootstrap + populate profile and load data
+        (async function initSession() {
+            const raw = localStorage.getItem('istruzioneF_user');
+            if (!raw) { window.location.href = 'student-login.html'; return; }
+            let user;
+            try { user = JSON.parse(raw); } catch { localStorage.removeItem('istruzioneF_user'); window.location.href='student-login.html'; return; }
+            if (user.role !== 'student') { window.location.href = 'student-login.html'; return; }
+
+            // Populate profile
+            const nameEl = document.querySelector('.user-name');
+            if (nameEl && user.firstName) nameEl.textContent = user.firstName;
+            const roleEl = document.querySelector('.user-role');
+            if (roleEl) roleEl.textContent = user.program || 'Student';
+
+            // Load enrolled courses
+            let enrolledCourses = [];
+            try {
+                const enrolledRes = await fetch(`http://localhost:5050/enrollments?studentId=${encodeURIComponent(user.id)}`);
+                enrolledCourses = await enrolledRes.json();
+                renderMyCourses(enrolledCourses);
+            } catch (e) { console.error('Failed to load enrolled', e); }
+
+            // Load available courses
+            try {
+                const availRes = await fetch(`http://localhost:5050/courses/available?studentId=${encodeURIComponent(user.id)}`);
+                const availableCourses = await availRes.json();
+                renderAvailableCourses(availableCourses, user);
+            } catch (e) { console.error('Failed to load available', e); }
+
+            // Load assignments for enrolled courses
+            try {
+                await loadAssignmentsForCourses(enrolledCourses);
+                populateAssignmentCourseSelect(enrolledCourses);
+            } catch (e) { console.error('Failed to load assignments', e); }
+        })();
+
+        async function loadAssignmentsForCourses(courses) {
+            const container = document.querySelector('#assignments .assignments-list');
+            if (!container) return;
+            container.innerHTML = '';
+            for (const c of courses) {
+                const res = await fetch(`http://localhost:5050/assignments?courseId=${encodeURIComponent(c._id)}`);
+                const list = await res.json();
+                list.forEach(a => container.appendChild(renderAssignmentItem(c, a)));
+            }
+        }
+
+        function renderAssignmentItem(course, assignment) {
+            const item = document.createElement('div');
+            item.className = 'assignment-item';
+            const info = document.createElement('div');
+            info.className = 'assignment-info';
+            info.innerHTML = `
+                <h4>${assignment.title}</h4>
+                <div class="assignment-meta">
+                    <span>Course: ${course.title}</span>
+                    <span>Due: ${assignment.dueDate ? new Date(assignment.dueDate).toDateString() : '—'}</span>
+                </div>
+            `;
+            const status = document.createElement('div');
+            status.className = 'submission-status status-pending';
+            status.textContent = 'Pending';
+            item.appendChild(info); item.appendChild(status);
+            return item;
+        }
+
+        function populateAssignmentCourseSelect(courses) {
+            const select = document.getElementById('assignmentCourse');
+            if (!select) return;
+            select.innerHTML = '<option value="">Select a course</option>' + courses.map(c => `<option value="${c._id}">${c.title}</option>`).join('');
+        }
+
+        function createCourseCard(course, options = {}) {
+            const { showEnroll = false, onEnroll } = options;
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            const header = document.createElement('div');
+            header.className = 'course-header';
+            header.innerHTML = `<i class="fas fa-book"></i>`;
+            const content = document.createElement('div');
+            content.className = 'course-content';
+            content.innerHTML = `
+                <h3 class="course-title">${course.title}</h3>
+                <div class="course-meta">
+                    <span>${course.code || ''}</span>
+                    <span>${course.term || ''}</span>
+                </div>
+            `;
+            const actions = document.createElement('div');
+            actions.className = 'course-actions';
+            if (showEnroll) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-success';
+                btn.textContent = 'Enroll Now';
+                btn.onclick = () => onEnroll && onEnroll(course, btn);
+                actions.appendChild(btn);
+            } else {
+                const enter = document.createElement('button');
+                enter.className = 'btn btn-primary';
+                enter.textContent = 'Enter Course';
+                actions.appendChild(enter);
+                const resBtn = document.createElement('button');
+                resBtn.className = 'btn btn-outline';
+                resBtn.textContent = 'Resources';
+                actions.appendChild(resBtn);
+            }
+            card.appendChild(header);
+            card.appendChild(content);
+            card.appendChild(actions);
+            return card;
+        }
+
+        function renderMyCourses(courses) {
+            const grid = document.querySelector('#my-courses .courses-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            courses.forEach(c => grid.appendChild(createCourseCard(c)));
+        }
+
+        function renderAvailableCourses(courses, user) {
+            const grid = document.querySelector('#available-courses .courses-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            courses.forEach(c => grid.appendChild(createCourseCard(c, {
+                showEnroll: true,
+                onEnroll: async (course, btn) => {
+                    try {
+                        const res = await fetch('http://localhost:5050/enroll', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ studentId: user.id, courseId: course._id })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) { alert(data.message || 'Enroll failed'); return; }
+                        btn.textContent = 'Enrolled'; btn.disabled = true; btn.classList.remove('btn-success'); btn.classList.add('btn-outline');
+                        // Move to my courses
+                        const myGrid = document.querySelector('#my-courses .courses-grid');
+                        if (myGrid) myGrid.appendChild(createCourseCard(course));
+                    } catch (e) { console.error(e); alert('Error enrolling'); }
+                }
+            })));
+        }
+
+        // Navigation and other existing handlers remain
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                const targetId = this.getAttribute('href').substring(1);
+                document.querySelectorAll('.dashboard-section').forEach(section => { section.style.display = 'none'; });
+                const target = document.getElementById(targetId); if (target) target.style.display = 'block';
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.nav-item.active').click();
+        });
+
+        // Logout clears storage and redirects
+        const logoutBtn = document.querySelector('a.btn.btn-outline');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('istruzioneF_user');
+                window.location.href = 'student-login.html';
+            });
+        }
+    </script>
+    <script>
+        async function loadGrades(studentId) {
+            try {
+                const res = await fetch(`http://localhost:5050/grades?studentId=${encodeURIComponent(studentId)}`);
+                const grades = await res.json();
+                const tbody = document.querySelector('#grades table tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                grades.forEach(g => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${g.courseTitle || ''}</td>
+                        <td>${g.assignmentTitle || ''}</td>
+                        <td><span class="grade-badge ${Number(g.grade) >= 90 ? 'grade-a' : Number(g.grade) >= 80 ? 'grade-b' : 'grade-c'}">${g.grade ?? '-'}</span></td>
+                        <td>-</td>
+                        <td>${g.feedback || ''}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error('Failed to load grades', e);
+            }
+        }
+
+        // Discussions UI (dynamic controls)
+        async function setupDiscussions(enrolledCourses, user) {
+            const forumSection = document.getElementById('forum');
+            if (!forumSection) return;
+            // Clear static placeholders
+            const forumContainer = forumSection.querySelector('.forum-container');
+            if (forumContainer) forumContainer.innerHTML = '';
+
+            const controls = document.createElement('div');
+            controls.style.marginBottom = '1rem';
+            const select = document.createElement('select');
+            select.className = 'btn btn-outline';
+            select.innerHTML = '<option value="">Select course</option>' + enrolledCourses.map(c => `<option value="${c._id}">${c.title}</option>`).join('');
+            controls.appendChild(select);
+            forumSection.querySelector('.section-header').appendChild(controls);
+
+            const list = document.createElement('div');
+            list.className = 'thread-list';
+            forumContainer.appendChild(list);
+
+            const formWrap = document.createElement('div');
+            formWrap.className = 'reply-form';
+            formWrap.innerHTML = `
+                <textarea id="discussionInput" class="reply-input" placeholder="Write a message..."></textarea>
+                <button id="discussionPost" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
+            `;
+            forumContainer.appendChild(formWrap);
+
+            async function loadMessages(courseId) {
+                list.innerHTML = '';
+                if (!courseId) return;
+                const res = await fetch(`http://localhost:5050/discussions?courseId=${encodeURIComponent(courseId)}`);
+                const msgs = await res.json();
+                msgs.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'thread-item';
+                    const when = m.createdAt ? new Date(m.createdAt).toLocaleString() : '';
+                    item.innerHTML = `
+                        <div class="thread-header">
+                            <div class="thread-author">${m.authorRole === 'teacher' ? 'Teacher' : 'Student'}</div>
+                            <div class="thread-date">${when}</div>
+                        </div>
+                        <div class="thread-content">${m.content}</div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            select.addEventListener('change', () => loadMessages(select.value));
+            document.getElementById('discussionPost').addEventListener('click', async () => {
+                const courseId = select.value; const content = document.getElementById('discussionInput').value.trim();
+                if (!courseId || !content) return;
+                const res = await fetch('http://localhost:5050/discussions', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseId, authorId: user.id, authorRole: 'student', content })
+                });
+                if (res.ok) { document.getElementById('discussionInput').value = ''; await loadMessages(courseId); }
+            });
+        }
+
+        // Extend existing init by observing DOM ready and loaded user to call grades and discussions
+        (async function afterInit() {
+            const raw = localStorage.getItem('istruzioneF_user');
+            if (!raw) return; let user; try { user = JSON.parse(raw);} catch { return; }
+            if (user.role !== 'student') return;
+            // fetch enrolled again for discussions/grades setup
+            try {
+                const enrolledRes = await fetch(`http://localhost:5050/enrollments?studentId=${encodeURIComponent(user.id)}`);
+                const enrolledCourses = await enrolledRes.json();
+                await loadGrades(user.id);
+                await setupDiscussions(enrolledCourses, user);
+            } catch {}
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Sign Up - Istruzione F</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --primary: #5856D6;
+            --primary-dark: #4A47C4;
+            --background: #F7F7FF;
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --white: #FFFFFF;
+            --gradient: linear-gradient(135deg, #5856D6 0%, #4A47C4 100%);
+        }
+
+        body {
+            background: var(--background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .signup-container {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(88, 86, 214, 0.15);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .signup-header {
+            background: var(--gradient);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .dino-logo {
+            width: 40px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .dino-logo::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 15px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+        }
+
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .f-accent {
+            color: #00ff88;
+            font-style: italic;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+
+        .signup-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .signup-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .signup-content {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+            resize: vertical;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .name-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .terms-agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(88, 86, 214, 0.05);
+            border-radius: 12px;
+        }
+
+        .terms-agreement input {
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .terms-agreement label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .terms-agreement a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-agreement a:hover {
+            text-decoration: underline;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .signup-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .signup-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E5E5E7;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid #E5E5E7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed::after {
+            content: '✓';
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #E5E5E7;
+        }
+
+        .divider::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #E5E5E7;
+        }
+
+        .social-signup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link a:hover {
+            color: var(--primary);
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .step-navigation {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .step-btn {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .step-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .step-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .qualification-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                border-radius: 20px;
+            }
+            
+            .signup-header {
+                padding: 30px 20px;
+            }
+            
+            .signup-content {
+                padding: 30px 20px;
+            }
+            
+            .name-fields, .qualification-fields {
+                grid-template-columns: 1fr;
+            }
+            
+            .social-signup {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <div class="logo">
+                <div class="dino-logo"></div>
+                <div class="brand-name">Istruzione<span class="f-accent">F</span></div>
+            </div>
+            <div class="user-badge">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Teacher Portal
+            </div>
+            <h1>Join Istruzione F as Teacher</h1>
+            <p>Start creating amazing learning experiences</p>
+        </div>
+        
+        <div class="signup-content">
+            <div class="progress-bar">
+                <div class="progress-step active">1</div>
+                <div class="progress-step">2</div>
+                <div class="progress-step">3</div>
+            </div>
+
+            <form id="teacherSignupForm">
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" id="step1">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Personal Information</h3>
+                    
+                    <div class="name-fields">
+                        <div class="form-group">
+                            <label for="teacherFirstName">First Name</label>
+                            <div class="input-group">
+                                <input type="text" id="teacherFirstName" placeholder="Enter your first name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="teacherLastName">Last Name</label>
+                            <div class="input-group">
+                                <input type="text" id="teacherLastName" placeholder="Enter your last name" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacherEmail">Professional Email</label>
+                        <div class="input-group">
+                            <input type="email" id="teacherEmail" placeholder="teacher@institution.edu" required>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacherPhone">Phone Number</label>
+                        <div class="input-group">
+                            <input type="tel" id="teacherPhone" placeholder="+1 (555) 123-4567" required>
+                            <div class="input-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-navigation">
+                        <button type="button" class="step-btn" onclick="nextStep(2)">
+                            Next
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Professional Information -->
+                <div class="form-step" id="step2">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Professional Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="institution">Educational Institution</label>
+                        <div class="input-group">
+                            <input type="text" id="institution" placeholder="Your school or university" required>
+                            <div class="input-icon">
+                                <i class="fas fa-school"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <div class="input-group">
+                            <input type="text" id="department" placeholder="Your department" required>
+                            <div class="input-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qualification-fields">
+                        <div class="form-group">
+                            <label for="position">Position/Role</label>
+                            <div class="input-group">
+                                <select id="position" required>
+                                    <option value="">Select your position</option>
+                                    <option value="professor">Professor</option>
+                                    <option value="assistant-professor">Assistant Professor</option>
+                                    <option value="lecturer">Lecturer</option>
+                                    <option value="instructor">Instructor</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="ta">Teaching Assistant</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <div class="input-icon">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience">Years of Experience</label>
+                            <div class="input-group">
+                                <select id="experience" required>
+                                    <option value="">Select experience</option>
+                                    <option value="0-2">0-2 years</option>
+                                    <option value="3-5">3-5 years</option>
+                                    <option value="6-10">6-10 years</option>
+                                    <option value="10+">10+ years</option>
+                                </select>
+                                <div class="input-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subjects">Subjects You Teach</label>
+                        <div class="input-group">
+                            <input type="text" id="subjects" placeholder="e.g., Mathematics, Computer Science, Biology" required>
+                            <div class="input-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-navigation">
+                        <button type="button" class="step-btn" onclick="prevStep(1)">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="button" class="step-btn primary" onclick="nextStep(3)">
+                            Next
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Account Setup -->
+                <div class="form-step" id="step3">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Account Setup</h3>
+                    
+                    <div class="form-group">
+                        <label for="teacherPassword">Create Password</label>
+                        <div class="input-group">
+                            <input type="password" id="teacherPassword" placeholder="Create a strong password" required>
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+                            Must be at least 8 characters with numbers and letters
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmTeacherPassword">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password" id="confirmTeacherPassword" placeholder="Confirm your password" required>
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">Professional Bio (Optional)</label>
+                        <div class="input-group">
+                            <textarea id="bio" placeholder="Tell us about your teaching philosophy and experience..." rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="terms-agreement">
+                        <input type="checkbox" id="teacherTerms" required>
+                        <label for="teacherTerms">
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. 
+                            I confirm that I am an educator at the institution mentioned above.
+                        </label>
+                    </div>
+
+                    <div class="terms-agreement">
+                        <input type="checkbox" id="teacherNewsletter">
+                        <label for="teacherNewsletter">
+                            Send me updates about new teaching tools, features, and educational resources (optional)
+                        </label>
+                    </div>
+
+                    <div class="step-navigation">
+                        <button type="button" class="step-btn" onclick="prevStep(2)">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="submit" class="step-btn primary">
+                            <i class="fas fa-user-plus"></i>
+                            Create Teacher Account
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="divider">or sign up with</div>
+            
+            <div class="social-signup">
+                <button class="social-btn">
+                    <i class="fab fa-google" style="color: #DB4437;"></i>
+                    Google
+                </button>
+                <button class="social-btn">
+                    <i class="fab fa-microsoft" style="color: #0078D4;"></i>
+                    Microsoft
+                </button>
+            </div>
+            
+            <div class="login-link">
+                Already have an account? <a href="teacher-login.html">Sign in as teacher</a>
+            </div>
+            
+            <div class="back-link">
+                <a href="login-select.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to User Selection
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+
+        function updateProgressBar() {
+            const steps = document.querySelectorAll('.progress-step');
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        function nextStep(step) {
+            if (validateStep(currentStep)) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                document.getElementById(`step${step}`).classList.add('active');
+                currentStep = step;
+                updateProgressBar();
+            }
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            updateProgressBar();
+        }
+
+        function validateStep(step) {
+            // Simple validation for demo purposes
+            if (step === 1) {
+                const firstName = document.getElementById('teacherFirstName').value;
+                const lastName = document.getElementById('teacherLastName').value;
+                const email = document.getElementById('teacherEmail').value;
+                const phone = document.getElementById('teacherPhone').value;
+                
+                if (!firstName || !lastName || !email || !phone) {
+                    alert('Please fill in all required fields');
+                    return false;
+                }
+                
+                if (!isValidEmail(email)) {
+                    alert('Please enter a valid professional email address');
+                    return false;
+                }
+            }
+            
+            if (step === 2) {
+                const institution = document.getElementById('institution').value;
+                const department = document.getElementById('department').value;
+                const position = document.getElementById('position').value;
+                const experience = document.getElementById('experience').value;
+                const subjects = document.getElementById('subjects').value;
+                
+                if (!institution || !department || !position || !experience || !subjects) {
+                    alert('Please fill in all professional information');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        document.getElementById('teacherSignupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (validateStep(3)) {
+                const password = document.getElementById('teacherPassword').value;
+                const confirmPassword = document.getElementById('confirmTeacherPassword').value;
+                const terms = document.getElementById('teacherTerms').checked;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    alert('Password must be at least 8 characters long');
+                    return;
+                }
+                
+                if (!terms) {
+                    alert('You must agree to the Terms of Service and Privacy Policy');
+                    return;
+                }
+                
+                const payload = {
+                    firstName: document.getElementById('teacherFirstName').value,
+                    lastName: document.getElementById('teacherLastName').value,
+                    email: document.getElementById('teacherEmail').value,
+                    phone: document.getElementById('teacherPhone').value,
+                    institution: document.getElementById('institution').value,
+                    department: document.getElementById('department').value,
+                    position: document.getElementById('position').value,
+                    experience: document.getElementById('experience').value,
+                    subjects: document.getElementById('subjects').value,
+                    bio: document.getElementById('bio').value,
+                    password: document.getElementById('teacherPassword').value,
+                    newsletter: document.getElementById('teacherNewsletter').checked
+                };
+
+                try {
+                    const res = await fetch('http://localhost:5050/register-teacher', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        alert(data.message || 'Registration failed');
+                        return;
+                    }
+                    alert(data.message || 'Registration successful');
+                    window.location.href = 'teacher-login.html';
+                } catch (err) {
+                    console.error(err);
+                    alert('Error registering teacher');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

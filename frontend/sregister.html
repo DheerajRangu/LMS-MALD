@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Sign Up - Istruzione F</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --primary: #00C7BE;
+            --primary-dark: #00A89F;
+            --background: #F0FDFC;
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --white: #FFFFFF;
+            --gradient: linear-gradient(135deg, #00C7BE 0%, #00A89F 100%);
+        }
+
+        body {
+            background: var(--background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .signup-container {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 199, 190, 0.15);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+        }
+
+        .signup-header {
+            background: var(--gradient);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .dino-logo {
+            width: 40px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .dino-logo::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 15px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+        }
+
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .f-accent {
+            color: #00ff88;
+            font-style: italic;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+
+        .signup-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .signup-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .signup-content {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 199, 190, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .name-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .terms-agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 199, 190, 0.05);
+            border-radius: 12px;
+        }
+
+        .terms-agreement input {
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .terms-agreement label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .terms-agreement a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-agreement a:hover {
+            text-decoration: underline;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .signup-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .signup-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E5E5E7;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid #E5E5E7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed::after {
+            content: '✓';
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #E5E5E7;
+        }
+
+        .divider::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #E5E5E7;
+        }
+
+        .social-signup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link a:hover {
+            color: var(--primary);
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .step-navigation {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .step-btn {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #E5E5E7;
+            border-radius: 12px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .step-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .step-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                border-radius: 20px;
+            }
+            
+            .signup-header {
+                padding: 30px 20px;
+            }
+            
+            .signup-content {
+                padding: 30px 20px;
+            }
+            
+            .name-fields {
+                grid-template-columns: 1fr;
+            }
+            
+            .social-signup {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <div class="logo">
+                <div class="dino-logo"></div>
+                <div class="brand-name">Istruzione<span class="f-accent">F</span></div>
+            </div>
+            <div class="user-badge">
+                <i class="fas fa-user-graduate"></i>
+                Student Portal
+            </div>
+            <h1>Join Istruzione F as Student</h1>
+            <p>Start your personalized learning journey today</p>
+        </div>
+        
+        <div class="signup-content">
+            <div class="progress-bar">
+                <div class="progress-step active">1</div>
+                <div class="progress-step">2</div>
+                <div class="progress-step">3</div>
+            </div>
+
+            <form id="studentSignupForm">
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" id="step1">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Personal Information</h3>
+                    
+                    <div class="name-fields">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <div class="input-group">
+                                <input type="text" id="firstName" placeholder="Enter your first name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <div class="input-group">
+                                <input type="text" id="lastName" placeholder="Enter your last name" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentEmail">Email Address</label>
+                        <div class="input-group">
+                            <input type="email" id="studentEmail" placeholder="student@university.edu" required>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentPhone">Phone Number (Optional)</label>
+                        <div class="input-group">
+                            <input type="tel" id="studentPhone" placeholder="+1 (555) 123-4567">
+                            <div class="input-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-navigation">
+                        <button type="button" class="step-btn" onclick="nextStep(2)">
+                            Next
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Academic Information -->
+                <div class="form-step" id="step2">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Academic Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="studentId">Student ID</label>
+                        <div class="input-group">
+                            <input type="text" id="studentId" placeholder="Enter your student ID" required>
+                            <div class="input-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="institution">Educational Institution</label>
+                        <div class="input-group">
+                            <input type="text" id="institution" placeholder="Your school or university" required>
+                            <div class="input-icon">
+                                <i class="fas fa-school"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="program">Study Program</label>
+                        <div class="input-group">
+                            <select id="program" required>
+                                <option value="">Select your program</option>
+                                <option value="computer-science">Computer Science</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="business">Business Administration</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="arts">Arts & Humanities</option>
+                                <option value="sciences">Natural Sciences</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <div class="input-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="yearLevel">Year Level</label>
+                        <div class="input-group">
+                            <select id="yearLevel" required>
+                                <option value="">Select year level</option>
+                                <option value="freshman">Freshman</option>
+                                <option value="sophomore">Sophomore</option>
+                                <option value="junior">Junior</option>
+                                <option value="senior">Senior</option>
+                                <option value="graduate">Graduate</option>
+                            </select>
+                            <div class="input-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-navigation">
+                        <button type="button" class="step-btn" onclick="prevStep(1)">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="button" class="step-btn primary" onclick="nextStep(3)">
+                            Next
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Account Setup -->
+                <div class="form-step" id="step3">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Account Setup</h3>
+                    
+                    <div class="form-group">
+                        <label for="studentPassword">Create Password</label>
+                        <div class="input-group">
+                            <input type="password" id="studentPassword" placeholder="Create a strong password" required>
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+                            Must be at least 8 characters with numbers and letters
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="terms-agreement">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. 
+                            I understand that my academic information will be used to personalize my learning experience.
+                        </label>
+                    </div>
+
+                    <div class="terms-agreement">
+                        <input type="checkbox" id="newsletter">
+                        <label for="newsletter">
+                            Send me updates about new courses, features, and learning opportunities (optional)
+                        </label>
+                    </div>
+
+                    <div class="step-navigation">
+                        <button type="button" class="step-btn" onclick="prevStep(2)">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="submit" class="step-btn primary">
+                            <i class="fas fa-user-plus"></i>
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="divider">or sign up with</div>
+            
+            <div class="social-signup">
+                <button class="social-btn">
+                    <i class="fab fa-google" style="color: #DB4437;"></i>
+                    Google
+                </button>
+                <button class="social-btn">
+                    <i class="fab fa-microsoft" style="color: #0078D4;"></i>
+                    Microsoft
+                </button>
+            </div>
+            
+            <div class="login-link">
+                Already have an account? <a href="student-login.html">Sign in as student</a>
+            </div>
+            
+            <div class="back-link">
+                <a href="login-select.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to User Selection
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+
+        function updateProgressBar() {
+            const steps = document.querySelectorAll('.progress-step');
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        function nextStep(step) {
+            if (validateStep(currentStep)) {
+                document.getElementById('step' + currentStep).classList.remove('active');
+                document.getElementById('step' + step).classList.add('active');
+                currentStep = step;
+                updateProgressBar();
+            }
+        }
+
+        function prevStep(step) {
+            document.getElementById('step' + currentStep).classList.remove('active');
+            document.getElementById('step' + step).classList.add('active');
+            currentStep = step;
+            updateProgressBar();
+        }
+
+        function validateStep(step) {
+            // Simple validation for demo purposes
+            if (step === 1) {
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const email = document.getElementById('studentEmail').value;
+                
+                if (!firstName || !lastName || !email) {
+                    alert('Please fill in all required fields');
+                    return false;
+                }
+                
+                if (!isValidEmail(email)) {
+                    alert('Please enter a valid email address');
+                    return false;
+                }
+            }
+            
+            if (step === 2) {
+                const studentId = document.getElementById('studentId').value;
+                const institution = document.getElementById('institution').value;
+                const program = document.getElementById('program').value;
+                const yearLevel = document.getElementById('yearLevel').value;
+                
+                if (!studentId || !institution || !program || !yearLevel) {
+                    alert('Please fill in all academic information');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        document.getElementById('studentSignupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (validateStep(3)) {
+                const password = document.getElementById('studentPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const terms = document.getElementById('terms').checked;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    alert('Password must be at least 8 characters long');
+                    return;
+                }
+                
+                if (!terms) {
+                    alert('You must agree to the Terms of Service and Privacy Policy');
+                    return;
+                }
+                
+                const payload = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('studentEmail').value,
+                    phone: document.getElementById('studentPhone').value,
+                    studentId: document.getElementById('studentId').value,
+                    institution: document.getElementById('institution').value,
+                    program: document.getElementById('program').value,
+                    yearLevel: document.getElementById('yearLevel').value,
+                    password: document.getElementById('studentPassword').value,
+                    newsletter: document.getElementById('newsletter').checked
+                };
+
+                try {
+                    const res = await fetch('http://localhost:5050/register-student', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        alert(data.message || 'Registration failed');
+                        return;
+                    }
+                    alert(data.message || 'Registration successful');
+                    window.location.href = 'student-login.html';
+                } catch (err) {
+                    console.error(err);
+                    alert('Error registering student');
+                }
+            }
+        });
+
+// Password strength indicator
+document.getElementById('studentPassword').addEventListener('input', function() {
+    const password = this.value;
+    const strengthIndicator = document.createElement('div');
+    strengthIndicator.className = 'password-strength';
+    
+    // Simple password strength check
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    // You could add visual feedback here
+});
+
+// Example: function to send collected student data to the backend.
+// Call submitStudentData() from your form submit handler after local validation.
+function submitStudentData() {
+    const studentData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('studentEmail').value,
+        phone: document.getElementById('studentPhone').value,
+        studentId: document.getElementById('studentId').value,
+        institution: document.getElementById('institution').value,
+        program: document.getElementById('program').value,
+        yearLevel: document.getElementById('yearLevel').value,
+        newsletter: document.getElementById('newsletter').checked
+    };
+
+    fetch('http://localhost:5000/register-student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(studentData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message || 'Registration successful');
+    })
+    .catch(err => {
+        console.error('Error registering student:', err);
+        alert('Error registering student');
+    });
+}
+
+
+    </script>
+    
+</body>
+
+</html>

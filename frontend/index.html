@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Istruzione F - Learning Management System</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #007AFF;
+            --secondary-color: #5856D6;
+            --accent-color: #00C7BE;
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --background: #FFFFFF;
+            --background-secondary: #F5F5F7;
+            --gradient: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #00C7BE 100%);
+            --gradient-soft: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --grok-green: #00ff88;
+            --gemini-blue: #4285F4;
+            --assistant-bg: #f7f7f8;
+            --user-bg: #007AFF;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: var(--background);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--gradient-soft);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeOut 0.5s ease-in-out 2.5s forwards;
+        }
+
+        .splash-content {
+            text-align: center;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        /* Dinosaur Logo */
+        .dinosaur-logo {
+            margin: 0 auto 2rem;
+            width: 120px;
+            height: 100px;
+            position: relative;
+        }
+
+        .dino-body {
+            position: relative;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--grok-green), var(--primary-color));
+            border-radius: 20px 20px 8px 8px;
+            margin: 0 auto;
+        }
+
+        .dino-head {
+            position: absolute;
+            top: -15px;
+            left: 60px;
+            width: 30px;
+            height: 25px;
+            background: linear-gradient(135deg, var(--grok-green), var(--primary-color));
+            border-radius: 50% 50% 40% 40%;
+            animation: headBob 2s ease-in-out infinite;
+        }
+
+        .dino-eye {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .dino-neck {
+            position: absolute;
+            top: 5px;
+            left: -10px;
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(135deg, var(--grok-green), var(--primary-color));
+            border-radius: 50%;
+        }
+
+        .dino-back {
+            position: absolute;
+            top: -5px;
+            left: 20px;
+            width: 20px;
+            height: 15px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 30% 40% 40% 30%;
+        }
+
+        .dino-tail {
+            position: absolute;
+            top: 10px;
+            left: -15px;
+            width: 20px;
+            height: 8px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 50% 0 0 50%;
+            animation: tailWag 1s ease-in-out infinite;
+        }
+
+        .dino-leg {
+            position: absolute;
+            bottom: -10px;
+            width: 8px;
+            height: 15px;
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .front-leg {
+            left: 20px;
+            animation: legMove 0.6s ease-in-out infinite;
+        }
+
+        .back-leg {
+            left: 50px;
+            animation: legMove 0.6s ease-in-out infinite 0.3s;
+        }
+
+        /* Logo Text */
+        .logo-text h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .f-accent {
+            color: var(--grok-green);
+            font-style: italic;
+            margin-left: 4px;
+        }
+
+        .tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading Dots */
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 2rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: dotPulse 1.4s ease-in-out infinite both;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Main Content */
+        .main-content {
+            opacity: 0;
+            animation: fadeIn 0.8s ease-in-out forwards;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .mini-dino {
+            width: 24px;
+            height: 16px;
+            background: var(--gradient);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .mini-dino::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 8px;
+            background: var(--gradient);
+            border-radius: 50%;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 2rem 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .gradient-text {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e5e7;
+            transform: translateY(-2px);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ai-orb {
+            width: 200px;
+            height: 200px;
+            background: var(--gradient);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.3;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .floating-card {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .card-1 {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .card-2 {
+            top: 60%;
+            right: 10%;
+            animation-delay: 1s;
+        }
+
+        .card-3 {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .card-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 2rem;
+            background: var(--background-secondary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: var(--text-primary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Tommy Chatbot Section */
+        .tommy-section {
+            padding: 80px 2rem;
+            background: var(--background);
+        }
+
+        .tommy-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .tommy-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tommy-avatar {
+            width: 300px;
+            height: 300px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .tommy-avatar::before {
+            content: '🤖';
+            font-size: 5rem;
+        }
+
+        .tommy-avatar::after {
+            content: '';
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+
+        .tommy-features {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .tommy-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--background-secondary);
+            border-radius: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .tommy-feature:hover {
+            transform: translateX(10px);
+        }
+
+        .tommy-feature-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Advanced Chatbot Widget */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .chatbot-widget:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-icon {
+            font-size: 1.5rem;
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e5e5e5;
+        }
+
+        .chatbot-container.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: white;
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .chatbot-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient);
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .chatbot-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.1rem;
+            font-weight: 600;
+        }
+
+        .chatbot-info p {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .chatbot-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .chatbot-close:hover {
+            background: var(--background-secondary);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: var(--assistant-bg);
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message-bot {
+            background: white;
+            align-self: flex-start;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .message-user {
+            background: var(--user-bg);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e5e5;
+            align-self: flex-start;
+            max-width: 60px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typingPulse 1.4s ease-in-out infinite both;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .chatbot-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e5e5e5;
+            background: white;
+        }
+
+        .chatbot-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .chatbot-input textarea {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            outline: none;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+        }
+
+        .chatbot-input button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .chatbot-input button:hover {
+            background: var(--secondary-color);
+        }
+
+        .chatbot-input button:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .suggestion {
+            background: var(--background-secondary);
+            border: 1px solid #e5e5e5;
+            padding: 0.5rem 1rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .action-btn:hover {
+            background: var(--background-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            background: var(--background-secondary);
+            color: var(--text-secondary);
+        }
+
+        /* Animations */
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes headBob {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        @keyframes tailWag {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg);
+            }
+            50% {
+                transform: translateX(-3px) rotate(-5deg);
+            }
+        }
+
+        @keyframes legMove {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes typingPulse {
+            0%, 60%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            30% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+            
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 200px;
+                justify-content: center;
+            }
+            
+            .hero-stats {
+                justify-content: center;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tommy-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .chatbot-container {
+                width: calc(100vw - 40px);
+                height: 70vh;
+                right: 20px;
+                bottom: 80px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Navigation function to redirect to role.html
+        const navigateToRolePage = () => {
+            window.location.href = 'role.html';
+        };
+
+        // Advanced Training Dataset with Context Awareness
+        const tommyTrainingData = {
+            // Context tracking
+            context: {
+                currentCourse: null,
+                currentIssue: null,
+                userLevel: 'beginner',
+                conversationHistory: []
+            },
+
+            // Advanced pattern matching with context awareness
+            patterns: {
+                // Login & Account
+                login: {
+                    triggers: ["login", "sign in", "account", "password", "credentials", "access", "authenticate", "log in"],
+                    responses: [
+                        "To access your account, click the 'Login' button in the top-right corner. You can use your email and password. If you've forgotten your password, there's a 'Forgot Password' option that will guide you through resetting it. You'll receive an email with a secure link to create a new password.",
+                        "You can sign in using your registered email and password. The login page also offers social login options if you prefer using Google or GitHub. Need help with login issues? Make sure you're using the correct email associated with your account.",
+                        "Account access is straightforward: 1) Navigate to the login page 2) Enter your credentials 3) Click 'Sign In'. Having trouble? The 'Trouble signing in?' link can help recover your account. If you're still having issues, our support team is available 24/7."
+                    ],
+                    followUp: {
+                        "forgot password": "I can help with password reset! Go to the login page and click 'Forgot Password'. Enter your email address, and we'll send you a secure link to reset your password. The link expires in 2 hours for security reasons.",
+                        "can't remember": "No worries! If you can't remember your password, use the 'Forgot Password' option. If you can't recall which email you used, contact our support team at support@istruzionef.com with your full name, and they'll help identify your account.",
+                        "locked out": "If you're locked out of your account, email security@istruzionef.com with your registered email address. Our security team will verify your identity and help you regain access within 24 hours. For faster service, include any previous course enrollments or purchase information you remember."
+                    }
+                },
+
+                // Course Information
+                courses: {
+                    triggers: ["course", "class", "learn", "study", "subject", "program", "curriculum", "syllabus", "training", "education"],
+                    responses: [
+                        "We offer a comprehensive curriculum including: **Web Development** (HTML/CSS, JavaScript, React, Node.js), **Data Science** (Python, Machine Learning, Data Analysis), **UI/UX Design** (Figma, User Research, Prototyping), **Cybersecurity** (Network Security, Ethical Hacking), **Mobile Development** (React Native, Flutter), and **Database Systems** (SQL, MongoDB). Each course has beginner to advanced levels with hands-on projects.",
+                        "Our course catalog features specialized learning paths: **Frontend Development** (3-6 months), **Backend Engineering** (4-8 months), **Data Analytics** (3-5 months), **Cybersecurity Fundamentals** (2-4 months), **Mobile App Development** (4-7 months), and **Cloud Computing** (3-6 months). Which area interests you most? I can provide more details about prerequisites, duration, and career outcomes.",
+                        "You can choose from specialized tracks: **Full-Stack Web Development** (comprehensive full-stack training), **Data Science & AI** (machine learning and analytics), **Cybersecurity** (security protocols and ethical hacking), **Mobile Development** (cross-platform apps), or **UI/UX Design** (user-centered design). Each track includes real-world projects, portfolio building, and certificate upon completion."
+                    ],
+                    followUp: {
+                        "web development": "Our **Web Development track** includes: HTML/CSS fundamentals (4 weeks), JavaScript programming (6 weeks), React framework (8 weeks), Node.js backend (6 weeks), database integration (4 weeks), and deployment (2 weeks). The complete path takes 3-6 months with 5 portfolio projects. Perfect for beginners starting their coding journey!",
+                        "data science": "**Data Science curriculum** covers: Python programming (6 weeks), data analysis with Pandas (4 weeks), machine learning algorithms (8 weeks), data visualization (3 weeks), SQL databases (3 weeks), and real-world projects (4 weeks). This 6-month program is perfect for beginners starting in analytics and requires no prior coding experience.",
+                        "cybersecurity": "**Cybersecurity program** includes: Network security fundamentals (4 weeks), ethical hacking (6 weeks), cryptography (3 weeks), security protocols (4 weeks), penetration testing (5 weeks), and compliance standards (2 weeks). Hands-on labs simulate real security scenarios. This 4-month program is great for IT professionals looking to specialize in security.",
+                        "beginner": "Perfect for beginners: **'Introduction to Programming'** (no experience needed), **'Web Development Basics'** (learn HTML/CSS/JavaScript), **'Data Science Fundamentals'** (start with Python), and **'Cybersecurity Essentials'** (security basics). These assume no prior knowledge and include step-by-step guidance, video tutorials, and mentor support.",
+                        "advanced": "Advanced offerings: **'Machine Learning Engineering'** (requires Python knowledge), **'Advanced React Patterns'** (needs React basics), **'Cloud Security'** (requires networking knowledge), **'Mobile App Architecture'** (needs programming experience), and **'DevOps Practices'** (requires Linux basics). These are designed for professionals looking to advance their skills."
+                    }
+                },
+
+                // Pricing & Payment
+                pricing: {
+                    triggers: ["price", "cost", "payment", "subscription", "fee", "plan", "billing", "money", "how much", "payment options"],
+                    responses: [
+                        "We offer flexible pricing plans:\n\n**Basic Plan - $19/month**\n• Access to all core courses\n• Community forums\n• Progress tracking\n• Certificate of completion\n\n**Pro Plan - $49/month**\n• Everything in Basic\n• Advanced courses\n• 1:1 mentorship sessions\n• Project reviews\n• Career guidance\n\n**Enterprise Plan - $99/month**\n• Everything in Pro\n• Team management dashboard\n• Custom learning paths\n• Dedicated support\n• Volume discounts for teams\n\nAll plans include a **14-day free trial** with full access!",
+                        "Our subscription model starts at **$19/month for individual learners**. For teams, we offer custom **Enterprise plans starting at $99/month**. Annual subscriptions save you **20%** compared to monthly billing. We also offer **student discounts** (30% off with valid .edu email) and **group discounts** for organizations training multiple employees.",
+                        "Pricing options:\n• **Basic** at $19/mo (all core courses + community)\n• **Pro** at $49/mo (+ mentorship + career support)\n• **Enterprise** at $99/mo (+ team features + custom content)\n\nNo hidden fees and you can **cancel anytime**. All plans include mobile access, downloadable resources, and lifetime access to completed course materials."
+                    ],
+                    followUp: {
+                        "free trial": "The **14-day free trial** gives you full access to all Basic plan features - no credit card required to start! You can explore any course, complete exercises, join discussions, and experience the platform before deciding. After 14 days, you can choose to subscribe or continue with limited free content.",
+                        "student discount": "We offer **30% student discount** with valid .edu email verification. Teachers and educational institutions also qualify for special pricing. Contact sales@istruzionef.com for educational rates. Student plans include all Pro features at a discounted rate to support your learning journey.",
+                        "team pricing": "**Enterprise plans** include: Team management dashboard, progress analytics, custom content, dedicated support, and volume discounts. Perfect for companies training 10+ employees. We offer customized pricing based on team size and specific needs. Schedule a demo with our sales team for details."
+                    }
+                },
+
+                // Technical Support
+                support: {
+                    triggers: ["help", "support", "issue", "problem", "bug", "error", "technical", "trouble", "not working", "broken"],
+                    responses: [
+                        "Our support team is available **24/7** through multiple channels:\n\n**Email**: support@istruzionef.com (response within 2 hours)\n**Phone**: +1-555-LEARN (532-7663)\n**Live Chat**: Available on our website\n**Help Center**: Comprehensive knowledge base with tutorials\n\nFor urgent technical issues, include **'URGENT'** in your email subject line. Common issues like video playback problems or login issues often have quick solutions in our help docs.",
+                        "Technical support options:\n• **Email** support@istruzionef.com\n• **Phone** +1-555-532-7663\n• **In-app live chat** (fastest response)\n• **Community forums** (peer support)\n\nWe typically respond within **2 hours** during business days and **6 hours** on weekends. For course-specific questions, you can also reach out to your assigned mentor through the platform.",
+                        "For assistance:\n1) **Check our knowledge base** - most common issues solved here\n2) **Email support** - for account and technical issues\n3) **Call our helpline** - for urgent matters\n4) **Community forums** - get help from other learners\n\nCommon issues like login problems, course access, or video playback usually have quick solutions. If you're experiencing a specific error, please describe it and I'll try to help!"
+                    ]
+                },
+
+                // Platform Features
+                features: {
+                    triggers: ["feature", "tool", "capability", "function", "what can", "how to", "platform", "interface", "dashboard"],
+                    responses: [
+                        "Key platform features:\n\n**Learning Tools**\n• Interactive coding exercises with real-time feedback\n• Video lessons with adjustable playback speed and transcripts\n• Progress tracking and personalized recommendations\n• Project submissions with automated testing\n• Peer code review system\n\n**Community & Support**\n• Discussion forums organized by course and topic\n• Live Q&A sessions with instructors\n• Study groups and peer matching\n• Mobile app for learning on the go\n• Tommy (your AI assistant!)\n\n**Career Development**\n• Portfolio project builder\n• Certificate generation and verification\n• Career path guidance\n• Interview preparation resources",
+                        "Our platform includes:\n• **Real-time code editor** with syntax highlighting and auto-complete\n• **Video player** with playback controls, bookmarks, and note-taking\n• **Progress analytics** showing your learning trajectory\n• **Certificate generation** with shareable digital credentials\n• **Community forums** for peer learning and support\n• **Assignment submission system** with detailed feedback\n• **Tommy AI assistant** for instant help and guidance\n\nEverything is designed to create a seamless, engaging learning experience across all devices.",
+                        "You'll have access to:\n• **HD video courses** with expert instructors\n• **Interactive coding challenges** with instant feedback\n• **Project-based learning** with real-world applications\n• **Mentor support** and code reviews\n• **Peer discussions** and collaborative learning\n• **Progress dashboards** with detailed insights\n• **Mobile learning** on iOS and Android devices\n• **Career services** including resume reviews and interview prep\n\nPlus, you get me - Tommy - to help guide your learning journey 24/7!"
+                    ]
+                },
+
+                // Enrollment Process
+                enrollment: {
+                    triggers: ["how to enroll", "sign up", "register", "join course", "start learning", "begin course", "course enrollment", "how to start", "get started", "registration"],
+                    responses: [
+                        "Getting started is easy! Here's the enrollment process:\n\n1) **Create an account** - Click 'Get Started' and provide your basic information\n2) **Choose your plan** - Select Basic, Pro, or Enterprise (14-day free trial available)\n3) **Browse courses** - Explore our catalog and read course descriptions\n4) **Enroll in courses** - Click 'Enroll' on any course to add it to your dashboard\n5) **Start learning** - Begin immediately with introductory materials\n\nYou can enroll in multiple courses simultaneously and learn at your own pace. Need help choosing? I can recommend courses based on your interests!",
+                        "Enrollment process:\n1. **Register an account** (2 minutes)\n2. **Choose subscription** (Basic/Pro/Enterprise)\n3. **Select courses** from our catalog\n4. **Start learning** immediately\n\nYou can begin with our **free trial** to explore the platform first. Once you enroll in a course, you'll get immediate access to all learning materials, including videos, exercises, and community forums.",
+                        "To begin your learning journey:\n\n**Step 1: Account Creation**\n- Visit our signup page\n- Enter your email and create a password\n- Verify your email address\n\n**Step 2: Plan Selection**\n- Choose between Basic, Pro, or Enterprise\n- Start with 14-day free trial\n- No payment required initially\n\n**Step 3: Course Selection**\n- Browse by category or skill level\n- Read course descriptions and reviews\n- Enroll in your chosen courses\n\n**Step 4: Start Learning**\n- Access your learning dashboard\n- Begin with introductory modules\n- Join community discussions\n\nYou can change your plan or enroll in additional courses at any time!"
+                    ]
+                },
+
+                // System Requirements
+                requirements: {
+                    triggers: ["system requirements", "what do i need", "browser compatibility", "device support", "technical requirements", "compatible devices", "what browser", "hardware requirements"],
+                    responses: [
+                        "Our platform works on any modern device with these requirements:\n\n**Minimum Requirements**\n• Any computer/tablet/phone with a modern web browser\n• Stable internet connection (5 Mbps recommended)\n• At least 2GB RAM\n• Audio capabilities for video courses\n\n**Recommended Browsers**\n• Chrome 90+ (best performance)\n• Firefox 85+\n• Safari 14+\n• Edge 90+\n\n**Mobile Apps**\n• iOS 14+ (iPhone/iPad)\n• Android 8+ (phones/tablets)\n\nNo special software needed - everything runs in your browser! For coding exercises, we provide a built-in code editor.",
+                        "Requirements: Any device with a modern web browser and internet connection. We recommend:\n• **Computer**: Chrome or Firefox for best experience\n• **Tablet**: iPad or Android tablet with latest OS\n• **Phone**: iPhone or Android smartphone\n• **Internet**: 5+ Mbps for smooth video streaming\n\nOur platform is fully responsive and works seamlessly across all devices. Mobile apps are available for offline learning on iOS and Android.",
+                        "You can access our platform from:\n• **Windows/Mac/Linux** computers\n• **iPhone/iPad** devices\n• **Android** phones and tablets\n• **Chromebooks**\n\n**Browser Support**:\n✅ Chrome (recommended)\n✅ Firefox\n✅ Safari\n✅ Edge\n\n**No downloads required** for most features. For the best coding experience, we recommend using a computer with Chrome browser. Mobile apps provide full functionality for learning on the go."
+                    ]
+                },
+
+                // Certificates & Completion
+                certificates: {
+                    triggers: ["certificate", "completion certificate", "certification", "course completion", "get certified", "proof of completion", "diploma", "credentials", "certificate of completion"],
+                    responses: [
+                        "Yes! You receive a **verified digital certificate** upon completing any course. Our certificates:\n\n• Are **industry-recognized** and can be verified by employers\n• Can be **shared on LinkedIn** with one click\n• **Downloadable as PDF** for your records\n• Include **course details** and completion date\n• Feature a **unique verification code**\n\nCertificates are issued automatically when you complete **100% of course requirements**, including all assignments and projects. They're a great way to showcase your skills to potential employers!",
+                        "All courses include a **completion certificate** that you can add to your resume and LinkedIn profile. Certificate features:\n\n• **Digital format** with secure verification\n• **Course-specific details** and skills learned\n• **Instructor signature** (for mentor-led courses)\n• **Shareable link** for employers to verify\n• **PDF download** for offline use\n\nCertificates are issued upon **100% course completion** and demonstrate your commitment to professional development. Many of our students use them to advance their careers or transition into new roles.",
+                        "We provide **digital certificates** for all completed courses. These certificates:\n• Are **verified and authenticatable**\n• Can be **added to LinkedIn** profiles\n• Include **detailed course information**\n• Have **employer verification links**\n• Are **available in multiple formats**\n\nTo earn a certificate, you must:\n1. Complete all video lessons\n2. Finish all coding exercises\n3. Submit and pass all projects\n4. Achieve passing scores on assessments\n\nCertificates are generated automatically and available immediately upon completion!"
+                    ]
+                },
+
+                // General Greetings
+                greeting: {
+                    triggers: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "what's up", "how are you", "hey there"],
+                    responses: [
+                        "Hello! I'm Tommy, your advanced learning assistant at Istruzione F. I'm here to help you with courses, technical support, account questions, pricing information, or anything else about our platform. What can I assist you with today?",
+                        "Hi there! Welcome to Istruzione F. I'm Tommy, ready to help you navigate your learning journey. Whether it's course selection, technical issues, platform features, or career guidance, I've got you covered! How can I make your learning experience better today?",
+                        "Hey! Great to see you. I'm Tommy, your guide to everything Istruzione F. I can help you find the perfect courses, understand our pricing, troubleshoot issues, or just chat about your learning goals. What would you like to explore first?"
+                    ]
+                },
+
+                // General Thanks
+                thanks: {
+                    triggers: ["thank you", "thanks", "appreciate it", "that helps", "perfect", "great help", "awesome", "good job", "thank"],
+                    responses: [
+                        "You're very welcome! I'm glad I could help. Don't hesitate to reach out if you have any other questions about Istruzione F - I'm here 24/7 to support your learning journey!",
+                        "Happy to assist! Remember, I'm here whenever you need guidance with courses, technical issues, platform features, or anything else learning-related. What else would you like to know?",
+                        "You're welcome! It's my pleasure to help you succeed in your learning journey. Is there anything specific you'd like to explore next, or any other questions I can answer for you?"
+                    ]
+                },
+
+                // Goodbye
+                goodbye: {
+                    triggers: ["bye", "goodbye", "see you", "farewell", "later", "take care", "cya"],
+                    responses: [
+                        "Goodbye! It was great chatting with you. Remember, I'm always here when you need help with your learning journey. Happy studying! 🎓",
+                        "See you later! Don't hesitate to come back if you have any questions about courses, pricing, or technical support. I'm here 24/7 to help!",
+                        "Take care! I'll be here whenever you're ready to continue your learning adventure. Wishing you success in your studies! 📚"
+                    ]
+                }
+            },
+
+            // Advanced response generation
+            generateResponse: function(userMessage, conversationHistory = []) {
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // Update conversation history
+                this.context.conversationHistory = [...conversationHistory, { text: userMessage, isBot: false }];
+                
+                // Context analysis from conversation history
+                const recentContext = this.analyzeContext(conversationHistory);
+                
+                // Find best matching category
+                let bestMatch = { category: null, score: 0 };
+                
+                Object.keys(this.patterns).forEach(category => {
+                    const score = this.calculateMatchScore(lowerMessage, this.patterns[category].triggers);
+                    if (score > bestMatch.score) {
+                        bestMatch = { category, score };
+                    }
+                });
+
+                // Check for follow-up triggers
+                if (bestMatch.category && this.patterns[bestMatch.category].followUp) {
+                    for (const [trigger, response] of Object.entries(this.patterns[bestMatch.category].followUp)) {
+                        if (lowerMessage.includes(trigger)) {
+                            return this.addContextToResponse(response, recentContext);
+                        }
+                    }
+                }
+
+                // Generate contextual response
+                if (bestMatch.score > 0.2) {
+                    const responses = this.patterns[bestMatch.category].responses;
+                    const contextualResponse = this.addContextToResponse(
+                        responses[Math.floor(Math.random() * responses.length)],
+                        recentContext
+                    );
+                    return contextualResponse;
+                }
+
+                return this.getFallbackResponse(userMessage, recentContext);
+            },
+
+            calculateMatchScore: function(message, triggers) {
+                let score = 0;
+                let matchedTriggers = 0;
+                
+                triggers.forEach(trigger => {
+                    const words = trigger.split(' ');
+                    let triggerScore = 0;
+                    
+                    words.forEach(word => {
+                        if (message.includes(word)) {
+                            triggerScore += 1;
+                            // Bonus for exact word matches
+                            if (message.includes(` ${word} `) || message.startsWith(word) || message.endsWith(word)) {
+                                triggerScore += 0.5;
+                            }
+                        }
+                    });
+                    
+                    // Normalize by word count and add to total score
+                    if (triggerScore > 0) {
+                        score += (triggerScore / words.length);
+                        matchedTriggers++;
+                    }
+                });
+                
+                // Average score across matched triggers
+                return matchedTriggers > 0 ? score / matchedTriggers : 0;
+            },
+
+            analyzeContext: function(history) {
+                if (history.length < 2) return {};
+                
+                const lastMessages = history.slice(-4);
+                let context = {
+                    mentionedCourses: new Set(),
+                    mentionedIssues: new Set(),
+                    userLevel: 'unknown'
+                };
+                
+                lastMessages.forEach(msg => {
+                    const lowerMsg = msg.text.toLowerCase();
+                    
+                    // Detect course interests
+                    if (lowerMsg.includes('web') || lowerMsg.includes('development') || lowerMsg.includes('coding')) {
+                        context.mentionedCourses.add('web development');
+                    }
+                    if (lowerMsg.includes('data') || lowerMsg.includes('science') || lowerMsg.includes('python') || lowerMsg.includes('machine learning')) {
+                        context.mentionedCourses.add('data science');
+                    }
+                    if (lowerMsg.includes('cyber') || lowerMsg.includes('security') || lowerMsg.includes('hack')) {
+                        context.mentionedCourses.add('cybersecurity');
+                    }
+                    
+                    // Detect user level
+                    if (lowerMsg.includes('beginner') || lowerMsg.includes('new') || lowerMsg.includes('start') || lowerMsg.includes('basic')) {
+                        context.userLevel = 'beginner';
+                    }
+                    if (lowerMsg.includes('advanced') || lowerMsg.includes('expert') || lowerMsg.includes('professional') || lowerMsg.includes('experienced')) {
+                        context.userLevel = 'advanced';
+                    }
+                    
+                    // Detect issues
+                    if (lowerMsg.includes('problem') || lowerMsg.includes('issue') || lowerMsg.includes('error') || lowerMsg.includes('trouble') || lowerMsg.includes('help')) {
+                        context.mentionedIssues.add('help needed');
+                    }
+                });
+                
+                return context;
+            },
+
+            addContextToResponse: function(response, context) {
+                let enhancedResponse = response;
+                
+                // Add beginner-friendly guidance
+                if (context.userLevel === 'beginner' && response.includes('course')) {
+                    enhancedResponse += "\n\nSince you're just starting out, I'd recommend beginning with our 'Introduction to Programming' course to build strong fundamentals before diving into specialized topics.";
+                }
+                
+                // Add course recommendations based on context
+                if (context.mentionedCourses.size > 0) {
+                    const courses = Array.from(context.mentionedCourses);
+                    if (courses.length === 1) {
+                        enhancedResponse += `\n\nBased on our conversation, you might be particularly interested in our ${courses[0]} track. I can provide more specific details about prerequisites and learning outcomes if you'd like!`;
+                    }
+                }
+                
+                // Add support guidance if issues mentioned
+                if (context.mentionedIssues.has('help needed')) {
+                    enhancedResponse += "\n\nIf you're still experiencing issues after trying these steps, our support team is available 24/7 and can provide more specific troubleshooting for your situation.";
+                }
+                
+                return enhancedResponse;
+            },
+
+            getFallbackResponse: function(userMessage, context) {
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // Try to understand the intent for unknown queries
+                if (lowerMessage.includes('?') || lowerMessage.includes('what') || lowerMessage.includes('how') || lowerMessage.includes('why')) {
+                    return "That's an interesting question! While I'm specifically trained to help with Istruzione F platform questions, I can tell you that our support team has experts who can answer more specialized questions. For now, I can best help you with course information, pricing plans, technical support, or login assistance. What specific area would you like to explore?";
+                }
+                
+                if (lowerMessage.length < 5) {
+                    return "I'm here to help with Istruzione F! Could you tell me a bit more about what you're looking for? I can assist with courses, pricing, technical support, or account management.";
+                }
+                
+                const fallbacks = [
+                    "I'm constantly learning about our platform! For now, I can best help you with course information, pricing plans, technical support, or login assistance. What would you like to know more about?",
+                    "That's a great question! I specialize in helping with course selection, platform features, technical support, and account management. How can I assist you with your Istruzione F experience?",
+                    "I'm here to help with platform-related questions. Try asking me about our courses, pricing, login help, technical support, or platform features. What would you like to explore?"
+                ];
+                
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
+        };
+
+        const App = () => {
+            const [showSplash, setShowSplash] = useState(true);
+            const [showContent, setShowContent] = useState(false);
+
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    setShowSplash(false);
+                    setTimeout(() => setShowContent(true), 500);
+                }, 3000);
+
+                return () => clearTimeout(timer);
+            }, []);
+
+            return React.createElement('div', { className: 'app' },
+                showSplash && React.createElement(SplashScreen),
+                showContent && React.createElement(MainContent),
+                showContent && React.createElement(AdvancedChatbotWidget)
+            );
+        };
+
+        const SplashScreen = () => {
+            return React.createElement('div', { className: 'splash-screen' },
+                React.createElement('div', { className: 'splash-content' },
+                    React.createElement('div', { className: 'dinosaur-logo' },
+                        React.createElement('div', { className: 'dino-body' },
+                            React.createElement('div', { className: 'dino-head' },
+                                React.createElement('div', { className: 'dino-eye' })
+                            ),
+                            React.createElement('div', { className: 'dino-neck' }),
+                            React.createElement('div', { className: 'dino-back' }),
+                            React.createElement('div', { className: 'dino-tail' }),
+                            React.createElement('div', { className: 'dino-leg front-leg' }),
+                            React.createElement('div', { className: 'dino-leg back-leg' })
+                        )
+                    ),
+                    React.createElement('div', { className: 'logo-text' },
+                        React.createElement('h1', null, 
+                            'Istruzione',
+                            React.createElement('span', { className: 'f-accent' }, 'F')
+                        ),
+                        React.createElement('p', { className: 'tagline' }, 'Advanced Learning Platform')
+                    ),
+                    React.createElement('div', { className: 'loading-dots' },
+                        React.createElement('div', { className: 'dot' }),
+                        React.createElement('div', { className: 'dot' }),
+                        React.createElement('div', { className: 'dot' })
+                    )
+                )
+            );
+        };
+
+        const MainContent = () => {
+            return React.createElement('div', { className: 'main-content' },
+                React.createElement(Header),
+                React.createElement(Hero),
+                React.createElement(Features),
+                React.createElement(TommySection),
+                React.createElement(Footer)
+            );
+        };
+
+        const Header = () => {
+            return React.createElement('header', { className: 'header' },
+                React.createElement('div', { className: 'header-content' },
+                    React.createElement('div', { className: 'nav-logo' },
+                        React.createElement('div', { className: 'mini-dino' }),
+                        React.createElement('span', null, 
+                            'Istruzione',
+                            React.createElement('span', { className: 'f-accent' }, 'F')
+                        )
+                    ),
+                    React.createElement('nav', { className: 'nav-menu' },
+                        React.createElement('a', { href: '#features' }, 'Features'),
+                        React.createElement('a', { href: '#tommy' }, 'Tommy Assistant'),
+                        React.createElement('a', { href: '#pricing' }, 'Pricing'),
+                        React.createElement('button', { 
+                            className: 'nav-button',
+                            onClick: navigateToRolePage
+                        }, 'Get Started')
+                    )
+                )
+            );
+        };
+
+        const Hero = () => {
+            return React.createElement('section', { className: 'hero' },
+                React.createElement('div', { className: 'hero-content' },
+                    React.createElement('div', { className: 'hero-text' },
+                        React.createElement('h1', null, 
+                            'The Future of Learning is ',
+                            React.createElement('span', { className: 'gradient-text' }, 'Here')
+                        ),
+                        React.createElement('p', null, 
+                            'Experience education transformed by advanced technology. Istruzione F combines ' +
+                            'cutting-edge learning tools with intuitive design to create personalized learning ' +
+                            'journeys that adapt to your unique style and goals.'
+                        ),
+                        React.createElement('div', { className: 'hero-buttons' },
+                            React.createElement('button', { 
+                                className: 'btn btn-primary',
+                                onClick: navigateToRolePage
+                            },
+                                React.createElement('span', null, 'Start Learning'),
+                                React.createElement('svg', { width: '20', height: '20', viewBox: '0 0 24 24', fill: 'none' },
+                                    React.createElement('path', { 
+                                        d: 'M5 12H19M19 12L12 5M19 12L12 19', 
+                                        stroke: 'currentColor', 
+                                        strokeWidth: '2' 
+                                    })
+                                )
+                            ),
+                            React.createElement('button', { className: 'btn btn-secondary' }, 'Watch Demo')
+                        ),
+                        React.createElement('div', { className: 'hero-stats' },
+                            React.createElement('div', { className: 'stat' },
+                                React.createElement('div', { className: 'stat-number' }, '50K+'),
+                                React.createElement('div', { className: 'stat-label' }, 'Active Learners')
+                            ),
+                            React.createElement('div', { className: 'stat' },
+                                React.createElement('div', { className: 'stat-number' }, '98%'),
+                                React.createElement('div', { className: 'stat-label' }, 'Success Rate')
+                            ),
+                            React.createElement('div', { className: 'stat' },
+                                React.createElement('div', { className: 'stat-number' }, '24/7'),
+                                React.createElement('div', { className: 'stat-label' }, 'AI Support')
+                            )
+                        )
+                    ),
+                    React.createElement('div', { className: 'hero-visual' },
+                        React.createElement('div', { className: 'ai-orb' }),
+                        React.createElement('div', { className: 'floating-card card-1' },
+                            React.createElement('div', { className: 'card-icon' }, '🤖'),
+                            React.createElement('span', null, 'Smart Assistant')
+                        ),
+                        React.createElement('div', { className: 'floating-card card-2' },
+                            React.createElement('div', { className: 'card-icon' }, '⚡'),
+                            React.createElement('span', null, 'Fast Learning')
+                        ),
+                        React.createElement('div', { className: 'floating-card card-3' },
+                            React.createElement('div', { className: 'card-icon' }, '🎯'),
+                            React.createElement('span', null, 'Precise Goals')
+                        )
+                    )
+                )
+            );
+        };
+
+        const Features = () => {
+            return React.createElement('section', { className: 'features', id: 'features' },
+                React.createElement('div', { className: 'container' },
+                    React.createElement('h2', null, 'Why Choose Istruzione F?'),
+                    React.createElement('div', { className: 'features-grid' },
+                        React.createElement('div', { className: 'feature-card' },
+                            React.createElement('div', { className: 'feature-icon' }, '🤖'),
+                            React.createElement('h3', null, 'Advanced Assistant'),
+                            React.createElement('p', null, 'Tommy provides intelligent, contextual help with comprehensive platform knowledge')
+                        ),
+                        React.createElement('div', { className: 'feature-card' },
+                            React.createElement('div', { className: 'feature-icon' }, '🎨'),
+                            React.createElement('h3', null, 'Beautiful Design'),
+                            React.createElement('p', null, 'Clean, intuitive interfaces that make learning enjoyable and engaging')
+                        ),
+                        React.createElement('div', { className: 'feature-card' },
+                            React.createElement('div', { className: 'feature-icon' }, '🚀'),
+                            React.createElement('h3', null, 'Lightning Fast'),
+                            React.createElement('p', null, 'Instant responses and seamless performance across all your devices')
+                        ),
+                        React.createElement('div', { className: 'feature-card' },
+                            React.createElement('div', { className: 'feature-icon' }, '📊'),
+                            React.createElement('h3', null, 'Smart Analytics'),
+                            React.createElement('p', null, 'Track progress with detailed insights and personalized recommendations')
+                        )
+                    )
+                )
+            );
+        };
+
+        const TommySection = () => {
+            return React.createElement('section', { className: 'tommy-section', id: 'tommy' },
+                React.createElement('div', { className: 'container' },
+                    React.createElement('div', { className: 'tommy-content' },
+                        React.createElement('div', { className: 'tommy-visual' },
+                            React.createElement('div', { className: 'tommy-avatar' })
+                        ),
+                        React.createElement('div', { className: 'tommy-features' },
+                            React.createElement('h2', null, 'Meet Tommy - Your Advanced Assistant'),
+                            React.createElement('p', { style: { marginBottom: '2rem', color: 'var(--text-secondary)' } }, 
+                                'Tommy is our sophisticated assistant with comprehensive knowledge of the Istruzione F platform. ' +
+                                'He provides intelligent, contextual responses and personalized guidance for your learning journey.'
+                            ),
+                            React.createElement('div', { className: 'tommy-feature' },
+                                React.createElement('div', { className: 'tommy-feature-icon' }, '💬'),
+                                React.createElement('div', null,
+                                    React.createElement('h3', null, 'Context-Aware Responses'),
+                                    React.createElement('p', null, 'Understands conversation context and provides relevant, personalized follow-ups')
+                                )
+                            ),
+                            React.createElement('div', { className: 'tommy-feature' },
+                                React.createElement('div', { className: 'tommy-feature-icon' }, '📚'),
+                                React.createElement('div', null,
+                                    React.createElement('h3', null, 'Comprehensive Knowledge'),
+                                    React.createElement('p', null, 'Deep understanding of courses, pricing, platform features, and technical support')
+                                )
+                            ),
+                            React.createElement('div', { className: 'tommy-feature' },
+                                React.createElement('div', { className: 'tommy-feature-icon' }, '🕒'),
+                                React.createElement('div', null,
+                                    React.createElement('h3', null, '24/7 Availability'),
+                                    React.createElement('p', null, 'Always available to help with your learning journey, day or night')
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        const AdvancedChatbotWidget = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [messages, setMessages] = useState([
+                { 
+                    text: "Hello! I'm Tommy, your advanced assistant at Istruzione F. I have comprehensive knowledge of our platform and can help you with course information, technical support, pricing, account issues, enrollment process, and much more. What would you like to know today?", 
+                    isBot: true,
+                    timestamp: new Date()
+                }
+            ]);
+            const [inputValue, setInputValue] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const messagesEndRef = useRef(null);
+            const textareaRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages, isTyping]);
+
+            const handleSendMessage = () => {
+                if (!inputValue.trim() || isTyping) return;
+
+                // Add user message
+                const userMessage = {
+                    text: inputValue,
+                    isBot: false,
+                    timestamp: new Date()
+                };
+                
+                const newMessages = [...messages, userMessage];
+                setMessages(newMessages);
+                setInputValue('');
+                setIsTyping(true);
+
+                // Auto-resize textarea
+                if (textareaRef.current) {
+                    textareaRef.current.style.height = 'auto';
+                }
+
+                // Simulate thinking and generate response
+                setTimeout(() => {
+                    const conversationHistory = newMessages.map(msg => ({ text: msg.text, isBot: msg.isBot }));
+                    const response = tommyTrainingData.generateResponse(inputValue, conversationHistory);
+                    
+                    const botMessage = {
+                        text: response,
+                        isBot: true,
+                        timestamp: new Date()
+                    };
+                    
+                    setMessages(prev => [...prev, botMessage]);
+                    setIsTyping(false);
+                }, 800 + Math.random() * 700);
+            };
+
+            const handleSuggestionClick = (suggestion) => {
+                setInputValue(suggestion);
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            };
+
+            const handleTextareaChange = (e) => {
+                setInputValue(e.target.value);
+                
+                // Auto-resize
+                if (textareaRef.current) {
+                    textareaRef.current.style.height = 'auto';
+                    textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+                }
+            };
+
+            const quickSuggestions = [
+                "How do I reset my password?",
+                "What courses do you offer for beginners?",
+                "Tell me about your pricing plans",
+                "I'm having technical issues",
+                "What's included in the free trial?",
+                "How do I enroll in a course?"
+            ];
+
+            return React.createElement(React.Fragment, null,
+                React.createElement('div', { 
+                    className: 'chatbot-widget',
+                    onClick: () => setIsOpen(true)
+                },
+                    React.createElement('div', { className: 'chatbot-icon' }, '💬')
+                ),
+                React.createElement('div', { 
+                    className: `chatbot-container ${isOpen ? 'active' : ''}` 
+                },
+                    React.createElement('div', { className: 'chatbot-header' },
+                        React.createElement('div', { className: 'chatbot-avatar' }, 'T'),
+                        React.createElement('div', { className: 'chatbot-info' },
+                            React.createElement('h3', null, 'Tommy'),
+                            React.createElement('p', null, 'Advanced Assistant')
+                        ),
+                        React.createElement('button', { 
+                            className: 'chatbot-close',
+                            onClick: () => setIsOpen(false)
+                        }, '×')
+                    ),
+                    React.createElement('div', { className: 'chatbot-messages' },
+                        messages.map((message, index) =>
+                            React.createElement('div', {
+                                key: index,
+                                className: `message ${message.isBot ? 'message-bot' : 'message-user'}`
+                            }, 
+                                message.text,
+                                React.createElement('div', { className: 'message-actions' },
+                                    React.createElement('button', { 
+                                        className: 'action-btn',
+                                        onClick: () => navigator.clipboard.writeText(message.text)
+                                    }, 'Copy'),
+                                    React.createElement('button', { className: 'action-btn' }, 'Share')
+                                )
+                            )
+                        ),
+                        isTyping && React.createElement('div', { className: 'typing-indicator' },
+                            React.createElement('div', { className: 'typing-dot' }),
+                            React.createElement('div', { className: 'typing-dot' }),
+                            React.createElement('div', { className: 'typing-dot' })
+                        ),
+                        messages.length === 1 && !isTyping && React.createElement('div', { className: 'suggestions' },
+                            quickSuggestions.map((suggestion, index) =>
+                                React.createElement('button', {
+                                    key: index,
+                                    className: 'suggestion',
+                                    onClick: () => handleSuggestionClick(suggestion)
+                                }, suggestion)
+                            )
+                        ),
+                        React.createElement('div', { ref: messagesEndRef })
+                    ),
+                    React.createElement('div', { className: 'chatbot-input-container' },
+                        React.createElement('div', { className: 'chatbot-input' },
+                            React.createElement('textarea', {
+                                ref: textareaRef,
+                                placeholder: 'Message Tommy...',
+                                value: inputValue,
+                                onChange: handleTextareaChange,
+                                onKeyPress: handleKeyPress,
+                                rows: 1
+                            }),
+                            React.createElement('button', { 
+                                onClick: handleSendMessage,
+                                disabled: !inputValue.trim() || isTyping
+                            }, '↑')
+                        )
+                    )
+                )
+            );
+        };
+
+        const Footer = () => {
+            return React.createElement('footer', { className: 'footer' },
+                React.createElement('div', { className: 'container' },
+                    React.createElement('p', null, 
+                        '©️ 2024 Istruzione F. The future of learning starts here.'
+                    )
+                )
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>
