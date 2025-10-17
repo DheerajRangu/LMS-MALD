@@ -13,6 +13,325 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
+        
+        /* File Upload and Preview Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .preview-modal-content {
+            max-width: 800px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background-color: rgba(99, 102, 241, 0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary-light);
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        
+        .file-upload input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-upload i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload p {
+            color: var(--text-light);
+            text-align: center;
+        }
+        
+        .file-info-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-info i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .file-name {
+            font-weight: 500;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-size {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+        
+        .file-type {
+            background-color: var(--primary-light);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--border);
+            color: var(--text);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        
+        /* Material Item Styles */
+        .material-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background-color: var(--card);
+            transition: all 0.2s;
+        }
+        
+        .material-item:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+        
+        .material-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .material-icon i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .material-info {
+            flex: 1;
+        }
+        
+        .material-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .material-info p {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+        
+        .material-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .view-material, .preview-material {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .view-material {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .view-material:hover {
+            background-color: #0ca678;
+        }
+        
+        .preview-material {
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .preview-material:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* PDF Preview Styles */
+        .pdf-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .pdf-iframe {
+            border: none;
+        }
+        
+        /* Video Preview Styles */
+        .video-container {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Image Preview Styles */
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-height: 500px;
+            overflow: hidden;
+        }
+        
+        /* No Preview Styles */
+        .no-preview {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .no-preview i {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+        
+        .no-preview p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
 
         :root {
             --primary: #4f46e5;
@@ -2963,5 +3282,87 @@
             uploadMaterialModal.classList.add('active');
         });
     </script>
+    
+    <!-- Upload Material Modal -->
+    <div id="upload-material-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Course Material</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="upload-material-form">
+                    <div class="form-group">
+                        <label for="material-title">Title (Optional)</label>
+                        <input type="text" id="material-title" class="form-control" placeholder="Enter a title for this material">
+                    </div>
+                    <div class="form-group">
+                        <label for="material-file">File</label>
+                        <div class="file-upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag and drop a file here, or click to browse</p>
+                            <p class="file-types">PDF, Video, Images, Documents (Max 50MB)</p>
+                            <input type="file" id="material-file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.mp4,.webm,.mov">
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Upload Material</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Assignment Modal -->
+    <div id="create-assignment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Assignment</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-assignment-form">
+                    <div class="form-group">
+                        <label for="assignment-title">Title</label>
+                        <input type="text" id="assignment-title" class="form-control" placeholder="Enter assignment title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-description">Description</label>
+                        <textarea id="assignment-description" class="form-control" rows="4" placeholder="Enter assignment description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-due-date">Due Date (Optional)</label>
+                        <input type="date" id="assignment-due-date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-points">Points (Optional)</label>
+                        <input type="number" id="assignment-points" class="form-control" placeholder="100" min="0">
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- File Preview Modal -->
+    <div id="file-preview-modal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <div class="modal-header">
+                <h3 id="preview-title">File Preview</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="preview-container">
+                <!-- Preview content will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- API and UI Scripts -->
+    <script src="teacher-api.js"></script>
+    <script src="teacher-ui.js"></script>
 </body>
 </html>
