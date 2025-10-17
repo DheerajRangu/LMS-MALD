@@ -1,0 +1,10 @@
+[build]
+publish = "frontend"
+# For a purely static frontend, no build command is needed.
+# If you later add a build step, set: command = "npm run build"
+
+# SPA-style routing: send unmatched paths to index.html
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
