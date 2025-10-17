@@ -175,6 +175,7 @@
             font-weight: 700;
             color: var(--sidebar);
             background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -1401,13 +1402,6 @@
                     <i class="fas fa-arrow-left"></i>
                 </div>
             </div>
-            <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;">
-                <div>
-                    <label style="display:block;margin-bottom:6px;color:#64748b;font-size:0.9rem;">Enroll with Code</label>
-                    <input id="enrollCodeInput" type="text" placeholder="Enter 6-char code" style="padding:10px;border:1px solid var(--border);border-radius:8px;">
-                </div>
-                <button class="btn btn-success" id="enrollByCodeBtn">Enroll</button>
-            </div>
             <div class="courses-grid">
                 <!-- Available Course 1 -->
                 <div class="course-card">
@@ -1507,7 +1501,7 @@
                     <i class="fas fa-arrow-left"></i>
                 </div>
             </div>
-            <div class="assignments-list" id="assignmentsList">
+            <div class="assignments-list">
                 <!-- Assignment 1 -->
                 <div class="assignment-item">
                     <div class="assignment-info">
@@ -1577,7 +1571,7 @@
                     <i class="fas fa-arrow-left"></i>
                 </div>
             </div>
-            <table class="grades-table" id="gradesTable">
+            <table class="grades-table">
                 <thead>
                     <tr>
                         <th>Course</th>
@@ -1587,7 +1581,7 @@
                         <th>Feedback</th>
                     </tr>
                 </thead>
-                <tbody id="gradesTbody">
+                <tbody>
                     <tr>
                         <td>Advanced Web Development</td>
                         <td>HTML/CSS Portfolio</td>
@@ -1659,7 +1653,7 @@
                             <button class="reply-btn">
                                 <i class="fas fa-reply"></i>
                                 Reply
-                                </button>
+                            </button>
                             <button class="reply-btn">
                                 <i class="fas fa-thumbs-up"></i>
                                 Like (5)
@@ -2294,185 +2288,7 @@
         // Initialize dashboard as active
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('dashboard').classList.add('active');
-            initBackendSync();
         });
-
-        // ===== Backend sync (courses/enrollments/materials/assignments/grades) =====
-        const BACKEND_BASE = 'http://localhost:5050';
-        function getCurrentUser() { try { return JSON.parse(localStorage.getItem('istruzioneF_user')) || {}; } catch { return {}; } }
-
-        async function fetchJSON(url, opts) {
-            const res = await fetch(url, opts);
-            if (!res.ok) throw new Error((await res.json()).message || 'Request failed');
-            return res.json();
-        }
-
-        async function renderAvailableCourses() {
-            const user = getCurrentUser();
-            if (!user.id) return;
-            const grid = document.querySelector('#available-courses .courses-grid');
-            try {
-                const courses = await fetchJSON(`${BACKEND_BASE}/courses/available?studentId=${user.id}`);
-                grid.innerHTML = courses.map(c => `
-                    <div class="course-card">
-                        <div class="course-header" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
-                            <i class="fas fa-book"></i>
-                            <span class="course-category">${(c.category||'Course')}</span>
-                        </div>
-                        <div class="course-content">
-                            <h3 class="course-title">${c.title||''}</h3>
-                            <div class="course-meta">
-                                <span>${c.code||''}</span>
-                                <span>${c.term||''}</span>
-                            </div>
-                            <div class="course-stats">
-                                <div class="stat"><i class="fas fa-clock"></i><span>${c.duration||''}</span></div>
-                            </div>
-                            <div class="course-actions">
-                                <button class="btn btn-success dyn-enroll" data-courseid="${c._id}">Enroll Now</button>
-                                <button class="btn btn-outline" onclick="alert('${(c.description||'No description').replace(/'/g, "&#39;")}')">Details</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('') || '<div style="color:#64748b">No available courses</div>';
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        async function renderMyCourses() {
-            const user = getCurrentUser();
-            if (!user.id) return;
-            const grid = document.querySelector('#my-courses .courses-grid');
-            try {
-                const courses = await fetchJSON(`${BACKEND_BASE}/enrollments?studentId=${user.id}`);
-                grid.innerHTML = courses.map(c => `
-                    <div class="course-card">
-                        <div class="course-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
-                            <i class="fas fa-chalkboard"></i>
-                            <span class="course-category">${(c.category||'Course')}</span>
-                        </div>
-                        <div class="course-content">
-                            <h3 class="course-title">${c.title||''}</h3>
-                            <div class="course-meta">
-                                <span>${c.code||''}</span>
-                                <span>${c.term||''}</span>
-                            </div>
-                            <div class="course-stats">
-                                <div class="stat"><i class="fas fa-clock"></i><span>${c.duration||''}</span></div>
-                            </div>
-                            <div class="course-actions">
-                                <button class="btn btn-primary enter-course-dyn" data-courseid="${c._id}">Enter Course</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('') || '<div style="color:#64748b">You are not enrolled in any course yet</div>';
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        async function renderAssignmentsAll() {
-            const user = getCurrentUser(); if (!user.id) return;
-            const listEl = document.getElementById('assignmentsList'); if (!listEl) return;
-            try {
-                const courses = await fetchJSON(`${BACKEND_BASE}/enrollments?studentId=${user.id}`);
-                let items = [];
-                for (const c of courses) {
-                    try {
-                        const a = await fetchJSON(`${BACKEND_BASE}/assignments?courseId=${c._id}`);
-                        items = items.concat(a.map(x => ({ courseTitle: c.title, title: x.title, dueDate: x.dueDate })));
-                    } catch (_) {}
-                }
-                listEl.innerHTML = items.map(it => `
-                    <div class="assignment-item">
-                        <div class="assignment-info">
-                            <h4>${it.title}</h4>
-                            <div class="assignment-meta">
-                                <span>Course: ${it.courseTitle||''}</span>
-                                <span>Due: ${it.dueDate ? new Date(it.dueDate).toLocaleDateString() : '—'}</span>
-                            </div>
-                        </div>
-                        <div class="submission-status status-pending">Pending</div>
-                    </div>
-                `).join('') || '<div style="color:#64748b">No assignments yet</div>';
-            } catch (e) { console.error(e); }
-        }
-
-        async function renderGrades() {
-            const user = getCurrentUser(); if (!user.id) return;
-            const tbody = document.getElementById('gradesTbody'); if (!tbody) return;
-            try {
-                const rows = await fetchJSON(`${BACKEND_BASE}/grades?studentId=${user.id}`);
-                tbody.innerHTML = rows.map(r => `
-                    <tr>
-                        <td>${r.courseTitle||''}</td>
-                        <td>${r.assignmentTitle||''}</td>
-                        <td><span class="grade-badge ${r.grade>=90?'grade-a':(r.grade>=80?'grade-b':(r.grade>=70?'grade-c':'grade-d'))}">${r.grade ?? '—'}</span></td>
-                        <td>—</td>
-                        <td>${r.feedback||''}</td>
-                    </tr>
-                `).join('') || '<tr><td colspan="5" style="color:#64748b">No grades yet</td></tr>';
-            } catch (e) { console.error(e); }
-        }
-
-        function bindDynamicHandlers() {
-            // Enroll buttons (event delegation)
-            document.addEventListener('click', async (e) => {
-                const btn = e.target.closest('.dyn-enroll');
-                if (!btn) return;
-                const courseId = btn.getAttribute('data-courseid');
-                const user = getCurrentUser();
-                try {
-                    await fetchJSON(`${BACKEND_BASE}/enroll`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ studentId: user.id, courseId })
-                    });
-                    await renderAvailableCourses();
-                    await renderMyCourses();
-                    alert('Enrolled successfully');
-                } catch (err) { alert(err.message||'Enroll failed'); }
-            });
-
-            // Enter dynamic course
-            document.addEventListener('click', (e) => {
-                const btn = e.target.closest('.enter-course-dyn');
-                if (!btn) return;
-                // Switch to My Courses section (reusing existing handlers)
-                document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
-                document.getElementById('my-courses').classList.add('active');
-            });
-            // Enroll by code
-            const enrollBtn = document.getElementById('enrollByCodeBtn');
-            if (enrollBtn) {
-                enrollBtn.addEventListener('click', async () => {
-                    const code = (document.getElementById('enrollCodeInput')?.value||'').trim();
-                    const user = getCurrentUser();
-                    if (!code) { alert('Enter enrollment code'); return; }
-                    try {
-                        await fetchJSON(`${BACKEND_BASE}/enroll`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ studentId: user.id, enrollCode: code }) });
-                        await renderAvailableCourses();
-                        await renderMyCourses();
-                        alert('Enrolled via code');
-                    } catch(err){ alert(err.message||'Enroll failed'); }
-                });
-            }
-        }
-
-        function initBackendSync() {
-            bindDynamicHandlers();
-            renderAvailableCourses();
-            renderMyCourses();
-            renderAssignmentsAll();
-            renderGrades();
-            // light polling every 12s
-            setInterval(() => {
-                renderAvailableCourses();
-                renderMyCourses();
-                renderAssignmentsAll();
-                renderGrades();
-            }, 12000);
-        }
     </script>
 </body>
 </html>
