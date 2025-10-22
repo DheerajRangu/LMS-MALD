@@ -1414,6 +1414,721 @@
             gap: 0.5rem;
         }
 
+        /* Professional Create Course Modal Styles */
+        .create-course-modal {
+            max-width: 900px;
+            width: 95%;
+            max-height: 95vh;
+            overflow: hidden;
+        }
+
+        .create-course-modal .modal-header {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 2rem;
+            border-bottom: none;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .header-text h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-text p {
+            margin: 0.25rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .close-modal {
+            color: white;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Progress Indicator */
+        .course-creation-progress {
+            display: flex;
+            justify-content: center;
+            padding: 1.5rem 2rem;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            right: -60px;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .progress-step.active:not(:last-child)::after {
+            background: var(--primary);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .step-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary);
+        }
+
+        /* Form Steps */
+        .course-form {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-step {
+            display: none;
+            padding: 2rem;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .step-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .step-header h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .step-header h4 i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .step-header p {
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* Form Layout */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group label i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        /* Enhanced Form Controls */
+        .form-control {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--card);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+        /* Thumbnail Upload */
+        .thumbnail-upload {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .thumbnail-upload:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .thumbnail-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .thumbnail-preview i {
+            font-size: 2rem;
+            color: var(--text-light);
+        }
+
+        .thumbnail-preview p {
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .thumbnail-preview small {
+            color: var(--text-light);
+        }
+
+        /* Materials Upload */
+        .materials-upload {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .upload-area h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .browse-link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .upload-formats {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .format-tag {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Video Upload */
+        .video-upload {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .video-upload-area {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .video-upload-area i {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .video-upload-area h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-preview {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .video-preview video {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .remove-video {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Price Input */
+        .price-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-light);
+            font-weight: 500;
+            z-index: 1;
+        }
+
+        .price-input .form-control {
+            padding-left: 2.5rem;
+        }
+
+        /* Learning Outcomes */
+        .outcomes-container {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .outcome-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .outcome-input-field {
+            flex: 1;
+        }
+
+        .add-outcome-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .add-outcome-btn:hover {
+            background: #4f46e5;
+        }
+
+        .outcomes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .outcome-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: var(--background);
+            border-radius: 6px;
+        }
+
+        .outcome-item i {
+            color: var(--primary);
+        }
+
+        .outcome-item span {
+            flex: 1;
+        }
+
+        .remove-outcome {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        /* Checkbox and Radio Styles */
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-label:hover, .radio-label:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .checkbox-label input, .radio-label input {
+            display: none;
+        }
+
+        .checkmark, .radio-mark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            position: relative;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .radio-mark {
+            border-radius: 50%;
+        }
+
+        .checkbox-label input:checked + .checkmark {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox-label input:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .radio-label input:checked + .radio-mark {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .radio-label input:checked + .radio-mark::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .label-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .label-text strong {
+            font-weight: 600;
+        }
+
+        .label-text small {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Course Preview */
+        .course-preview {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .preview-thumbnail {
+            height: 200px;
+            background: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .preview-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-thumbnail {
+            color: var(--text-light);
+            font-size: 2rem;
+        }
+
+        .preview-content {
+            padding: 1.5rem;
+        }
+
+        .preview-content h5 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-content p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .preview-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .meta-item i {
+            color: var(--primary);
+        }
+
+        /* Publish Options */
+        .publish-options {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .publish-options h5 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .publish-option {
+            margin-bottom: 1rem;
+        }
+
+        .publish-option:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Form Navigation */
+        .form-navigation {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: var(--background);
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-spacer {
+            flex: 1;
+        }
+
+        .form-navigation .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .form-navigation .btn i {
+            font-size: 0.9rem;
+        }
+
+        /* File Upload Items */
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .file-info i {
+            color: var(--primary);
+        }
+
+        .file-info span {
+            font-weight: 500;
+        }
+
+        .file-info small {
+            color: var(--text-light);
+            margin-left: auto;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .remove-file:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .create-course-modal {
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .course-creation-progress {
+                padding: 1rem;
+            }
+
+            .progress-step {
+                max-width: 80px;
+            }
+
+            .step-label {
+                font-size: 0.7rem;
+            }
+
+            .form-step {
+                padding: 1rem;
+            }
+
+            .form-navigation {
+                padding: 1rem;
+            }
+        }
+
         .file-upload {
             border: 2px dashed var(--border);
             border-radius: 8px;
@@ -1854,7 +2569,7 @@
                 </div>
             </div>
             <div class="user-details">
-                <div class="user-name" id="teacherNameDisplay">Dr. Sarah Johnson</div>
+            <div class="user-name" id="teacherNameDisplay">Dr. Sarah Johnson</div>
                 <div class="user-department" id="teacherDepartmentDisplay">Computer Science</div>
             </div>
         </div>
@@ -2848,69 +3563,361 @@
 
     <!-- Create Course Modal -->
     <div class="modal" id="createCourseModal">
-        <div class="modal-content">
+        <div class="modal-content create-course-modal">
             <div class="modal-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="header-text">
                 <h3>Create New Course</h3>
+                        <p>Design and launch your professional course</p>
+                    </div>
+                </div>
                 <button class="close-modal" id="closeCourseModal">&times;</button>
             </div>
-            <form id="courseForm">
+            
+            <!-- Progress Indicator -->
+            <div class="course-creation-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Basic Info</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Content</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Settings</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Review</div>
+                </div>
+            </div>
+
+            <form id="courseForm" class="course-form">
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" data-step="1">
+                    <div class="step-header">
+                        <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                        <p>Tell us about your course</p>
+                    </div>
+                    
+                    <div class="form-row">
                 <div class="form-group">
-                    <label for="courseTitle">Course Title</label>
-                    <input type="text" id="courseTitle" placeholder="Enter course title" required>
+                            <label for="courseTitle">
+                                <i class="fas fa-book"></i>
+                                Course Title
+                            </label>
+                            <input type="text" id="courseTitle" class="form-control" placeholder="e.g., Advanced Web Development with React" required>
+                            <div class="input-hint">Choose a clear, descriptive title that attracts students</div>
                 </div>
                 <div class="form-group">
-                    <label for="courseCode">Course Code</label>
-                    <input type="text" id="courseCode" placeholder="e.g., CS401" required>
+                            <label for="courseCode">
+                                <i class="fas fa-code"></i>
+                                Course Code
+                            </label>
+                            <input type="text" id="courseCode" class="form-control" placeholder="e.g., CS401" required>
+                            <div class="input-hint">Unique identifier for your course</div>
                 </div>
+                    </div>
+
                 <div class="form-group">
-                    <label for="courseDescription">Description</label>
-                    <textarea id="courseDescription" placeholder="Enter course description..." rows="4" required></textarea>
+                        <label for="courseDescription">
+                            <i class="fas fa-align-left"></i>
+                            Course Description
+                        </label>
+                        <textarea id="courseDescription" class="form-control" placeholder="Describe what students will learn, the skills they'll gain, and why this course is valuable..." rows="4" required></textarea>
+                        <div class="input-hint">Be detailed and engaging to attract more students</div>
                 </div>
+
+                    <div class="form-row">
                 <div class="form-group">
-                    <label for="courseDuration">Duration</label>
-                    <input type="text" id="courseDuration" placeholder="e.g., 8 weeks" required>
-                </div>
-                <div class="form-group">
-                    <label for="courseCategory">Category</label>
-                    <select id="courseCategory" required>
+                            <label for="courseCategory">
+                                <i class="fas fa-tags"></i>
+                                Category
+                            </label>
+                            <select id="courseCategory" class="form-control" required>
                         <option value="">Select category</option>
-                        <option value="programming">Programming</option>
-                        <option value="data-science">Data Science</option>
-                        <option value="design">Design</option>
-                        <option value="business">Business</option>
+                                <option value="programming">Programming & Development</option>
+                                <option value="data-science">Data Science & Analytics</option>
+                                <option value="design">Design & Creative</option>
+                                <option value="business">Business & Marketing</option>
+                                <option value="science">Science & Engineering</option>
+                                <option value="language">Language & Communication</option>
+                                <option value="health">Health & Wellness</option>
+                                <option value="other">Other</option>
                     </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseDifficulty">
+                                <i class="fas fa-signal"></i>
+                                Difficulty Level
+                            </label>
+                            <select id="courseDifficulty" class="form-control" required>
+                                <option value="">Select difficulty</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="expert">Expert</option>
+                            </select>
+                        </div>
                 </div>
                 
-                <!-- Course Materials Upload Section -->
+                    <div class="form-row">
                 <div class="form-group">
-                    <label>Course Materials</label>
-                    <div class="file-upload" id="courseFileUpload">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 1rem; color: var(--text-light);"></i>
-                        <p>Drag and drop course materials here or click to browse</p>
-                        <small>Supported formats: PDF, PPT, MP4, ZIP (Max: 100MB each)</small>
+                            <label for="courseDuration">
+                                <i class="fas fa-clock"></i>
+                                Duration
+                            </label>
+                            <input type="text" id="courseDuration" class="form-control" placeholder="e.g., 8 weeks, 12 hours" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseLanguage">
+                                <i class="fas fa-globe"></i>
+                                Language
+                            </label>
+                            <select id="courseLanguage" class="form-control" required>
+                                <option value="english">English</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="french">French</option>
+                                <option value="german">German</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Video Upload Section -->
-                <div class="form-group video-upload-container">
-                    <label for="courseVideo">Course Introduction Video (Optional)</label>
-                    <div class="file-upload" id="courseVideoUpload">
-                        <i class="fas fa-video" style="font-size: 2rem; margin-bottom: 1rem; color: var(--text-light);"></i>
-                        <p>Upload a course introduction video</p>
-                        <small>Supported formats: MP4, MOV, AVI (Max: 500MB)</small>
+                <!-- Step 2: Content & Materials -->
+                <div class="form-step" data-step="2">
+                    <div class="step-header">
+                        <h4><i class="fas fa-file-alt"></i> Course Content</h4>
+                        <p>Upload your course materials and resources</p>
                     </div>
-                    <div class="video-preview" id="videoPreview">
+
+                    <!-- Course Thumbnail Upload -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-image"></i>
+                            Course Thumbnail
+                        </label>
+                        <div class="thumbnail-upload" id="courseThumbnailUpload">
+                            <div class="thumbnail-preview" id="thumbnailPreview">
+                                <i class="fas fa-image"></i>
+                                <p>Upload course thumbnail</p>
+                                <small>Recommended: 1280x720px, JPG/PNG</small>
+                            </div>
+                            <input type="file" id="thumbnailInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Course Materials Upload -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-folder-open"></i>
+                            Course Materials
+                        </label>
+                        <div class="materials-upload" id="courseFileUpload">
+                            <div class="upload-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h5>Drag & Drop Files Here</h5>
+                                <p>or <span class="browse-link">browse files</span></p>
+                                <div class="upload-formats">
+                                    <span class="format-tag">PDF</span>
+                                    <span class="format-tag">PPT</span>
+                                    <span class="format-tag">MP4</span>
+                                    <span class="format-tag">ZIP</span>
+                                </div>
+                                <small>Max file size: 100MB each</small>
+                            </div>
+                            <div class="uploaded-files" id="uploadedFiles"></div>
+                        </div>
+                    </div>
+
+                    <!-- Course Introduction Video -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-video"></i>
+                            Introduction Video (Optional)
+                        </label>
+                        <div class="video-upload" id="courseVideoUpload">
+                            <div class="video-upload-area">
+                                <i class="fas fa-video"></i>
+                                <h5>Upload Introduction Video</h5>
+                                <p>Give students a preview of your course</p>
+                                <div class="upload-formats">
+                                    <span class="format-tag">MP4</span>
+                                    <span class="format-tag">MOV</span>
+                                    <span class="format-tag">AVI</span>
+                                </div>
+                                <small>Max file size: 500MB</small>
+                            </div>
+                            <div class="video-preview" id="videoPreview" style="display: none;">
                         <video controls>
                             <source src="" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
+                                <button type="button" class="remove-video" id="removeVideo">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <!-- Step 3: Course Settings -->
+                <div class="form-step" data-step="3">
+                    <div class="step-header">
+                        <h4><i class="fas fa-cog"></i> Course Settings</h4>
+                        <p>Configure enrollment and access settings</p>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coursePrice">
+                                <i class="fas fa-dollar-sign"></i>
+                                Course Price
+                            </label>
+                            <div class="price-input">
+                                <span class="currency">$</span>
+                                <input type="number" id="coursePrice" class="form-control" placeholder="0.00" min="0" step="0.01">
+                            </div>
+                            <div class="input-hint">Set to $0 for free course</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="maxStudents">
+                                <i class="fas fa-users"></i>
+                                Max Students
+                            </label>
+                            <input type="number" id="maxStudents" class="form-control" placeholder="Unlimited" min="1">
+                            <div class="input-hint">Leave empty for unlimited enrollment</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prerequisites">
+                            <i class="fas fa-list-check"></i>
+                            Prerequisites
+                        </label>
+                        <textarea id="prerequisites" class="form-control" placeholder="List any prerequisites or recommended knowledge..." rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="learningOutcomes">
+                            <i class="fas fa-target"></i>
+                            Learning Outcomes
+                        </label>
+                        <div class="outcomes-container">
+                            <div class="outcome-input">
+                                <input type="text" class="form-control outcome-input-field" placeholder="What will students learn?">
+                                <button type="button" class="add-outcome-btn">
                     <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="outcomes-list" id="outcomesList"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="coursePublic">
+                            <span class="checkmark"></span>
+                            <span class="label-text">
+                                <strong>Make course public</strong>
+                                <small>Allow students to discover and enroll in this course</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="allowDiscussions">
+                            <span class="checkmark"></span>
+                            <span class="label-text">
+                                <strong>Enable discussions</strong>
+                                <small>Allow students to ask questions and discuss topics</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review & Publish -->
+                <div class="form-step" data-step="4">
+                    <div class="step-header">
+                        <h4><i class="fas fa-eye"></i> Review & Publish</h4>
+                        <p>Review your course details before publishing</p>
+                    </div>
+
+                    <div class="course-preview" id="coursePreview">
+                        <div class="preview-thumbnail">
+                            <img id="previewThumbnail" src="" alt="Course Thumbnail" style="display: none;">
+                            <div class="no-thumbnail" id="noThumbnail">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <h5 id="previewTitle">Course Title</h5>
+                            <p id="previewDescription">Course description will appear here...</p>
+                            <div class="preview-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-tag"></i>
+                                    <span id="previewCategory">Category</span>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-signal"></i>
+                                    <span id="previewDifficulty">Difficulty</span>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="previewDuration">Duration</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="publish-options">
+                        <h5>Publishing Options</h5>
+                        <div class="publish-option">
+                            <label class="radio-label">
+                                <input type="radio" name="publishOption" value="publish" checked>
+                                <span class="radio-mark"></span>
+                                <span class="label-text">
+                                    <strong>Publish Now</strong>
+                                    <small>Make course available immediately</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="publish-option">
+                            <label class="radio-label">
+                                <input type="radio" name="publishOption" value="draft">
+                                <span class="radio-mark"></span>
+                                <span class="label-text">
+                                    <strong>Save as Draft</strong>
+                                    <small>Save course for later editing</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Navigation -->
+                <div class="form-navigation">
+                    <button type="button" class="btn btn-secondary" id="prevStep" style="display: none;">
+                        <i class="fas fa-arrow-left"></i>
+                        Previous
+                    </button>
+                    <div class="nav-spacer"></div>
+                    <button type="button" class="btn btn-primary" id="nextStep">
+                        Next
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" class="btn btn-success" id="createCourseBtn" style="display: none;">
+                        <i class="fas fa-rocket"></i>
                     Create Course
                 </button>
+                </div>
             </form>
         </div>
     </div>
@@ -3100,18 +4107,338 @@
             notificationsPanel.classList.remove('active');
         });
 
-        // Course Creation Modal
+        // Professional Course Creation Modal
         const createCourseBtn = document.getElementById('createCourseBtn');
         const createCourseModal = document.getElementById('createCourseModal');
         const closeCourseModal = document.getElementById('closeCourseModal');
+        const courseForm = document.getElementById('courseForm');
+        const nextStepBtn = document.getElementById('nextStep');
+        const prevStepBtn = document.getElementById('prevStep');
+        const createCourseSubmitBtn = document.getElementById('createCourseSubmitBtn');
 
+        // Multi-step form functionality
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Open modal
         createCourseBtn.addEventListener('click', () => {
             createCourseModal.classList.add('active');
+            resetForm();
         });
 
+        // Close modal
         closeCourseModal.addEventListener('click', () => {
             createCourseModal.classList.remove('active');
+            resetForm();
         });
+
+        // Next step
+        nextStepBtn.addEventListener('click', () => {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateStepDisplay();
+                }
+            }
+        });
+
+        // Previous step
+        prevStepBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        });
+
+        // Form submission
+        courseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (validateCurrentStep()) {
+                createCourse();
+            }
+        });
+
+        // Step validation
+        function validateCurrentStep() {
+            const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+            const requiredFields = currentStepElement.querySelectorAll('[required]');
+            
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    field.focus();
+                    showNotification('Please fill in all required fields', 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Update step display
+        function updateStepDisplay() {
+            // Update progress indicator
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update form steps
+            document.querySelectorAll('.form-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+
+            // Update navigation buttons
+            prevStepBtn.style.display = currentStep > 1 ? 'flex' : 'none';
+            nextStepBtn.style.display = currentStep < totalSteps ? 'flex' : 'none';
+            createCourseSubmitBtn.style.display = currentStep === totalSteps ? 'flex' : 'none';
+
+            // Update course preview on step 4
+            if (currentStep === 4) {
+                updateCoursePreview();
+            }
+        }
+
+        // Update course preview
+        function updateCoursePreview() {
+            const title = document.getElementById('courseTitle').value;
+            const description = document.getElementById('courseDescription').value;
+            const category = document.getElementById('courseCategory').value;
+            const difficulty = document.getElementById('courseDifficulty').value;
+            const duration = document.getElementById('courseDuration').value;
+            const thumbnail = document.getElementById('thumbnailInput').files[0];
+
+            document.getElementById('previewTitle').textContent = title || 'Course Title';
+            document.getElementById('previewDescription').textContent = description || 'Course description will appear here...';
+            document.getElementById('previewCategory').textContent = category || 'Category';
+            document.getElementById('previewDifficulty').textContent = difficulty || 'Difficulty';
+            document.getElementById('previewDuration').textContent = duration || 'Duration';
+
+            if (thumbnail) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('previewThumbnail').src = e.target.result;
+                    document.getElementById('previewThumbnail').style.display = 'block';
+                    document.getElementById('noThumbnail').style.display = 'none';
+                };
+                reader.readAsDataURL(thumbnail);
+            } else {
+                document.getElementById('previewThumbnail').style.display = 'none';
+                document.getElementById('noThumbnail').style.display = 'flex';
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            currentStep = 1;
+            courseForm.reset();
+            updateStepDisplay();
+            
+            // Clear uploaded files
+            document.getElementById('uploadedFiles').innerHTML = '';
+            document.getElementById('videoPreview').style.display = 'none';
+            document.getElementById('previewThumbnail').style.display = 'none';
+            document.getElementById('noThumbnail').style.display = 'flex';
+        }
+
+        // Create course function
+        function createCourse() {
+            const formData = new FormData();
+            
+            // Basic information
+            formData.append('title', document.getElementById('courseTitle').value);
+            formData.append('code', document.getElementById('courseCode').value);
+            formData.append('description', document.getElementById('courseDescription').value);
+            formData.append('category', document.getElementById('courseCategory').value);
+            formData.append('difficulty', document.getElementById('courseDifficulty').value);
+            formData.append('duration', document.getElementById('courseDuration').value);
+            formData.append('language', document.getElementById('courseLanguage').value);
+            
+            // Settings
+            formData.append('price', document.getElementById('coursePrice').value || 0);
+            formData.append('maxStudents', document.getElementById('maxStudents').value || '');
+            formData.append('prerequisites', document.getElementById('prerequisites').value);
+            formData.append('isPublic', document.getElementById('coursePublic').checked);
+            formData.append('allowDiscussions', document.getElementById('allowDiscussions').checked);
+            
+            // Publishing option
+            const publishOption = document.querySelector('input[name="publishOption"]:checked').value;
+            formData.append('publishOption', publishOption);
+            
+            // Learning outcomes
+            const outcomes = Array.from(document.querySelectorAll('.outcome-item span')).map(item => item.textContent);
+            formData.append('learningOutcomes', JSON.stringify(outcomes));
+            
+            // Files
+            const thumbnail = document.getElementById('thumbnailInput').files[0];
+            if (thumbnail) formData.append('thumbnail', thumbnail);
+            
+            const materials = document.getElementById('courseFileUpload').files;
+            for (let file of materials) {
+                formData.append('materials', file);
+            }
+            
+            const video = document.getElementById('courseVideoUpload').files[0];
+            if (video) formData.append('video', video);
+
+            // Show loading state
+            createCourseSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Course...';
+            createCourseSubmitBtn.disabled = true;
+
+            // Submit to backend
+            fetch('/api/courses', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Course created successfully!', 'success');
+                    createCourseModal.classList.remove('active');
+                    resetForm();
+                    // Refresh courses list or redirect
+                    location.reload();
+                } else {
+                    showNotification(data.message || 'Failed to create course', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error creating course:', error);
+                showNotification('An error occurred while creating the course', 'error');
+            })
+            .finally(() => {
+                createCourseSubmitBtn.innerHTML = '<i class="fas fa-rocket"></i> Create Course';
+                createCourseSubmitBtn.disabled = false;
+            });
+        }
+
+        // File upload handlers
+        setupFileUploads();
+
+        // Setup file upload functionality
+        function setupFileUploads() {
+            // Thumbnail upload
+            const thumbnailUpload = document.getElementById('courseThumbnailUpload');
+            const thumbnailInput = document.getElementById('thumbnailInput');
+            
+            thumbnailUpload.addEventListener('click', () => {
+                thumbnailInput.click();
+            });
+            
+            thumbnailInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const thumbnailPreview = document.getElementById('thumbnailPreview');
+                        thumbnailPreview.innerHTML = `
+                            <img src="${e.target.result}" alt="Thumbnail Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                        `;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Materials upload
+            const materialsUpload = document.getElementById('courseFileUpload');
+            const materialsInput = document.createElement('input');
+            materialsInput.type = 'file';
+            materialsInput.multiple = true;
+            materialsInput.accept = '.pdf,.ppt,.pptx,.mp4,.zip,.doc,.docx';
+            materialsInput.style.display = 'none';
+            document.body.appendChild(materialsInput);
+
+            materialsUpload.addEventListener('click', () => {
+                materialsInput.click();
+            });
+
+            materialsInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                const uploadedFiles = document.getElementById('uploadedFiles');
+                
+                files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <i class="fas fa-file"></i>
+                            <span>${file.name}</span>
+                            <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                        </div>
+                        <button type="button" class="remove-file" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    uploadedFiles.appendChild(fileItem);
+                });
+            });
+
+            // Video upload
+            const videoUpload = document.getElementById('courseVideoUpload');
+            const videoInput = document.createElement('input');
+            videoInput.type = 'file';
+            videoInput.accept = 'video/*';
+            videoInput.style.display = 'none';
+            document.body.appendChild(videoInput);
+
+            videoUpload.addEventListener('click', () => {
+                videoInput.click();
+            });
+
+            videoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const videoPreview = document.getElementById('videoPreview');
+                    const video = videoPreview.querySelector('video');
+                    const url = URL.createObjectURL(file);
+                    video.src = url;
+                    videoPreview.style.display = 'block';
+                }
+            });
+
+            // Remove video
+            document.getElementById('removeVideo').addEventListener('click', () => {
+                document.getElementById('videoPreview').style.display = 'none';
+                videoInput.value = '';
+            });
+
+            // Learning outcomes
+            setupLearningOutcomes();
+        }
+
+        // Setup learning outcomes functionality
+        function setupLearningOutcomes() {
+            const addOutcomeBtn = document.querySelector('.add-outcome-btn');
+            const outcomeInput = document.querySelector('.outcome-input-field');
+            const outcomesList = document.getElementById('outcomesList');
+
+            addOutcomeBtn.addEventListener('click', () => {
+                const outcomeText = outcomeInput.value.trim();
+                if (outcomeText) {
+                    const outcomeItem = document.createElement('div');
+                    outcomeItem.className = 'outcome-item';
+                    outcomeItem.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span>${outcomeText}</span>
+                        <button type="button" class="remove-outcome" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    outcomesList.appendChild(outcomeItem);
+                    outcomeInput.value = '';
+                }
+            });
+
+            outcomeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addOutcomeBtn.click();
+                }
+            });
+        }
 
         // Assignment Creation Modal
         const createAssignmentBtn = document.getElementById('createAssignmentBtn');
