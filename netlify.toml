@@ -8,3 +8,45 @@ publish = "frontend"
 from = "/*"
 to = "/index.html"
 status = 200
+
+# Increase request size limit for file uploads
+[[headers]]
+for = "/*"
+  [headers.values]
+  X-Content-Type-Options = "nosniff"
+  X-Frame-Options = "DENY"
+  X-XSS-Protection = "1; mode=block"
+  
+# Configure Netlify to allow larger file uploads (20MB)
+[functions]
+  node_bundler = "esbuild"
+
+# Increase payload size limit
+[[plugins]]
+package = "@netlify/plugin-functions-core"
+
+# Set max payload size to 20MB (value in bytes)
+[build.processing]
+  skip_processing = false
+[build.processing.html]
+  pretty_urls = true
+[build.processing.images]
+  compress = true
+[build.processing.css]
+  bundle = true
+  minify = true
+[build.processing.js]
+  bundle = true
+  minify = true
+
+# Increase request size limit
+[dev]
+  command = "npm run dev"
+  targetPort = 8080
+  port = 8888
+  publish = "frontend"
+  autoLaunch = true
+  framework = "#custom"
+  [dev.headers]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"

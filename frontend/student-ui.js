@@ -13,8 +13,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize the dashboard
 async function initializeStudentDashboard() {
+    // Debug: Check localStorage
+    console.log('Checking localStorage data:', localStorage.getItem('istruzioneF_user'));
+    
     // Load user information
     loadUserInfo();
+    
+    // Test profile picture elements
+    console.log('Profile picture elements:', {
+        uploadBtn: !!document.getElementById('uploadProfilePic'),
+        fileInput: !!document.getElementById('profilePictureInput'),
+        profileImage: !!document.getElementById('profileImage'),
+        defaultAvatar: !!document.getElementById('defaultAvatar'),
+        removeBtn: !!document.getElementById('removeProfilePic')
+    });
     
     // Fetch courses and notifications
     await displayStudentCourses();
@@ -23,20 +35,116 @@ async function initializeStudentDashboard() {
 
 // Load user information from localStorage
 function loadUserInfo() {
-    const firstName = localStorage.getItem('firstName') || 'Student';
-    const lastName = localStorage.getItem('lastName') || '';
-    const major = localStorage.getItem('major') || '';
+    // Get user data from localStorage (set during login)
+    const userData = JSON.parse(localStorage.getItem('istruzioneF_user') || '{}');
+    
+    // Check if we have valid user data
+    if (!userData.id) {
+        console.warn('No user data found in localStorage. Redirecting to login...');
+        window.location.href = 'student-login.html';
+        return;
+    }
+    
+    const firstName = userData.firstName || 'Student';
+    const lastName = userData.lastName || '';
+    const major = userData.program || userData.major || 'Student';
+    const email = userData.email || '';
+    const institution = userData.institution || '';
+    const yearLevel = userData.yearLevel || '';
+    const profilePicture = userData.profilePicture || '';
     
     // Update the UI with user information
-    const userNameElement = document.querySelector('.user-name');
-    const userRoleElement = document.querySelector('.user-role');
+    const userNameElement = document.getElementById('userName');
+    const userRoleElement = document.getElementById('userRole');
+    const userAvatar = document.getElementById('userAvatar');
     
     if (userNameElement) {
-        userNameElement.textContent = `${firstName} ${lastName}`;
+        const fullName = `${firstName} ${lastName}`.trim();
+        userNameElement.textContent = fullName || 'Student';
     }
     
     if (userRoleElement) {
         userRoleElement.textContent = major;
+    }
+    
+    // Debug: Log what we're setting
+    console.log('Setting profile:', {
+        firstName,
+        lastName,
+        major,
+        profilePicture: profilePicture ? 'Present: ' + profilePicture.substring(0, 50) + '...' : 'Not present'
+    });
+    
+    // Debug: Check if profile picture elements exist
+    console.log('Profile picture elements check:', {
+        userAvatar: !!userAvatar,
+        profileImage: !!document.getElementById('profileImage'),
+        defaultAvatar: !!document.getElementById('defaultAvatar')
+    });
+    
+    // Update profile picture in sidebar
+    if (userAvatar) {
+        if (profilePicture) {
+            userAvatar.innerHTML = `<img src="${profilePicture}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+        } else {
+            userAvatar.innerHTML = '<i class="fas fa-user-graduate"></i>';
+        }
+    }
+    
+    // Load settings form with user data
+    loadSettingsForm(userData);
+}
+
+// Load settings form with user data
+function loadSettingsForm(userData) {
+    // Safely get form elements
+    const nameField = document.getElementById('studentName');
+    const emailField = document.getElementById('studentEmail');
+    const programField = document.getElementById('studentProgram');
+    const institutionField = document.getElementById('studentInstitution');
+    const yearLevelField = document.getElementById('studentYearLevel');
+    
+    if (nameField) {
+        nameField.value = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+    }
+    if (emailField) {
+        emailField.value = userData.email || '';
+    }
+    if (programField) {
+        programField.value = userData.program || userData.major || '';
+    }
+    if (institutionField) {
+        institutionField.value = userData.institution || '';
+    }
+    if (yearLevelField) {
+        yearLevelField.value = userData.yearLevel || '';
+    }
+    
+    // Load profile picture
+    const profileImage = document.getElementById('profileImage');
+    const defaultAvatar = document.getElementById('defaultAvatar');
+    const removeBtn = document.getElementById('removeProfilePic');
+    
+    if (profileImage && defaultAvatar && removeBtn) {
+        console.log('Loading profile picture in settings:', userData.profilePicture ? 'Present' : 'Not present');
+        if (userData.profilePicture) {
+            console.log('Setting profile image src:', userData.profilePicture.substring(0, 50) + '...');
+            profileImage.src = userData.profilePicture;
+            profileImage.style.display = 'block';
+            defaultAvatar.style.display = 'none';
+            removeBtn.style.display = 'inline-flex';
+        } else {
+            console.log('No profile picture, showing default avatar');
+            profileImage.style.display = 'none';
+            defaultAvatar.style.display = 'flex';
+            removeBtn.style.display = 'none';
+        }
+    } else {
+        console.error('Profile picture elements not found in settings:', {
+            profileImage: !!profileImage,
+            defaultAvatar: !!defaultAvatar,
+            removeBtn: !!removeBtn
+        });
     }
 }
 
@@ -347,4 +455,225 @@ function setupEventListeners() {
             alert('Failed to submit assignment. Please try again.');
         }
     });
+    
+    // Profile picture upload - use event delegation to ensure it works
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'uploadProfilePic') {
+            e.preventDefault();
+            console.log('Upload profile picture button clicked');
+            const fileInput = document.getElementById('profilePictureInput');
+            if (fileInput) {
+                fileInput.click();
+            } else {
+                console.error('Profile picture input not found');
+            }
+        }
+    });
+    
+    // Fallback: Direct event listener for upload button
+    setTimeout(() => {
+        const uploadBtn = document.getElementById('uploadProfilePic');
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Direct upload button click handler triggered');
+                const fileInput = document.getElementById('profilePictureInput');
+                if (fileInput) {
+                    fileInput.click();
+                }
+            });
+        }
+    }, 1000);
+    
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'profilePictureInput') {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file.');
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const profileImage = document.getElementById('profileImage');
+                    const defaultAvatar = document.getElementById('defaultAvatar');
+                    const removeBtn = document.getElementById('removeProfilePic');
+                    
+                    if (profileImage && defaultAvatar && removeBtn) {
+                        profileImage.src = e.target.result;
+                        profileImage.style.display = 'block';
+                        defaultAvatar.style.display = 'none';
+                        removeBtn.style.display = 'inline-flex';
+                        
+                        // Update sidebar avatar
+                        const userAvatar = document.getElementById('userAvatar');
+                        if (userAvatar) {
+                            userAvatar.innerHTML = `<img src="${e.target.result}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        }
+                        
+                        // Update user data in localStorage
+                        const userData = JSON.parse(localStorage.getItem('istruzioneF_user') || '{}');
+                        userData.profilePicture = e.target.result;
+                        localStorage.setItem('istruzioneF_user', JSON.stringify(userData));
+                        
+                        console.log('Profile picture updated successfully');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+    
+    // Remove profile picture - use event delegation
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'removeProfilePic') {
+            e.preventDefault();
+            
+            const profileImage = document.getElementById('profileImage');
+            const defaultAvatar = document.getElementById('defaultAvatar');
+            const removeBtn = document.getElementById('removeProfilePic');
+            const userAvatar = document.getElementById('userAvatar');
+            
+            if (profileImage && defaultAvatar && removeBtn) {
+                profileImage.style.display = 'none';
+                defaultAvatar.style.display = 'flex';
+                removeBtn.style.display = 'none';
+                
+                // Reset sidebar avatar
+                if (userAvatar) {
+                    userAvatar.innerHTML = '<i class="fas fa-user-graduate"></i>';
+                }
+                
+                // Clear file input
+                const fileInput = document.getElementById('profilePictureInput');
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+                
+                // Update user data in localStorage
+                const userData = JSON.parse(localStorage.getItem('istruzioneF_user') || '{}');
+                userData.profilePicture = '';
+                localStorage.setItem('istruzioneF_user', JSON.stringify(userData));
+                
+                console.log('Profile picture removed successfully');
+            }
+        }
+    });
+    
+    // Save settings
+    document.getElementById('saveSettings').addEventListener('click', async function() {
+        const userData = JSON.parse(localStorage.getItem('istruzioneF_user') || '{}');
+        
+        // Get form data
+        const fullName = document.getElementById('studentName').value.trim();
+        const email = document.getElementById('studentEmail').value.trim();
+        const program = document.getElementById('studentProgram').value.trim();
+        const institution = document.getElementById('studentInstitution').value.trim();
+        const yearLevel = document.getElementById('studentYearLevel').value;
+        const notifications = document.getElementById('notifications').value;
+        
+        // Split full name into first and last name
+        const nameParts = fullName.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
+        // Get profile picture
+        const profileImage = document.getElementById('profileImage');
+        const profilePicture = profileImage.style.display !== 'none' ? profileImage.src : '';
+        
+        // Update user data
+        const updatedUserData = {
+            ...userData,
+            firstName,
+            lastName,
+            email,
+            program,
+            major: program, // Keep both for compatibility
+            institution,
+            yearLevel,
+            profilePicture,
+            notifications
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('istruzioneF_user', JSON.stringify(updatedUserData));
+        
+        // Update UI
+        loadUserInfo();
+        
+        // Show success message
+        alert('Settings saved successfully!');
+        
+        // TODO: Send to backend API for persistence
+        try {
+            await updateStudentProfile(updatedUserData);
+        } catch (error) {
+            console.error('Failed to update profile on server:', error);
+        }
+    });
 }
+
+// Update student profile on server
+async function updateStudentProfile(userData) {
+    try {
+        const response = await fetch('http://localhost:3000/api/student/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: userData.id,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                email: userData.email,
+                program: userData.program,
+                institution: userData.institution,
+                yearLevel: userData.yearLevel,
+                profilePicture: userData.profilePicture
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update profile');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+    }
+}
+
+// Test function to check if profile picture upload is working
+window.testProfilePicture = function() {
+    console.log('Testing profile picture functionality...');
+    
+    const uploadBtn = document.getElementById('uploadProfilePic');
+    const fileInput = document.getElementById('profilePictureInput');
+    const profileImage = document.getElementById('profileImage');
+    const defaultAvatar = document.getElementById('defaultAvatar');
+    const removeBtn = document.getElementById('removeProfilePic');
+    
+    console.log('Elements found:', {
+        uploadBtn: !!uploadBtn,
+        fileInput: !!fileInput,
+        profileImage: !!profileImage,
+        defaultAvatar: !!defaultAvatar,
+        removeBtn: !!removeBtn
+    });
+    
+    if (uploadBtn) {
+        console.log('Upload button found, clicking...');
+        uploadBtn.click();
+    } else {
+        console.error('Upload button not found!');
+    }
+};

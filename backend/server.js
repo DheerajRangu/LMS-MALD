@@ -43,7 +43,9 @@ const StudentSchema = new Schema({
     ...UserSchema.obj,
     enrolledCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
     institution: { type: String },
-    major: { type: String }
+    major: { type: String },
+    yearLevel: { type: String },
+    profilePicture: { type: String }
 });
 
 // Teacher Schema
@@ -198,13 +200,23 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
         
-        res.status(200).json({
+        const responseData = {
             id: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             role
-        });
+        };
+        
+        // Add student-specific fields
+        if (role === 'student') {
+            responseData.program = user.major;
+            responseData.institution = user.institution;
+            responseData.yearLevel = user.yearLevel;
+            responseData.profilePicture = user.profilePicture;
+        }
+        
+        res.status(200).json(responseData);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -236,7 +248,9 @@ app.post('/api/register', async (req, res) => {
                 email,
                 password, // In a real app, you would hash this password
                 institution,
-                major
+                major,
+                yearLevel: req.body.yearLevel || '',
+                profilePicture: ''
             });
         } else if (role === 'teacher') {
             newUser = new Teacher({
@@ -574,6 +588,95 @@ app.post('/api/courses/:courseId/enroll', async (req, res) => {
         await student.save();
         
         res.status(200).json({ message: 'Student enrolled successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Student Profile Routes
+// Update student profile
+app.put('/api/student/profile', async (req, res) => {
+    try {
+        const { userId, firstName, lastName, email, program, institution, yearLevel, profilePicture } = req.body;
+        
+        // Find and update student
+        const student = await Student.findById(userId);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        // Update student fields
+        student.firstName = firstName || student.firstName;
+        student.lastName = lastName || student.lastName;
+        student.email = email || student.email;
+        student.major = program || student.major;
+        student.institution = institution || student.institution;
+        student.yearLevel = yearLevel || student.yearLevel;
+        student.profilePicture = profilePicture || student.profilePicture;
+        
+        await student.save();
+        
+        res.status(200).json({
+            message: 'Profile updated successfully',
+            student: {
+                id: student._id,
+                firstName: student.firstName,
+                lastName: student.lastName,
+                email: student.email,
+                program: student.major,
+                institution: student.institution,
+                yearLevel: student.yearLevel,
+                profilePicture: student.profilePicture
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get student profile
+app.get('/api/student/:studentId/profile', async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        res.status(200).json({
+            id: student._id,
+            firstName: student.firstName,
+            lastName: student.lastName,
+            email: student.email,
+            program: student.major,
+            institution: student.institution,
+            yearLevel: student.yearLevel,
+            profilePicture: student.profilePicture
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Upload profile picture
+app.post('/api/student/:studentId/profile-picture', upload.single('profilePicture'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        
+        const student = await Student.findById(req.params.studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        // Update student's profile picture path
+        student.profilePicture = `/uploads/${req.file.filename}`;
+        await student.save();
+        
+        res.status(200).json({
+            message: 'Profile picture uploaded successfully',
+            profilePicture: student.profilePicture
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

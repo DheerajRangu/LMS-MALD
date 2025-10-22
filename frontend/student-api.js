@@ -19,7 +19,7 @@ const userRole = 'student';
 // Function to fetch courses for the current student
 async function fetchStudentCourses() {
     try {
-        const response = await fetch(`${API_BASE_URL}/students/${currentUserId}/courses`);
+        const response = await fetch(`${API_BASE_URL}/student/${currentUserId}/courses`);
         if (!response.ok) throw new Error('Failed to fetch courses');
         return await response.json();
     } catch (error) {

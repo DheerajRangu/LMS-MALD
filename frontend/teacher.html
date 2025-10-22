@@ -1793,11 +1793,14 @@
         </div>
         
         <div class="user-info">
-            <div class="user-avatar">
-                <i class="fas fa-chalkboard-teacher"></i>
+            <div class="user-avatar" id="sidebarProfilePic">
+                <img id="sidebarProfileImage" src="" alt="Profile Picture" style="display: none;">
+                <div class="default-avatar" id="sidebarDefaultAvatar">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
             </div>
-            <div class="user-name">Dr. Sarah Johnson</div>
-            <div class="user-role">Computer Science Professor</div>
+            <div class="user-name" id="teacherNameDisplay">Dr. Sarah Johnson</div>
+            <div class="user-role" id="teacherDepartmentDisplay">Computer Science Professor</div>
         </div>
         
         <nav class="nav-menu">
@@ -1828,6 +1831,10 @@
             <a href="#materials" class="nav-item">
                 <i class="fas fa-file-alt"></i>
                 Course Materials
+            </a>
+            <a href="#settings" class="nav-item">
+                <i class="fas fa-cog"></i>
+                Settings
             </a>
         </nav>
         
@@ -2422,6 +2429,80 @@
                         <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Delete</button>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="dashboard-section" id="settings">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <div class="view-all" data-section="dashboard">
+                    Back to Dashboard
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+            </div>
+            <div style="max-width: 600px;">
+                <h3 style="margin-bottom: 1.5rem;">Account Settings</h3>
+                
+                <!-- Profile Picture Section -->
+                <div class="form-group">
+                    <label>Profile Picture</label>
+                    <div class="profile-picture-section">
+                        <div class="current-profile-pic" id="currentProfilePic">
+                            <img id="profileImage" src="" alt="Profile Picture" style="display: none;">
+                            <div class="default-avatar" id="defaultAvatar">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                        </div>
+                        <div class="profile-pic-actions">
+                            <input type="file" id="profilePictureInput" accept="image/*" style="display: none;" onchange="handleProfilePictureChange(this);">
+                            <button type="button" class="btn btn-outline" id="uploadProfilePic" style="cursor: pointer;" onclick="document.getElementById('profilePictureInput').click(); console.log('Button clicked!');">
+                                <i class="fas fa-upload"></i>
+                                Upload Picture
+                            </button>
+                            <button type="button" class="btn btn-outline" id="removeProfilePic" style="display: none; cursor: pointer;" onclick="removeProfilePicture();">
+                                <i class="fas fa-trash"></i>
+                                Remove Picture
+                            </button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9rem; color: var(--text-light);">
+                        <small>Click "Upload Picture" to select an image file (JPG, PNG, GIF - Max 5MB)</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="teacherFirstName">First Name</label>
+                    <input type="text" id="teacherFirstName" placeholder="Enter your first name">
+                </div>
+                <div class="form-group">
+                    <label for="teacherLastName">Last Name</label>
+                    <input type="text" id="teacherLastName" placeholder="Enter your last name">
+                </div>
+                <div class="form-group">
+                    <label for="teacherEmail">Email Address</label>
+                    <input type="email" id="teacherEmail" placeholder="Enter your email address">
+                </div>
+                <div class="form-group">
+                    <label for="teacherDepartment">Department</label>
+                    <input type="text" id="teacherDepartment" placeholder="Enter your department">
+                </div>
+                <div class="form-group">
+                    <label for="teacherInstitution">Institution</label>
+                    <input type="text" id="teacherInstitution" placeholder="Enter your institution">
+                </div>
+                <div class="form-group">
+                    <label for="notifications">Notification Preferences</label>
+                    <select id="notifications">
+                        <option value="all">All Notifications</option>
+                        <option value="important">Important Only</option>
+                        <option value="none">No Notifications</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="saveSettings">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
             </div>
         </section>
 

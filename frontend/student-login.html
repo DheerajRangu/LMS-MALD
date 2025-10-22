@@ -787,10 +787,10 @@
         const password = document.getElementById('studentPassword').value;
 
         try {
-            const res = await fetch('http://localhost:5050/login-student', {
+            const res = await fetch('http://localhost:3000/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password, role: 'student' })
             });
             const data = await res.json();
             if (!res.ok) {
@@ -799,16 +799,23 @@
             }
 
             // Save user to localStorage for later pages
-            localStorage.setItem('istruzioneF_user', JSON.stringify({
+            const userData = {
                 role: data.role,
-                id: data.user?.id,
-                firstName: data.user?.firstName,
-                email: data.user?.email,
-                program: data.user?.program,
-                institution: data.user?.institution,
-                studentId: data.user?.studentId,
-                yearLevel: data.user?.yearLevel
-            }));
+                id: data.id,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                program: data.program,
+                major: data.program, // Keep both for compatibility
+                institution: data.institution,
+                yearLevel: data.yearLevel,
+                profilePicture: data.profilePicture || ''
+            };
+            
+            console.log('Saving user data to localStorage:', userData);
+            console.log('Profile picture from login:', data.profilePicture ? 'Present: ' + data.profilePicture.substring(0, 50) + '...' : 'Not present');
+            
+            localStorage.setItem('istruzioneF_user', JSON.stringify(userData));
 
             showNotification();
             setTimeout(() => {
