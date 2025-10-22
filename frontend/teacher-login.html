@@ -538,16 +538,24 @@
                     alert(data.message || 'Login failed');
                     return;
                 }
-                // persist user session
-                localStorage.setItem('istruzioneF_user', JSON.stringify({
+                // persist teacher session with full details
+                const teacherData = {
                     role: data.role,
-                    id: data.user?.id,
-                    firstName: data.user?.firstName,
-                    email: data.user?.email,
-                    institution: data.user?.institution,
-                    department: data.user?.department,
-                    position: data.user?.position
-                }));
+                    id: data.id,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    email: data.email,
+                    phone: data.phone || '',
+                    institution: data.institution || '',
+                    department: data.department || '',
+                    position: data.position || '',
+                    experience: data.experience || '',
+                    subjects: data.subjects || [],
+                    bio: data.bio || '',
+                    profilePicture: data.profilePicture || ''
+                };
+                console.log('Saving teacher data to localStorage:', teacherData);
+                localStorage.setItem('istruzioneF_teacher', JSON.stringify(teacherData));
                 alert('Login successful');
                 window.location.href = 'teacher.html';
             } catch (err) {
