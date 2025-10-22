@@ -53,6 +53,11 @@ const TeacherSchema = new Schema({
     ...UserSchema.obj,
     institution: { type: String },
     department: { type: String },
+    position: { type: String },
+    experience: { type: String },
+    subjects: [{ type: String }],
+    bio: { type: String },
+    profilePicture: { type: String },
     courses: [{ type: Schema.Types.ObjectId, ref: 'Course' }]
 });
 
@@ -216,6 +221,17 @@ app.post('/api/login', async (req, res) => {
             responseData.profilePicture = user.profilePicture;
         }
         
+        // Add teacher-specific fields
+        if (role === 'teacher') {
+            responseData.institution = user.institution;
+            responseData.department = user.department;
+            responseData.position = user.position;
+            responseData.experience = user.experience;
+            responseData.subjects = user.subjects;
+            responseData.bio = user.bio;
+            responseData.profilePicture = user.profilePicture;
+        }
+        
         res.status(200).json(responseData);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -259,7 +275,12 @@ app.post('/api/register', async (req, res) => {
                 email,
                 password, // In a real app, you would hash this password
                 institution,
-                department
+                department: req.body.department || '',
+                position: req.body.position || '',
+                experience: req.body.experience || '',
+                subjects: req.body.subjects || [],
+                bio: req.body.bio || '',
+                profilePicture: ''
             });
         }
         
@@ -676,6 +697,78 @@ app.post('/api/student/:studentId/profile-picture', upload.single('profilePictur
         res.status(200).json({
             message: 'Profile picture uploaded successfully',
             profilePicture: student.profilePicture
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Update teacher profile
+app.put('/api/teacher/profile', async (req, res) => {
+    try {
+        const { userId, firstName, lastName, email, phone, institution, department, position, experience, subjects, bio, profilePicture } = req.body;
+        const teacher = await Teacher.findById(userId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+        
+        teacher.firstName = firstName || teacher.firstName;
+        teacher.lastName = lastName || teacher.lastName;
+        teacher.email = email || teacher.email;
+        teacher.phone = phone || teacher.phone;
+        teacher.institution = institution || teacher.institution;
+        teacher.department = department || teacher.department;
+        teacher.position = position || teacher.position;
+        teacher.experience = experience || teacher.experience;
+        teacher.subjects = subjects || teacher.subjects;
+        teacher.bio = bio || teacher.bio;
+        teacher.profilePicture = profilePicture || teacher.profilePicture;
+        
+        await teacher.save();
+        
+        res.status(200).json({
+            message: 'Profile updated successfully',
+            teacher: {
+                id: teacher._id,
+                firstName: teacher.firstName,
+                lastName: teacher.lastName,
+                email: teacher.email,
+                phone: teacher.phone,
+                institution: teacher.institution,
+                department: teacher.department,
+                position: teacher.position,
+                experience: teacher.experience,
+                subjects: teacher.subjects,
+                bio: teacher.bio,
+                profilePicture: teacher.profilePicture
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get teacher profile
+app.get('/api/teacher/:teacherId/profile', async (req, res) => {
+    try {
+        const teacher = await Teacher.findById(req.params.teacherId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+        
+        res.status(200).json({
+            id: teacher._id,
+            firstName: teacher.firstName,
+            lastName: teacher.lastName,
+            email: teacher.email,
+            phone: teacher.phone,
+            institution: teacher.institution,
+            department: teacher.department,
+            position: teacher.position,
+            experience: teacher.experience,
+            subjects: teacher.subjects,
+            bio: teacher.bio,
+            profilePicture: teacher.profilePicture
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
