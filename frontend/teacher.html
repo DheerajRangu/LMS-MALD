@@ -3507,18 +3507,22 @@
         // Load user info immediately when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Teacher page loaded, initializing profile picture...');
-            // Load user info to populate profile picture
-            if (typeof loadUserInfo === 'function') {
-                loadUserInfo();
-            } else {
-                // Fallback: load profile picture directly
-                const teacherData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
-                if (teacherData.profilePicture) {
+            // Wait a bit for teacher-ui.js to load, then load user info
+            setTimeout(() => {
+                if (typeof loadUserInfo === 'function') {
+                    console.log('loadUserInfo function found, calling it...');
+                    loadUserInfo();
+                } else {
+                    console.log('loadUserInfo function not found, using fallback...');
+                    // Fallback: load profile picture directly
+                    const teacherData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
+                    console.log('Loading teacher data from localStorage:', teacherData);
+                    
+                    if (teacherData.profilePicture) {
+                        console.log('Loading profile picture from localStorage');
                     const profileImage = document.getElementById('profileImage');
                     const defaultAvatar = document.getElementById('defaultAvatar');
                     const removeBtn = document.getElementById('removeProfilePic');
-                    const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-                    const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
                     
                     if (profileImage && defaultAvatar && removeBtn) {
                         profileImage.src = teacherData.profilePicture;
@@ -3527,12 +3531,15 @@
                         removeBtn.style.display = 'inline-flex';
                     }
                     
-                    const sidebarProfilePic = document.getElementById('sidebarProfilePic');
-                    if (sidebarProfilePic) {
-                        sidebarProfilePic.innerHTML = `<img src="${teacherData.profilePicture}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+                        if (sidebarProfilePic) {
+                            sidebarProfilePic.innerHTML = `<img src="${teacherData.profilePicture}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        }
+                    } else {
+                        console.log('No profile picture found in localStorage');
                     }
                 }
-            }
+            }, 100);
         });
         
         // Profile picture handling functions

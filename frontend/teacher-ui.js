@@ -75,18 +75,13 @@ function loadUserInfo() {
         userRoleElement.textContent = department;
     }
 
-    // Update profile picture in sidebar
-    const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-    const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
-
-    if (sidebarProfileImage && sidebarDefaultAvatar) {
+    // Update profile picture in sidebar (matching student system approach)
+    const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+    if (sidebarProfilePic) {
         if (profilePicture) {
-            sidebarProfileImage.src = profilePicture;
-            sidebarProfileImage.style.display = 'block';
-            sidebarDefaultAvatar.style.display = 'none';
+            sidebarProfilePic.innerHTML = `<img src="${profilePicture}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
         } else {
-            sidebarProfileImage.style.display = 'none';
-            sidebarDefaultAvatar.style.display = 'flex';
+            sidebarProfilePic.innerHTML = '<i class="fas fa-chalkboard-teacher"></i>';
         }
     }
 
@@ -200,13 +195,9 @@ function handleProfilePictureChange(event) {
         localStorage.setItem('istruzioneF_teacher', JSON.stringify(userData));
         
         // Update sidebar profile picture
-        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-        const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
-        
-        if (sidebarProfileImage && sidebarDefaultAvatar) {
-            sidebarProfileImage.src = e.target.result;
-            sidebarProfileImage.style.display = 'block';
-            sidebarDefaultAvatar.style.display = 'none';
+        const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+        if (sidebarProfilePic) {
+            sidebarProfilePic.innerHTML = `<img src="${e.target.result}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
         }
     };
     reader.readAsDataURL(file);
@@ -227,13 +218,9 @@ function removeProfilePicture() {
     }
     
     // Update sidebar
-    const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-    const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
-    
-    if (sidebarProfileImage && sidebarDefaultAvatar) {
-        sidebarProfileImage.src = '';
-        sidebarProfileImage.style.display = 'none';
-        sidebarDefaultAvatar.style.display = 'flex';
+    const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+    if (sidebarProfilePic) {
+        sidebarProfilePic.innerHTML = '<i class="fas fa-chalkboard-teacher"></i>';
     }
     
     // Update localStorage
