@@ -3483,10 +3483,9 @@
                         removeBtn.style.display = 'inline-flex';
                     }
                     
-                    if (sidebarProfileImage && sidebarDefaultAvatar) {
-                        sidebarProfileImage.src = teacherData.profilePicture;
-                        sidebarProfileImage.style.display = 'block';
-                        sidebarDefaultAvatar.style.display = 'none';
+                    const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+                    if (sidebarProfilePic) {
+                        sidebarProfilePic.innerHTML = `<img src="${teacherData.profilePicture}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
                     }
                 }
             }
@@ -3518,12 +3517,9 @@
                         defaultAvatar.style.display = 'none';
                         removeBtn.style.display = 'inline-flex';
                         // Update sidebar profile picture
-                        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-                        const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
-                        if (sidebarProfileImage && sidebarDefaultAvatar) {
-                            sidebarProfileImage.src = e.target.result;
-                            sidebarProfileImage.style.display = 'block';
-                            sidebarDefaultAvatar.style.display = 'none';
+                        const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+                        if (sidebarProfilePic) {
+                            sidebarProfilePic.innerHTML = `<img src="${e.target.result}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
                         }
                         // Update localStorage
                         const teacherData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
@@ -3553,11 +3549,9 @@
                 defaultAvatar.style.display = 'flex';
                 removeBtn.style.display = 'none';
                 // Update sidebar profile picture
-                const sidebarProfileImage = document.getElementById('sidebarProfileImage');
-                const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
-                if (sidebarProfileImage && sidebarDefaultAvatar) {
-                    sidebarProfileImage.style.display = 'none';
-                    sidebarDefaultAvatar.style.display = 'flex';
+                const sidebarProfilePic = document.getElementById('sidebarProfilePic');
+                if (sidebarProfilePic) {
+                    sidebarProfilePic.innerHTML = '<i class="fas fa-chalkboard-teacher"></i>';
                 }
                 const fileInput = document.getElementById('profilePictureInput');
                 if (fileInput) {
@@ -3581,6 +3575,17 @@
                     console.error('No teacher ID found in localStorage');
                     alert('Error: No teacher ID found. Please log in again.');
                     return;
+                }
+                
+                // First, try to get the teacher profile to check if it exists
+                try {
+                    const getResponse = await fetch(`http://localhost:3000/api/teacher/${teacherData.id}/profile`);
+                    if (!getResponse.ok) {
+                        console.log('Teacher profile not found, creating new profile...');
+                        // If teacher doesn't exist, we'll still try to update (which might create it)
+                    }
+                } catch (getError) {
+                    console.log('Could not check teacher profile, proceeding with update...');
                 }
                 const requestData = {
                     userId: teacherData.id,
@@ -3625,7 +3630,27 @@
                         statusText: response.statusText,
                         error: errorText
                     });
-                    alert(`Failed to save profile picture to database. Status: ${response.status}, Error: ${errorText}`);
+                    
+                    // Handle specific error cases
+                    if (response.status === 404) {
+                        alert('Teacher profile not found. Please log out and log back in to refresh your session.');
+                    } else if (response.status === 500) {
+                        try {
+                            const errorData = JSON.parse(errorText);
+                            if (errorData.message && errorData.message.includes('No matching document found')) {
+                                if (confirm('Your teacher profile was not found in the database. Would you like to refresh your session by logging in again?')) {
+                                    window.refreshTeacherSession();
+                                }
+                                return;
+                            } else {
+                                alert(`Database error: ${errorData.message}`);
+                            }
+                        } catch (e) {
+                            alert(`Failed to save profile picture to database. Status: ${response.status}, Error: ${errorText}`);
+                        }
+                    } else {
+                        alert(`Failed to save profile picture to database. Status: ${response.status}, Error: ${errorText}`);
+                    }
                 }
             } catch (error) {
                 console.error('Error saving profile picture to database:', error);
@@ -3722,6 +3747,15 @@
             } catch (error) {
                 console.error('Server connection failed:', error);
             }
+        };
+        
+        // Function to refresh teacher session
+        window.refreshTeacherSession = function() {
+            console.log('Refreshing teacher session...');
+            localStorage.removeItem('istruzioneF_teacher');
+            localStorage.removeItem('istruzioneF_user');
+            alert('Session refreshed. Please log in again.');
+            window.location.href = 'teacher-login.html';
         };
     </script>
 </body>
