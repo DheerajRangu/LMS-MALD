@@ -63,19 +63,59 @@ const TeacherSchema = new Schema({
 
 // Course Schema
 const CourseSchema = new Schema({
+    // Basic Information
     title: { type: String, required: true },
-    code: { type: String },
-    description: { type: String },
-    teacherId: { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
-    students: [{ type: Schema.Types.ObjectId, ref: 'Student' }],
+    code: { type: String, required: true },
+    description: { type: String, required: true },
+    category: { type: String, required: true },
+    difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'expert'], required: true },
+    duration: { type: String, required: true },
+    language: { type: String, default: 'english' },
+    
+    // Course Settings
+    price: { type: Number, default: 0 },
+    maxStudents: { type: Number, default: null },
+    prerequisites: { type: String, default: '' },
+    learningOutcomes: [{ type: String }],
+    isPublic: { type: Boolean, default: true },
+    allowDiscussions: { type: Boolean, default: true },
+    publishOption: { type: String, enum: ['publish', 'draft'], default: 'draft' },
+    
+    // Media Files
+    thumbnail: {
+        filename: { type: String },
+        originalname: { type: String },
+        path: { type: String },
+        mimetype: { type: String },
+        size: { type: Number }
+    },
+    introductionVideo: {
+        filename: { type: String },
+        originalname: { type: String },
+        path: { type: String },
+        mimetype: { type: String },
+        size: { type: Number }
+    },
+    
+    // Course Materials
     materials: [{
         filename: { type: String },
         originalname: { type: String },
         path: { type: String },
         uploadDate: { type: Date, default: Date.now },
-        mimetype: { type: String }
+        mimetype: { type: String },
+        size: { type: Number }
     }],
-    createdAt: { type: Date, default: Date.now }
+    
+    // Relationships
+    teacherId: { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
+    students: [{ type: Schema.Types.ObjectId, ref: 'Student' }],
+    
+    // Metadata
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+    publishedAt: { type: Date },
+    status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' }
 });
 
 // Assignment Schema
@@ -168,20 +208,72 @@ app.put('/api/notifications/:notificationId/read', async (req, res) => {
 });
 
 // Configure multer storage for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+const createStorage = (subfolder) => {
+    return multer.diskStorage({
+        destination: (req, file, cb) => {
+            const uploadDir = path.join(__dirname, 'uploads', subfolder);
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            cb(null, uploadDir);
+        },
+        filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, `${uniqueSuffix}-${file.originalname}`);
         }
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+    });
+};
+
+// File filter function
+const fileFilter = (req, file, cb) => {
+    // Allow all file types for now, but you can add restrictions here
+    cb(null, true);
+};
+
+// Create different upload configurations
+const upload = multer({ 
+    storage: createStorage('general'),
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB limit
     }
 });
 
-const upload = multer({ storage });
+const uploadThumbnail = multer({ 
+    storage: createStorage('thumbnails'),
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed for thumbnails'), false);
+        }
+    },
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit for thumbnails
+    }
+});
+
+const uploadVideo = multer({ 
+    storage: createStorage('videos'),
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('video/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only video files are allowed'), false);
+        }
+    },
+    limits: {
+        fileSize: 500 * 1024 * 1024 // 500MB limit for videos
+    }
+});
+
+const uploadMaterials = multer({ 
+    storage: createStorage('materials'),
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB limit for materials
+    }
+});
 
 // Authentication Routes
 // Login route
@@ -322,29 +414,120 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
     }
 });
 
-// Create a new course
-app.post('/api/courses', async (req, res) => {
+// Create a new course with comprehensive data and file uploads
+app.post('/api/courses', upload.fields([
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'introductionVideo', maxCount: 1 },
+    { name: 'materials', maxCount: 10 }
+]), async (req, res) => {
     try {
-        const { title, code, description, teacherId } = req.body;
-        
-        const newCourse = new Course({
+        const {
+            title, code, description, category, difficulty, duration, language,
+            price, maxStudents, prerequisites, learningOutcomes, isPublic,
+            allowDiscussions, publishOption, teacherId
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !code || !description || !category || !difficulty || !duration || !teacherId) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Missing required fields: title, code, description, category, difficulty, duration, teacherId' 
+            });
+        }
+
+        // Parse learning outcomes if it's a JSON string
+        let parsedLearningOutcomes = [];
+        if (learningOutcomes) {
+            try {
+                parsedLearningOutcomes = JSON.parse(learningOutcomes);
+            } catch (e) {
+                parsedLearningOutcomes = Array.isArray(learningOutcomes) ? learningOutcomes : [learningOutcomes];
+            }
+        }
+
+        // Create course object
+        const courseData = {
             title,
             code,
             description,
-            teacherId
-        });
-        
+            category,
+            difficulty,
+            duration,
+            language: language || 'english',
+            price: parseFloat(price) || 0,
+            maxStudents: maxStudents ? parseInt(maxStudents) : null,
+            prerequisites: prerequisites || '',
+            learningOutcomes: parsedLearningOutcomes,
+            isPublic: isPublic === 'true' || isPublic === true,
+            allowDiscussions: allowDiscussions === 'true' || allowDiscussions === true,
+            publishOption: publishOption || 'draft',
+            teacherId,
+            status: publishOption === 'publish' ? 'published' : 'draft'
+        };
+
+        // Handle thumbnail upload
+        if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
+            const thumbnailFile = req.files.thumbnail[0];
+            courseData.thumbnail = {
+                filename: thumbnailFile.filename,
+                originalname: thumbnailFile.originalname,
+                path: `/uploads/thumbnails/${thumbnailFile.filename}`,
+                mimetype: thumbnailFile.mimetype,
+                size: thumbnailFile.size
+            };
+        }
+
+        // Handle introduction video upload
+        if (req.files && req.files.introductionVideo && req.files.introductionVideo[0]) {
+            const videoFile = req.files.introductionVideo[0];
+            courseData.introductionVideo = {
+                filename: videoFile.filename,
+                originalname: videoFile.originalname,
+                path: `/uploads/videos/${videoFile.filename}`,
+                mimetype: videoFile.mimetype,
+                size: videoFile.size
+            };
+        }
+
+        // Handle course materials upload
+        if (req.files && req.files.materials && req.files.materials.length > 0) {
+            courseData.materials = req.files.materials.map(file => ({
+                filename: file.filename,
+                originalname: file.originalname,
+                path: `/uploads/materials/${file.filename}`,
+                mimetype: file.mimetype,
+                size: file.size,
+                uploadDate: new Date()
+            }));
+        }
+
+        // Set published date if publishing
+        if (publishOption === 'publish') {
+            courseData.publishedAt = new Date();
+        }
+
+        // Create the course
+        const newCourse = new Course(courseData);
         await newCourse.save();
-        
+
         // Update teacher's courses array
         await Teacher.findByIdAndUpdate(
             teacherId,
             { $push: { courses: newCourse._id } }
         );
-        
-        res.status(201).json(newCourse);
+
+        res.status(201).json({
+            success: true,
+            message: 'Course created successfully',
+            course: newCourse
+        });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error creating course:', error);
+        res.status(500).json({ 
+            success: false,
+            message: error.message || 'Failed to create course' 
+        });
     }
 });
 
