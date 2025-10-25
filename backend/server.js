@@ -65,7 +65,7 @@ const TeacherSchema = new Schema({
 const CourseSchema = new Schema({
     // Basic Information
     title: { type: String, required: true },
-    code: { type: String, required: true },
+    code: { type: String, required: true, unique: true },
     description: { type: String, required: true },
     category: { type: String, required: true },
     difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'expert'], required: true },
@@ -395,6 +395,16 @@ app.post('/api/register', async (req, res) => {
 app.get('/api/teacher/:teacherId/courses', async (req, res) => {
     try {
         const courses = await Course.find({ teacherId: req.params.teacherId });
+        courses.forEach((course, idx) => {
+            if (course.thumbnail) {
+                console.log(`Course ${idx + 1} (${course.title}) has thumbnail:`, {
+                    filename: course.thumbnail.filename,
+                    path: course.thumbnail.path
+                });
+            } else {
+                console.log(`Course ${idx + 1} (${course.title}) has no thumbnail`);
+            }
+        });
         res.status(200).json(courses);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -411,6 +421,44 @@ app.get('/api/student/:studentId/courses', async (req, res) => {
         res.status(200).json(student.enrolledCourses);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+
+// Update course status (publish/unpublish)
+app.put('/api/courses/:courseId/status', async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const { status } = req.body;
+        
+        if (!status || (status !== 'publish' && status !== 'draft')) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid status. Must be "publish" or "draft".' 
+            });
+        }
+        
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Course not found' 
+            });
+        }
+        
+        course.status = status;
+        await course.save();
+        
+        res.status(200).json({ 
+            success: true,
+            message: `Course ${status === 'publish' ? 'published' : 'unpublished'} successfully`,
+            course
+        });
+    } catch (error) {
+        console.error('Error updating course status:', error);
+        res.status(500).json({ 
+            success: false,
+            message: error.message 
+        });
     }
 });
 
@@ -468,13 +516,18 @@ app.post('/api/courses', upload.fields([
         // Handle thumbnail upload
         if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
             const thumbnailFile = req.files.thumbnail[0];
+            const thumbnailPath = `/uploads/general/${thumbnailFile.filename}`;
+            console.log('Thumbnail uploaded:', {filename: thumbnailFile.filename, originalname: thumbnailFile.originalname, path: thumbnailPath});
             courseData.thumbnail = {
                 filename: thumbnailFile.filename,
                 originalname: thumbnailFile.originalname,
-                path: `/uploads/thumbnails/${thumbnailFile.filename}`,
+                path: thumbnailPath,
                 mimetype: thumbnailFile.mimetype,
                 size: thumbnailFile.size
             };
+            console.log('Saved thumbnail to courseData:', courseData.thumbnail);
+        } else {
+            console.log('No thumbnail uploaded. req.files:', req.files ? Object.keys(req.files) : 'undefined');
         }
 
         // Handle introduction video upload
@@ -483,7 +536,7 @@ app.post('/api/courses', upload.fields([
             courseData.introductionVideo = {
                 filename: videoFile.filename,
                 originalname: videoFile.originalname,
-                path: `/uploads/videos/${videoFile.filename}`,
+                path: `/uploads/general/${videoFile.filename}`,
                 mimetype: videoFile.mimetype,
                 size: videoFile.size
             };
@@ -494,7 +547,7 @@ app.post('/api/courses', upload.fields([
             courseData.materials = req.files.materials.map(file => ({
                 filename: file.filename,
                 originalname: file.originalname,
-                path: `/uploads/materials/${file.filename}`,
+                path: `/uploads/general/${file.filename}`,
                 mimetype: file.mimetype,
                 size: file.size,
                 uploadDate: new Date()
@@ -524,10 +577,74 @@ app.post('/api/courses', upload.fields([
 
     } catch (error) {
         console.error('Error creating course:', error);
+        
+        // Handle duplicate course code error
+        if (error.code === 11000 && error.keyPattern && error.keyPattern.code) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'This course code is already in use. Please choose a different course code.' 
+            });
+        }
+        
         res.status(500).json({ 
             success: false,
             message: error.message || 'Failed to create course' 
         });
+    }
+});
+
+// Get courses by query (search by code, etc.) and generate suggested codes
+app.get('/api/courses', async (req, res) => {
+    try {
+        const { code, suggestCode, published } = req.query;
+        let query = {};
+        
+        if (code) {
+            query.code = code;
+        }
+        
+        // If published=true, only get published courses
+        if (published === 'true') {
+            query.status = 'published';
+            query.isPublic = true;
+        }
+        
+        const courses = await Course.find(query).populate('teacherId', 'firstName lastName').populate('students');
+        
+        // If suggestCode is true and code is provided, generate alternative codes
+        if (suggestCode === 'true' && code) {
+            const existingCodes = courses.map(c => c.code);
+            const suggestedCodes = [];
+            
+            // Try incrementing numbers at the end of the code
+            let baseCode = code;
+            let counter = 1;
+            let match = code.match(/(\D+)(\d+)$/);
+            
+            if (match) {
+                baseCode = match[1];
+                counter = parseInt(match[2]) + 1;
+            }
+            
+            // Generate 3 suggestions
+            for (let i = 0; i < 5; i++) {
+                const suggestedCode = baseCode + (counter + i);
+                if (!existingCodes.includes(suggestedCode)) {
+                    suggestedCodes.push(suggestedCode);
+                    if (suggestedCodes.length === 3) break;
+                }
+            }
+            
+            return res.status(200).json({
+                exists: existingCodes.includes(code),
+                suggestedCodes: suggestedCodes
+            });
+        }
+        
+        res.status(200).json(courses);
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -545,6 +662,28 @@ app.get('/api/courses/:courseId', async (req, res) => {
         res.status(200).json(course);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+
+app.delete('/api/courses/:courseId', async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const teacherId = req.query.teacherId || req.body.teacherId;
+        if (!teacherId) {
+            return res.status(400).json({ success: false, message: 'teacherId is required' });
+        }
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+        if (course.teacherId.toString() !== teacherId.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this course' });
+        }
+        await Course.findByIdAndDelete(courseId);
+        await Teacher.findByIdAndUpdate(teacherId, { $pull: { courses: courseId } });
+        res.status(200).json({ success: true, message: 'Course deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

@@ -718,6 +718,28 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .courses-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .courses-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .courses-grid::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .courses-grid::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
 
         .course-card {
@@ -1639,32 +1661,44 @@
             text-align: center;
             transition: all 0.2s ease;
             cursor: pointer;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(99, 102, 241, 0.02);
         }
 
         .thumbnail-upload:hover {
             border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
+            background: rgba(99, 102, 241, 0.08);
         }
 
         .thumbnail-preview {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
         }
 
         .thumbnail-preview i {
-            font-size: 2rem;
-            color: var(--text-light);
+            font-size: 2.5rem;
+            color: var(--primary);
         }
 
         .thumbnail-preview p {
-            font-weight: 500;
+            font-weight: 600;
             margin: 0;
+            color: var(--text);
+            font-size: 1rem;
         }
 
         .thumbnail-preview small {
             color: var(--text-light);
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 0.25rem;
         }
 
         /* Materials Upload */
@@ -2563,14 +2597,16 @@
         
         <div class="user-info">
             <div class="user-avatar" id="sidebarProfilePic">
-                <img id="sidebarProfileImage" src="" alt="Profile Picture" style="display: none;">
+                <img id="sidebarProfileImage" src="" alt="Profile Picture" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 <div class="default-avatar" id="sidebarDefaultAvatar">
                     <i class="fas fa-chalkboard-teacher"></i>
                 </div>
             </div>
             <div class="user-details">
-            <div class="user-name" id="teacherNameDisplay">Dr. Sarah Johnson</div>
-                <div class="user-department" id="teacherDepartmentDisplay">Computer Science</div>
+                <div class="user-name" id="teacherNameDisplay">Teacher Name</div>
+                <div class="user-department" id="teacherDepartmentDisplay">Department</div>
+                <div class="user-meta" id="teacherPositionDisplay"></div>
+                <div class="user-meta" id="teacherCourseSummary"></div>
             </div>
         </div>
         
@@ -2698,7 +2734,7 @@
                             </div>
                         </div>
                         <div class="course-actions">
-                            <button class="btn btn-primary manage-course-btn" data-course="web-dev">Manage</button>
+                            <button class="btn btn-primary manage-course-action" data-course-id="web-dev">Manage</button>
                             <button class="btn btn-outline">View Students</button>
                         </div>
                     </div>
@@ -2727,7 +2763,7 @@
                             </div>
                         </div>
                         <div class="course-actions">
-                            <button class="btn btn-primary manage-course-btn" data-course="ml">Manage</button>
+                            <button class="btn btn-primary manage-course-action" data-course-id="ml">Manage</button>
                             <button class="btn btn-outline">View Students</button>
                         </div>
                     </div>
@@ -2756,7 +2792,7 @@
                             </div>
                         </div>
                         <div class="course-actions">
-                            <button class="btn btn-primary manage-course-btn" data-course="design">Manage</button>
+                            <button class="btn btn-primary manage-course-action" data-course-id="design">Manage</button>
                             <button class="btn btn-outline">View Students</button>
                         </div>
                     </div>
@@ -3220,7 +3256,7 @@
                     <label>Profile Picture</label>
                     <div class="profile-picture-section">
                         <div class="current-profile-pic" id="currentProfilePic">
-                            <img id="profileImage" src="" alt="Profile Picture" style="display: none;">
+                            <img id="profileImage" src="" alt="Profile Picture" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             <div class="default-avatar" id="defaultAvatar">
                                 <i class="fas fa-user-tie"></i>
                             </div>
@@ -3261,6 +3297,22 @@
                 <div class="form-group">
                     <label for="teacherInstitution">Institution</label>
                     <input type="text" id="teacherInstitution" placeholder="Enter your institution">
+                </div>
+                <div class="form-group">
+                    <label for="teacherPhone">Phone</label>
+                    <input type="text" id="teacherPhone" placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label for="teacherPosition">Position</label>
+                    <input type="text" id="teacherPosition" placeholder="Enter your position">
+                </div>
+                <div class="form-group">
+                    <label for="teacherExperience">Experience</label>
+                    <input type="text" id="teacherExperience" placeholder="Years of experience or summary">
+                </div>
+                <div class="form-group">
+                    <label for="teacherSubjects">Subjects</label>
+                    <input type="text" id="teacherSubjects" placeholder="Comma-separated subjects">
                 </div>
                 <div class="form-group">
                     <label for="notifications">Notification Preferences</label>
@@ -3452,49 +3504,7 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="student-info">
-                                            <div class="student-avatar">JS</div>
-                                            <div>
-                                                <div class="student-name">John Student</div>
-                                                <div class="student-id">S12345</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Sep 1, 2024</td>
-                                    <td>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: 75%"></div>
-                                        </div>
-                                    </td>
-                                    <td>Oct 24, 2024</td>
-                                    <td>
-                                        <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-info">
-                                            <div class="student-avatar">ES</div>
-                                            <div>
-                                                <div class="student-name">Emma Smith</div>
-                                                <div class="student-id">S12346</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Sep 2, 2024</td>
-                                    <td>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: 60%"></div>
-                                        </div>
-                                    </td>
-                                    <td>Oct 22, 2024</td>
-                                    <td>
-                                        <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View</button>
-                                    </td>
-                                </tr>
+                            <tbody id="courseStudentsTableBody">
                             </tbody>
                         </table>
                     </div>
@@ -3913,7 +3923,7 @@
                         Next
                         <i class="fas fa-arrow-right"></i>
                     </button>
-                    <button type="submit" class="btn btn-success" id="createCourseBtn" style="display: none;">
+                    <button type="submit" class="btn btn-success" id="createCourseSubmitBtn" style="display: none;">
                         <i class="fas fa-rocket"></i>
                     Create Course
                 </button>
@@ -4075,23 +4085,32 @@
 
     <script>
         // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', function(e) {
                 e.preventDefault();
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 this.classList.add('active');
                 
-                const targetId = this.getAttribute('href').substring(1);
+                const hrefVal = this.getAttribute('href') || '';
+                const targetId = hrefVal.startsWith('#') ? hrefVal.substring(1) : hrefVal;
+                const targetEl = targetId ? document.getElementById(targetId) : null;
+                if (!targetEl) {
+                    return;
+                }
                 document.querySelectorAll('.dashboard-section').forEach(section => {
                     section.style.display = 'none';
                 });
-                document.getElementById(targetId).style.display = 'block';
+                targetEl.style.display = 'block';
             });
         });
 
         // Show dashboard by default
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelector('.nav-item.active').click();
+            // Load teacher's courses from backend and replace demo cards
+            if (typeof loadMyCourses === 'function') {
+                loadMyCourses();
+            }
         });
 
         // Notifications Panel
@@ -4115,6 +4134,19 @@
         const nextStepBtn = document.getElementById('nextStep');
         const prevStepBtn = document.getElementById('prevStep');
         const createCourseSubmitBtn = document.getElementById('createCourseSubmitBtn');
+        // Keep references to hidden inputs created in setupFileUploads()
+        let __materialsInputRef = null;
+        let __videoInputRef = null;
+
+        // Ensure clicking the final step button triggers submitCourseForm
+        if (createCourseSubmitBtn) {
+            createCourseSubmitBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (await validateCurrentStep()) {
+                    submitCourseForm();
+                }
+            });
+        }
 
         // Multi-step form functionality
         let currentStep = 1;
@@ -4133,8 +4165,8 @@
         });
 
         // Next step
-        nextStepBtn.addEventListener('click', () => {
-            if (validateCurrentStep()) {
+        nextStepBtn.addEventListener('click', async () => {
+            if (await validateCurrentStep()) {
                 if (currentStep < totalSteps) {
                     currentStep++;
                     updateStepDisplay();
@@ -4151,15 +4183,33 @@
         });
 
         // Form submission
-        courseForm.addEventListener('submit', (e) => {
+        courseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (validateCurrentStep()) {
-                createCourse();
+            if (await validateCurrentStep()) {
+                submitCourseForm();
             }
         });
 
+        // Check if course code is unique and get suggestions
+        async function checkCourseCode(courseCode) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/courses?code=${encodeURIComponent(courseCode)}&suggestCode=true`);
+                const result = await response.json();
+                return {
+                    exists: result.exists,
+                    suggestedCodes: result.suggestedCodes || []
+                };
+            } catch (error) {
+                console.error('Error checking course code uniqueness:', error);
+                return {
+                    exists: false,
+                    suggestedCodes: []
+                };
+            }
+        }
+
         // Step validation
-        function validateCurrentStep() {
+        async function validateCurrentStep() {
             const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`);
             const requiredFields = currentStepElement.querySelectorAll('[required]');
             
@@ -4170,7 +4220,98 @@
                     return false;
                 }
             }
+            
+            // Validate course code uniqueness on step 1
+            if (currentStep === 1) {
+                const courseCodeInput = document.getElementById('courseCode');
+                if (courseCodeInput && courseCodeInput.value.trim()) {
+                    const codeCheck = await checkCourseCode(courseCodeInput.value.trim());
+                    if (codeCheck.exists) {
+                        courseCodeInput.focus();
+                        
+                        // Create notification with suggestions
+                        let message = 'This course code is already in use.';
+                        if (codeCheck.suggestedCodes && codeCheck.suggestedCodes.length > 0) {
+                            message += ` Try: ${codeCheck.suggestedCodes.map(c => `<strong>${c}</strong>`).join(', ')}`;
+                        }
+                        
+                        showNotificationWithSuggestions(message, codeCheck.suggestedCodes, courseCodeInput);
+                        return false;
+                    }
+                }
+            }
+            
             return true;
+        }
+        
+        // Show notification with suggested codes
+        function showNotificationWithSuggestions(message, suggestions, inputElement) {
+            try {
+                const toast = document.createElement('div');
+                toast.setAttribute('role', 'alert');
+                toast.style.position = 'fixed';
+                toast.style.top = '20px';
+                toast.style.right = '20px';
+                toast.style.zIndex = '9999';
+                toast.style.padding = '15px';
+                toast.style.borderRadius = '8px';
+                toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                toast.style.fontSize = '14px';
+                toast.style.maxWidth = '400px';
+                toast.style.background = '#fee2e2';
+                toast.style.color = '#991b1b';
+                toast.style.wordBreak = 'break-word';
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.innerHTML = message;
+                messageDiv.style.marginBottom = suggestions.length > 0 ? '10px' : '0';
+                toast.appendChild(messageDiv);
+                
+                // Add suggestion buttons if available
+                if (suggestions && suggestions.length > 0) {
+                    const suggestionsDiv = document.createElement('div');
+                    suggestionsDiv.style.display = 'flex';
+                    suggestionsDiv.style.gap = '8px';
+                    suggestionsDiv.style.flexWrap = 'wrap';
+                    
+                    suggestions.forEach(code => {
+                        const btn = document.createElement('button');
+                        btn.textContent = code;
+                        btn.style.padding = '6px 12px';
+                        btn.style.background = '#065f46';
+                        btn.style.color = 'white';
+                        btn.style.border = 'none';
+                        btn.style.borderRadius = '4px';
+                        btn.style.cursor = 'pointer';
+                        btn.style.fontSize = '12px';
+                        btn.style.fontWeight = '600';
+                        
+                        btn.addEventListener('click', () => {
+                            inputElement.value = code;
+                            inputElement.focus();
+                            document.body.removeChild(toast);
+                        });
+                        
+                        btn.addEventListener('mouseover', () => {
+                            btn.style.background = '#047857';
+                        });
+                        btn.addEventListener('mouseout', () => {
+                            btn.style.background = '#065f46';
+                        });
+                        
+                        suggestionsDiv.appendChild(btn);
+                    });
+                    
+                    toast.appendChild(suggestionsDiv);
+                }
+                
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 5000);
+            } catch (e) {
+                console.log('[Notification]', 'error', message);
+            }
         }
 
         // Update step display
@@ -4199,6 +4340,42 @@
             // Update course preview on step 4
             if (currentStep === 4) {
                 updateCoursePreview();
+            }
+        }
+
+        // Simple notification helper used throughout this page
+        function showNotification(message, type) {
+            try {
+                const toast = document.createElement('div');
+                toast.setAttribute('role', 'alert');
+                toast.style.position = 'fixed';
+                toast.style.top = '20px';
+                toast.style.right = '20px';
+                toast.style.zIndex = '9999';
+                toast.style.padding = '10px 14px';
+                toast.style.borderRadius = '8px';
+                toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                toast.style.fontSize = '14px';
+                toast.style.maxWidth = '320px';
+                toast.style.wordBreak = 'break-word';
+                const kind = (type || 'info').toLowerCase();
+                if (kind === 'success') {
+                    toast.style.background = '#d1fae5';
+                    toast.style.color = '#065f46';
+                } else if (kind === 'error') {
+                    toast.style.background = '#fee2e2';
+                    toast.style.color = '#991b1b';
+                } else {
+                    toast.style.background = '#e5e7eb';
+                    toast.style.color = '#111827';
+                }
+                toast.textContent = message || '';
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 2500);
+            } catch (e) {
+                console.log('[Notification]', type || 'info', message);
             }
         }
 
@@ -4244,8 +4421,8 @@
             document.getElementById('noThumbnail').style.display = 'flex';
         }
 
-        // Create course function
-        function createCourse() {
+        // Create course function (uses FormData to support files)
+        function submitCourseForm() {
             const formData = new FormData();
             
             // Basic information
@@ -4274,33 +4451,57 @@
             
             // Files
             const thumbnail = document.getElementById('thumbnailInput').files[0];
+            console.log('Thumbnail file to upload:', thumbnail ? {name: thumbnail.name, size: thumbnail.size, type: thumbnail.type} : 'No file selected');
             if (thumbnail) formData.append('thumbnail', thumbnail);
             
-            const materials = document.getElementById('courseFileUpload').files;
-            for (let file of materials) {
-                formData.append('materials', file);
+            // Materials from hidden file input created in setupFileUploads
+            if (__materialsInputRef && __materialsInputRef.files && __materialsInputRef.files.length) {
+                for (let file of __materialsInputRef.files) {
+                    formData.append('materials', file);
+                }
             }
             
-            const video = document.getElementById('courseVideoUpload').files[0];
-            if (video) formData.append('video', video);
+            // Introduction video (backend expects field name 'introductionVideo')
+            if (__videoInputRef && __videoInputRef.files && __videoInputRef.files[0]) {
+                formData.append('introductionVideo', __videoInputRef.files[0]);
+            }
+
+            // Teacher ID (required by backend)
+            try {
+                const teacherObj = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
+                const teacherId = teacherObj.id || localStorage.getItem('userId') || '';
+                if (teacherId) formData.append('teacherId', teacherId);
+            } catch (_) {}
+
+            // Guard: if no teacherId, stop and notify
+            if (!formData.get('teacherId')) {
+                showNotification('No teacher ID found. Please log in again.', 'error');
+                return;
+            }
 
             // Show loading state
             createCourseSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Course...';
             createCourseSubmitBtn.disabled = true;
 
             // Submit to backend
-            fetch('/api/courses', {
+            fetch('http://localhost:3000/api/courses', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+            .then(response => {
+                return response.json().then(data => ({status: response.status, data}));
+            })
+            .then(({status, data}) => {
+                console.log('Course creation response:', data);
+                if (status === 201 && data.success) {
+                    console.log('Course created with thumbnail:', data.course && data.course.thumbnail);
                     showNotification('Course created successfully!', 'success');
                     createCourseModal.classList.remove('active');
                     resetForm();
                     // Refresh courses list or redirect
-                    location.reload();
+                    loadMyCourses();
+                } else if (status === 400 && data.message) {
+                    showNotification(data.message, 'error');
                 } else {
                     showNotification(data.message || 'Failed to create course', 'error');
                 }
@@ -4350,6 +4551,8 @@
             materialsInput.accept = '.pdf,.ppt,.pptx,.mp4,.zip,.doc,.docx';
             materialsInput.style.display = 'none';
             document.body.appendChild(materialsInput);
+            // Store reference for createCourse()
+            __materialsInputRef = materialsInput;
 
             materialsUpload.addEventListener('click', () => {
                 materialsInput.click();
@@ -4383,6 +4586,8 @@
             videoInput.accept = 'video/*';
             videoInput.style.display = 'none';
             document.body.appendChild(videoInput);
+            // Store reference for createCourse()
+            __videoInputRef = videoInput;
 
             videoUpload.addEventListener('click', () => {
                 videoInput.click();
@@ -4504,10 +4709,7 @@
         // Form submissions
         document.getElementById('courseForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const title = document.getElementById('courseTitle').value;
-            alert(`Course "${title}" created successfully!`);
-            createCourseModal.classList.remove('active');
-            this.reset();
+            submitCourseForm();
         });
 
         document.getElementById('assignmentForm').addEventListener('submit', function(e) {
@@ -4547,23 +4749,7 @@
             alert('Course settings saved successfully!');
         });
 
-        // File upload interaction
-        const fileUpload = document.getElementById('fileUpload');
-        fileUpload.addEventListener('click', function() {
-            alert('File upload dialog would open here');
-        });
 
-        const courseFileUpload = document.getElementById('courseFileUpload');
-        courseFileUpload.addEventListener('click', function() {
-            alert('Course materials upload dialog would open here');
-        });
-
-        const courseVideoUpload = document.getElementById('courseVideoUpload');
-        courseVideoUpload.addEventListener('click', function() {
-            alert('Video upload dialog would open here');
-            // In a real implementation, this would handle video preview
-            document.getElementById('videoPreview').style.display = 'block';
-        });
 
         // Tab functionality
         document.querySelectorAll('.tab').forEach(tab => {
@@ -4745,6 +4931,232 @@
         uploadCourseMaterialBtn.addEventListener('click', function() {
             uploadMaterialModal.classList.add('active');
         });
+
+        // Load course students
+        function loadCourseStudents(courseId) {
+            const tableBody = document.getElementById('courseStudentsTableBody');
+            if (!tableBody) {
+                console.error('courseStudentsTableBody element not found');
+                return;
+            }
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Loading students...</td></tr>';
+            
+            fetch(`http://localhost:3000/api/courses/${courseId}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(course => {
+                    if (!course || !course.students || course.students.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No students enrolled yet</td></tr>';
+                        return;
+                    }
+                    
+                    tableBody.innerHTML = '';
+                    course.students.forEach(student => {
+                        const enrollmentDate = student.enrollmentDate ? new Date(student.enrollmentDate).toLocaleDateString() : 'Unknown';
+                        const studentName = student.name || (student.firstName && student.lastName ? student.firstName + ' ' + student.lastName : 'Unknown');
+                        const studentInitials = studentName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                        const studentIdString = student._id ? String(student._id).slice(-6) : 'N/A';
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>
+                                <div class="student-info">
+                                    <div class="student-avatar">${studentInitials}</div>
+                                    <div>
+                                        <div class="student-name">${studentName}</div>
+                                        <div class="student-id">${studentIdString}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${enrollmentDate}</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 50%"></div>
+                                </div>
+                            </td>
+                            <td>${new Date().toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading students:', error);
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Error loading students</td></tr>';
+                });
+        }
+
+        const handleCourseAction = function(e) {
+            const target = e.target;
+            const cardBtn = target.closest('button');
+            if (!cardBtn) return;
+            const cid = cardBtn.getAttribute('data-course-id');
+            if (!cid) return;
+            
+            if (cardBtn.classList.contains('delete-course-btn')) {
+                let teacherId = '';
+                try {
+                    const t = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
+                    teacherId = t.id || localStorage.getItem('userId') || '';
+                } catch (_) {}
+                if (!teacherId) return;
+                const ok = confirm('Are you sure you want to delete this course? This action cannot be undone.');
+                if (!ok) return;
+                fetch(`http://localhost:3000/api/courses/${cid}?teacherId=${encodeURIComponent(teacherId)}`, {
+                    method: 'DELETE'
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp && resp.success) {
+                        showNotification('Course deleted successfully', 'success');
+                        loadMyCourses();
+                    } else {
+                        showNotification((resp && resp.message) || 'Failed to delete course', 'error');
+                    }
+                })
+                .catch(() => showNotification('Failed to delete course', 'error'));
+            }
+            
+            if (cardBtn.classList.contains('manage-course-action')) {
+                try {
+                    const courseId = cid;
+                    const courseCard = cardBtn.closest('.course-card');
+                    
+                    if (!courseCard) {
+                        throw new Error('Could not find course card');
+                    }
+                    
+                    const titleEl = courseCard.querySelector('.course-title');
+                    const codeEl = courseCard.querySelector('.course-meta span:first-child');
+                    const durationEl = courseCard.querySelector('.course-meta span:last-child');
+                    const studentCountEl = courseCard.querySelector('.stat span');
+                    
+                    // Safe defaults if any element is missing
+                    const courseTitle = titleEl ? titleEl.textContent : 'Course';
+                    const courseCode = codeEl ? codeEl.textContent : '';
+                    const courseDuration = durationEl ? durationEl.textContent : '';
+                    const studentCount = studentCountEl ? (studentCountEl.textContent.split(' ')[0] || '0') : '0';
+                    
+                    const titleTarget = document.getElementById('courseManagementTitle');
+                    if (titleTarget) titleTarget.textContent = courseTitle;
+                    const codeTarget = document.getElementById('courseManagementCode');
+                    if (codeTarget) codeTarget.textContent = [courseCode, courseDuration].filter(Boolean).join(' • ');
+                    
+                    const previewStats = document.querySelectorAll('.preview-stat');
+                    if (previewStats.length > 0) {
+                        const val = previewStats[0].querySelector('.preview-value');
+                        if (val) val.textContent = studentCount;
+                    }
+                    
+                    // Populate students for this course
+                    loadCourseStudents(courseId);
+                    
+                    // Toggle sections
+                    const courseManagementSection = document.getElementById('course-management');
+                    const myCoursesSection = document.getElementById('my-courses');
+                    if (courseManagementSection && myCoursesSection) {
+                        myCoursesSection.style.display = 'none';
+                        courseManagementSection.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error managing course - Details:', error.message, error);
+                    showNotification('Error opening course management', 'error');
+                }
+            }
+        };
+
+        function attachCourseActionListeners() {
+            const grid = document.querySelector('#my-courses .courses-grid');
+            if (!grid) return;
+            grid.removeEventListener('click', handleCourseAction);
+            grid.addEventListener('click', handleCourseAction);
+        }
+
+        // My Courses dynamic loader
+        function loadMyCourses() {
+            const grid = document.querySelector('#my-courses .courses-grid');
+            if (!grid) return;
+            grid.innerHTML = '<div class="loading">Loading courses...</div>';
+            let teacherId = '';
+            try {
+                const t = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
+                teacherId = t.id || localStorage.getItem('userId') || '';
+            } catch (_) {}
+            if (!teacherId) {
+                grid.innerHTML = '<p>No teacher ID found. Please log in.</p>';
+                return;
+            }
+            fetch(`http://localhost:3000/api/teacher/${teacherId}/courses`)
+                .then(r => r.ok ? r.json() : [])
+                .then(courses => {
+                    grid.innerHTML = '';
+                    if (!courses || courses.length === 0) {
+                        grid.innerHTML = '<p>You have no courses yet. Create your first course!</p>';
+                        return;
+                    }
+                    courses.forEach(c => {
+                        const card = document.createElement('div');
+                        card.className = 'course-card';
+                        let thumbnailUrl = '';
+                        if (c.thumbnail) {
+                            try {
+                                if (c.thumbnail.path) {
+                                    thumbnailUrl = c.thumbnail.path.startsWith('http') ? c.thumbnail.path : `http://localhost:3000${c.thumbnail.path}`;
+                                } else if (c.thumbnail.filename) {
+                                    thumbnailUrl = `http://localhost:3000/uploads/general/${c.thumbnail.filename}`;
+                                } else if (typeof c.thumbnail === 'string') {
+                                    thumbnailUrl = c.thumbnail.startsWith('http') ? c.thumbnail : `http://localhost:3000${c.thumbnail}`;
+                                }
+                            } catch (e) {
+                                console.error(`Error constructing thumbnail URL for course ${c.title}:`, e);
+                            }
+                            console.log(`Course: ${c.title}, Thumbnail:`, c.thumbnail, 'URL:', thumbnailUrl);
+                        }
+                        const categoryBg = thumbnailUrl ? 'rgba(255, 255, 255, 0.95)' : 'transparent';
+                        const cardId = `course-card-${c._id}`;
+                        card.id = cardId;
+                        card.innerHTML = `
+                            <div class="course-header" style="background: var(--primary); position: relative; overflow: hidden;">
+                                ${thumbnailUrl ? `<img class="course-thumbnail" src="${thumbnailUrl}" alt="Course Thumbnail" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                <div class="course-header-fallback" style="display: ${thumbnailUrl ? 'none' : 'flex'}; width: 100%; height: 100%; align-items: center; justify-content: center;"><i class="fas fa-book"></i></div>
+                                <span class="course-category" style="background: ${categoryBg};">${(c.category || '').toString().replace(/-/g,' ') || 'Course'}</span>
+                            </div>
+                            <div class="course-content">
+                                <h3 class="course-title">${c.title}</h3>
+                                <div class="course-meta">
+                                    <span>${c.code || ''}</span>
+                                    <span>${c.duration || ''}</span>
+                                </div>
+                                <div class="course-stats">
+                                    <div class="stat">
+                                        <i class="fas fa-users"></i>
+                                        <span>${(c.students || []).length} Students</span>
+                                    </div>
+                                </div>
+                                <div class="course-actions">
+                                    <button class="btn btn-primary manage-course-action" data-course-id="${c._id}">Manage</button>
+                                    <button class="btn btn-outline delete-course-btn" data-course-id="${c._id}">Delete</button>
+                                </div>
+                            </div>`;
+                        grid.appendChild(card);
+                    });
+                    
+                    // Update active courses count
+                    const activeCoursesValue = document.querySelector('.stats-grid .stat-card .stat-value');
+                    if (activeCoursesValue && activeCoursesValue.parentElement.querySelector('.stat-label') && activeCoursesValue.parentElement.querySelector('.stat-label').textContent.includes('Active')) {
+                        activeCoursesValue.textContent = courses.length;
+                    }
+                    attachCourseActionListeners();
+                })
+                .catch((error) => {
+                    console.error('Error loading courses:', error);
+                    grid.innerHTML = '<p>Failed to load courses.</p>';
+                });
+        }
+
+        // Load courses on page ready
+        document.addEventListener('DOMContentLoaded', loadMyCourses);
     </script>
     
     <!-- Upload Material Modal -->

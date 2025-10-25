@@ -39,17 +39,25 @@ function initializeTeacherDashboard() {
     // Set up polling for notifications
     setInterval(refreshNotifications, 30000); // Check every 30 seconds
     
+    // Update dashboard stats initially and on interval
+    updateDashboardStats();
+    setInterval(updateDashboardStats, 30000);
+    
     // Set up settings form handlers
     setupSettingsHandlers();
 }
 
 // Load user information from localStorage
 function loadUserInfo() {
+    console.log('Loading user information...');
+    
     // Read teacher data from either teacher-specific or generic key
     let userData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || 'null');
     if (!userData) {
         userData = JSON.parse(localStorage.getItem('istruzioneF_user') || '{}');
     }
+    
+    console.log('User data from localStorage:', userData);
 
     // If no essential fields, redirect to login
     if (!userData || (!userData.email && !userData.firstName)) {
@@ -58,35 +66,138 @@ function loadUserInfo() {
         return;
     }
 
-    const firstName = userData.firstName || 'Teacher';
-    const lastName = userData.lastName || '';
-    const department = userData.department || userData.position || '';
-    const profilePicture = userData.profilePicture || '';
+    // Store current user ID for API calls
+    window.currentUserId = userData.id || userData._id;
+    console.log('Current teacher ID:', window.currentUserId);
 
-    // Update the UI with user information
-    const userNameElement = document.getElementById('teacherNameDisplay');
-    const userRoleElement = document.getElementById('teacherDepartmentDisplay');
+    // Helper to apply data to UI and settings
+    function applyUserToUI(source) {
+        const firstName = source.firstName || 'Teacher';
+        const lastName = source.lastName || '';
+        const department = source.department || source.position || '';
+        const profilePicture = source.profilePicture || '';
 
-    if (userNameElement) {
-        userNameElement.textContent = `${firstName} ${lastName}`.trim();
-    }
+        console.log(`Teacher info: ${firstName} ${lastName}, ${department}`);
 
-    if (userRoleElement) {
-        userRoleElement.textContent = department;
-    }
+        // Update the UI with user information
+        const nameEl = document.getElementById('teacherNameDisplay');
+        if (nameEl) nameEl.innerHTML = `${firstName} ${lastName}`.trim();
+        const deptEl = document.getElementById('teacherDepartmentDisplay');
+        if (deptEl) deptEl.innerHTML = department;
 
-    // Update profile picture in sidebar (matching student system approach)
-    const sidebarProfilePic = document.getElementById('sidebarProfilePic');
-    if (sidebarProfilePic) {
-        if (profilePicture) {
-            sidebarProfilePic.innerHTML = `<img src="${profilePicture}" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-        } else {
-            sidebarProfilePic.innerHTML = '<i class="fas fa-chalkboard-teacher"></i>';
+        const instEl = document.getElementById('teacherInstitutionDisplay');
+        if (instEl) instEl.textContent = source.institution ? `Institution: ${source.institution}` : '';
+        const posEl = document.getElementById('teacherPositionDisplay');
+        const positionText = source.position || '';
+        if (posEl) posEl.textContent = positionText ? `Position: ${positionText}` : '';
+
+        // Fill course summary
+        const courseSummaryEl = document.getElementById('teacherCourseSummary');
+        if (courseSummaryEl && window.currentUserId) {
+            try {
+                fetch(`http://localhost:3000/api/teacher/${window.currentUserId}/courses`)
+                    .then(r => r.ok ? r.json() : [])
+                    .then(list => {
+                        const count = Array.isArray(list) ? list.length : 0;
+                        courseSummaryEl.textContent = `Courses: ${count}`;
+                    })
+                    .catch(() => { courseSummaryEl.textContent = ''; });
+            } catch (_) { /* noop */ }
         }
+
+        // Sidebar profile image
+        const sidebarProfileImage = document.getElementById('sidebarProfileImage');
+        const sidebarDefaultAvatar = document.getElementById('sidebarDefaultAvatar');
+        if (sidebarProfileImage && sidebarDefaultAvatar) {
+            if (profilePicture) {
+                sidebarProfileImage.src = profilePicture;
+                sidebarProfileImage.style.display = 'block';
+                sidebarDefaultAvatar.style.display = 'none';
+            } else {
+                sidebarProfileImage.style.display = 'none';
+                sidebarDefaultAvatar.style.display = 'flex';
+            }
+        }
+
+        // Settings form
+        loadSettingsForm(source);
     }
 
-    // Load settings form with user data
-    loadSettingsForm(userData);
+    // Prefer fetching fresh data from DB
+    if (window.currentUserId) {
+        fetch(`http://localhost:3000/api/teacher/${window.currentUserId}/profile`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch teacher profile');
+                return res.json();
+            })
+            .then(apiData => {
+                // Persist canonical server data to localStorage for subsequent reads
+                localStorage.setItem('istruzioneF_teacher', JSON.stringify({
+                    role: 'teacher',
+                    id: apiData.id,
+                    firstName: apiData.firstName,
+                    lastName: apiData.lastName,
+                    email: apiData.email,
+                    phone: apiData.phone || '',
+                    institution: apiData.institution || '',
+                    department: apiData.department || '',
+                    position: apiData.position || '',
+                    experience: apiData.experience || '',
+                    subjects: apiData.subjects || [],
+                    bio: apiData.bio || '',
+                    profilePicture: apiData.profilePicture || ''
+                }));
+                applyUserToUI(JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}'));
+            })
+            .catch(err => {
+                console.warn('Using localStorage teacher data due to profile fetch error:', err);
+                applyUserToUI(userData);
+            });
+    } else {
+        applyUserToUI(userData);
+    }
+}
+
+// Update dashboard stat cards: Active Courses and Total Students (unique across all courses)
+function updateDashboardStats() {
+    const teacherData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
+    const teacherId = window.currentUserId || teacherData.id || teacherData._id;
+    if (!teacherId) return;
+    
+    fetch(`http://localhost:3000/api/teacher/${teacherId}/courses`)
+        .then(r => r.ok ? r.json() : [])
+        .then(courses => {
+            if (!Array.isArray(courses)) courses = [];
+            // Active courses
+            const activeCount = courses.length;
+            // Unique students across all courses
+            const uniq = new Set();
+            courses.forEach(c => {
+                const students = Array.isArray(c.students) ? c.students : [];
+                students.forEach(s => {
+                    const id = (s && (s._id || s.id)) ? (s._id || s.id) : s;
+                    if (id) uniq.add(String(id));
+                });
+            });
+            const totalStudents = uniq.size;
+            
+            // Update DOM by locating stat cards by their labels
+            document.querySelectorAll('.stat-card').forEach(card => {
+                const labelEl = card.querySelector('.stat-label');
+                const valueEl = card.querySelector('.stat-value');
+                if (!labelEl || !valueEl) return;
+                const label = (labelEl.textContent || '').trim().toLowerCase();
+                if (label === 'active courses') {
+                    valueEl.textContent = String(activeCount);
+                }
+                if (label === 'total students') {
+                    valueEl.textContent = String(totalStudents);
+                }
+            });
+        })
+        .catch(err => {
+            console.warn('Failed to update dashboard stats:', err);
+        });
 }
 
 // Load settings form with user data
@@ -97,6 +208,10 @@ function loadSettingsForm(userData) {
     const emailField = document.getElementById('teacherEmail');
     const departmentField = document.getElementById('teacherDepartment');
     const institutionField = document.getElementById('teacherInstitution');
+    const phoneField = document.getElementById('teacherPhone');
+    const positionField = document.getElementById('teacherPosition');
+    const experienceField = document.getElementById('teacherExperience');
+    const subjectsField = document.getElementById('teacherSubjects');
     
     if (firstNameField) {
         firstNameField.value = userData.firstName || '';
@@ -112,6 +227,18 @@ function loadSettingsForm(userData) {
     }
     if (institutionField) {
         institutionField.value = userData.institution || '';
+    }
+    if (phoneField) {
+        phoneField.value = userData.phone || '';
+    }
+    if (positionField) {
+        positionField.value = userData.position || '';
+    }
+    if (experienceField) {
+        experienceField.value = userData.experience || '';
+    }
+    if (subjectsField) {
+        subjectsField.value = Array.isArray(userData.subjects) ? userData.subjects.join(', ') : (userData.subjects || '');
     }
     
     // Load profile picture
@@ -241,67 +368,68 @@ async function updateTeacherProfile() {
         const email = document.getElementById('teacherEmail').value;
         const department = document.getElementById('teacherDepartment').value;
         const institution = document.getElementById('teacherInstitution').value;
+        const phone = document.getElementById('teacherPhone') ? document.getElementById('teacherPhone').value : '';
+        const position = document.getElementById('teacherPosition') ? document.getElementById('teacherPosition').value : '';
+        const experience = document.getElementById('teacherExperience') ? document.getElementById('teacherExperience').value : '';
+        const subjectsStr = document.getElementById('teacherSubjects') ? document.getElementById('teacherSubjects').value : '';
+        const subjects = subjectsStr ? subjectsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
         
         // Get current user data
         const userData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
-        
-        // Update user data
-        userData.firstName = firstName;
-        userData.lastName = lastName;
-        userData.email = email;
-        userData.department = department;
-        userData.institution = institution;
-        
-        // Save to localStorage
-        localStorage.setItem('istruzioneF_teacher', JSON.stringify(userData));
-        
-        // Update UI
-        document.getElementById('teacherNameDisplay').textContent = `${firstName} ${lastName}`;
-        document.getElementById('teacherDepartmentDisplay').textContent = department;
-        
-        // When backend is ready, uncomment this code to save to server
-        /*
-        // First update user profile data without the profile picture
+
+        // Persist to backend
         const response = await fetch('http://localhost:3000/api/teacher/profile', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                userId: userData.id,
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                department: department,
-                institution: institution
+                userId: userData.id || userData._id,
+                firstName,
+                lastName,
+                email,
+                phone,
+                institution,
+                department,
+                position,
+                experience,
+                subjects,
+                bio: userData.bio || '',
+                profilePicture: userData.profilePicture || ''
             })
         });
-        
         if (!response.ok) {
-            throw new Error('Failed to update profile');
+            const errText = await response.text();
+            throw new Error(errText || 'Failed to update profile');
         }
-        
-        // If there's a profile picture and it's changed (starts with data:image), upload it separately
-        if (userData.profilePicture && userData.profilePicture.startsWith('data:image')) {
-            // Convert base64 to blob
-            const fetchResponse = await fetch(userData.profilePicture);
-            const blob = await fetchResponse.blob();
-            
-            // Create FormData and append the blob
-            const formData = new FormData();
-            formData.append('profilePicture', blob, 'profile-image.jpg');
-            
-            // Upload the profile picture
-            const pictureResponse = await fetch(`http://localhost:3000/api/teacher/${userData.id}/profile-picture`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!pictureResponse.ok) {
-                console.error('Failed to upload profile picture');
-            }
-        }
-        */
+        const result = await response.json();
+        const updated = result.teacher || {};
+
+        // Sync localStorage with server response
+        localStorage.setItem('istruzioneF_teacher', JSON.stringify({
+            role: 'teacher',
+            id: updated.id,
+            firstName: updated.firstName,
+            lastName: updated.lastName,
+            email: updated.email,
+            phone: updated.phone || '',
+            institution: updated.institution || '',
+            department: updated.department || '',
+            position: updated.position || '',
+            experience: updated.experience || '',
+            subjects: updated.subjects || [],
+            bio: updated.bio || '',
+            profilePicture: updated.profilePicture || ''
+        }));
+
+        // Update UI using canonical server data
+        const newData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
+        document.getElementById('teacherNameDisplay').textContent = `${newData.firstName || ''} ${newData.lastName || ''}`.trim();
+        document.getElementById('teacherDepartmentDisplay').textContent = newData.department || newData.position || '';
+        const instEl = document.getElementById('teacherInstitutionDisplay');
+        if (instEl) instEl.textContent = newData.institution ? `Institution: ${newData.institution}` : '';
+        const posEl = document.getElementById('teacherPositionDisplay');
+        if (posEl) posEl.textContent = newData.position ? `Position: ${newData.position}` : '';
         
         // Show success message
         alert('Profile updated successfully!');
@@ -460,10 +588,63 @@ function createCourseCard(course) {
         <p class="course-code">${course.code || 'No code'}</p>
         <p>${course.description || 'No description'}</p>
         <p><strong>Students:</strong> ${course.students ? course.students.length : 0}</p>
-        <button class="view-course-btn" data-course-id="${course._id}">View Course</button>
+        <div class="course-actions">
+            <button class="view-course-btn" data-course-id="${course._id}">View Course</button>
+            <button class="manage-course-btn" data-course-id="${course._id}">
+                <i class="fas fa-cogs"></i> Manage
+            </button>
+        </div>
     `;
     
-    return card;
+    // Add event listener for manage button
+             setTimeout(() => {
+                 const manageBtn = card.querySelector('.manage-course-btn');
+                 if (manageBtn) {
+                     manageBtn.addEventListener('click', (e) => {
+                         e.stopPropagation();
+                         manageCourse(course._id, course.title, course.code);
+                     });
+                 }
+             }, 0);
+      
+      return card;
+}
+
+// Function to handle course management
+function manageCourse(courseId, courseTitle, courseCode) {
+    // Match IDs used in teacher.html
+    const courseManagementSection = document.getElementById('course-management');
+    const myCoursesSection = document.getElementById('my-courses');
+
+    if (courseManagementSection && myCoursesSection) {
+        // Set course details in the management section (guard each element)
+        const titleEl = document.getElementById('courseManagementTitle');
+        if (titleEl) titleEl.textContent = courseTitle || 'Course';
+
+        const codeEl = document.getElementById('courseManagementCode');
+        if (codeEl) codeEl.textContent = courseCode ? `${courseCode}` : 'No Code';
+
+        // Show the management section and hide the courses section
+        courseManagementSection.style.display = 'block';
+        myCoursesSection.style.display = 'none';
+    } else {
+        // Fallback: try previously used IDs before failing
+        const altMgmt = document.getElementById('course-management-section');
+        const altCourses = document.getElementById('my-courses-section');
+        if (altMgmt && altCourses) {
+            altMgmt.style.display = 'block';
+            altCourses.style.display = 'none';
+            const altTitle = document.getElementById('manage-course-title');
+            if (altTitle) altTitle.textContent = courseTitle || 'Course';
+            const altCode = document.getElementById('manage-course-code');
+            if (altCode) altCode.textContent = courseCode || 'No Code';
+        } else {
+            if (typeof showNotification === 'function') {
+                showNotification('Error opening course management', 'error');
+            }
+            console.error('Course management elements not found in the DOM');
+        }
+    }
 }
 
 // View a specific course
