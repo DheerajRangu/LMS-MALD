@@ -1,0 +1,354 @@
+0 verbose cli /opt/homebrew/Cellar/node/24.10.0/bin/node /opt/homebrew/bin/npm
+1 info using npm@11.6.0
+2 info using node@v24.10.0
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/dheerajrangu/LMS-MALD/backend/.npmrc
+5 silly config load:file:/Users/dheerajrangu/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm uninstall @langchain/tavily
+8 verbose argv "uninstall" "@langchain/tavily"
+9 verbose logfile logs-max:10 dir:/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_45_51_050Z-
+10 verbose logfile /Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_45_51_050Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly packumentCache heap:2348810240 maxSize:587202560 maxEntrySize:293601280
+13 silly logfile done cleaning log files
+14 silly idealTree buildDeps
+15 silly fetch manifest @langchain/core@^1.0.0
+16 silly packumentCache full:https://registry.npmjs.org/@langchain%2fcore cache-miss
+17 http cache https://registry.npmjs.org/@langchain%2fcore 33ms (cache hit)
+18 silly packumentCache full:https://registry.npmjs.org/@langchain%2fcore set size:3808684 disposed:false
+19 warn ERESOLVE overriding peer dependency {
+19 warn ERESOLVE   code: 'ERESOLVE',
+19 warn ERESOLVE   edge: {
+19 warn ERESOLVE     type: 'peer',
+19 warn ERESOLVE     name: '@langchain/core',
+19 warn ERESOLVE     spec: '^1.0.0',
+19 warn ERESOLVE     error: 'INVALID',
+19 warn ERESOLVE     from: {
+19 warn ERESOLVE       name: '@langchain/tavily',
+19 warn ERESOLVE       version: '1.0.1',
+19 warn ERESOLVE       location: 'node_modules/@langchain/tavily',
+19 warn ERESOLVE       isWorkspace: false,
+19 warn ERESOLVE       dependents: []
+19 warn ERESOLVE     }
+19 warn ERESOLVE   },
+19 warn ERESOLVE   dep: {
+19 warn ERESOLVE     name: '@langchain/core',
+19 warn ERESOLVE     version: '1.1.4',
+19 warn ERESOLVE     whileInstalling: {
+19 warn ERESOLVE       name: '@langchain/tavily',
+19 warn ERESOLVE       version: '1.0.1',
+19 warn ERESOLVE       path: '/Users/dheerajrangu/LMS-MALD/backend/node_modules/@langchain/tavily'
+19 warn ERESOLVE     },
+19 warn ERESOLVE     location: 'node_modules/@langchain/core',
+19 warn ERESOLVE     isWorkspace: false,
+19 warn ERESOLVE     dependents: [ [Object] ]
+19 warn ERESOLVE   },
+19 warn ERESOLVE   force: false,
+19 warn ERESOLVE   isMine: false,
+19 warn ERESOLVE   strictPeerDeps: false,
+19 warn ERESOLVE   current: {
+19 warn ERESOLVE     name: '@langchain/core',
+19 warn ERESOLVE     version: '0.2.36',
+19 warn ERESOLVE     location: 'node_modules/@langchain/core',
+19 warn ERESOLVE     isWorkspace: false,
+19 warn ERESOLVE     dependents: [ [Object], [Object], [Object], [Object], [Object] ]
+19 warn ERESOLVE   },
+19 warn ERESOLVE   peerConflict: {
+19 warn ERESOLVE     current: {
+19 warn ERESOLVE       name: '@langchain/core',
+19 warn ERESOLVE       version: '0.2.36',
+19 warn ERESOLVE       location: 'node_modules/@langchain/core',
+19 warn ERESOLVE       isWorkspace: false,
+19 warn ERESOLVE       dependents: [Array]
+19 warn ERESOLVE     },
+19 warn ERESOLVE     peer: {
+19 warn ERESOLVE       name: '@langchain/core',
+19 warn ERESOLVE       version: '1.1.4',
+19 warn ERESOLVE       whileInstalling: [Object],
+19 warn ERESOLVE       location: 'node_modules/@langchain/core',
+19 warn ERESOLVE       isWorkspace: false,
+19 warn ERESOLVE       dependents: [Array]
+19 warn ERESOLVE     }
+19 warn ERESOLVE   }
+19 warn ERESOLVE }
+20 silly reify mark retired [
+20 silly reify   '/Users/dheerajrangu/LMS-MALD/backend/node_modules/@langchain/tavily'
+20 silly reify ]
+21 silly reify moves {
+21 silly reify   '/Users/dheerajrangu/LMS-MALD/backend/node_modules/@langchain/tavily': '/Users/dheerajrangu/LMS-MALD/backend/node_modules/@langchain/.tavily-uLj5ph2U'
+21 silly reify }
+22 silly audit bulk request {
+22 silly audit   '@langchain/community': [ '0.2.33' ],
+22 silly audit   '@langchain/core': [ '0.2.36' ],
+22 silly audit   '@langchain/openai': [ '0.2.11' ],
+22 silly audit   '@langchain/textsplitters': [ '0.0.3' ],
+22 silly audit   '@mongodb-js/saslprep': [ '1.4.0' ],
+22 silly audit   '@types/node': [ '18.19.130' ],
+22 silly audit   '@types/node-fetch': [ '2.6.13' ],
+22 silly audit   '@types/retry': [ '0.12.0' ],
+22 silly audit   '@types/uuid': [ '10.0.0' ],
+22 silly audit   '@types/webidl-conversions': [ '7.0.3' ],
+22 silly audit   '@types/whatwg-url': [ '11.0.5' ],
+22 silly audit   'abort-controller': [ '3.0.0' ],
+22 silly audit   accepts: [ '2.0.0' ],
+22 silly audit   'agent-base': [ '6.0.2' ],
+22 silly audit   agentkeepalive: [ '4.6.0' ],
+22 silly audit   'ansi-styles': [ '5.2.0' ],
+22 silly audit   'append-field': [ '1.0.0' ],
+22 silly audit   argparse: [ '2.0.1' ],
+22 silly audit   asynckit: [ '0.4.0' ],
+22 silly audit   'aws-ssl-profiles': [ '1.1.2' ],
+22 silly audit   axios: [ '1.13.2' ],
+22 silly audit   'base64-js': [ '1.5.1' ],
+22 silly audit   base64url: [ '3.0.1' ],
+22 silly audit   bcryptjs: [ '3.0.3' ],
+22 silly audit   'binary-extensions': [ '2.3.0' ],
+22 silly audit   'body-parser': [ '2.2.1' ],
+22 silly audit   bson: [ '6.10.4' ],
+22 silly audit   'buffer-equal-constant-time': [ '1.0.1' ],
+22 silly audit   'buffer-from': [ '1.1.2' ],
+22 silly audit   busboy: [ '1.6.0' ],
+22 silly audit   bytes: [ '3.1.2' ],
+22 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+22 silly audit   'call-bound': [ '1.0.4' ],
+22 silly audit   camelcase: [ '6.3.0' ],
+22 silly audit   'combined-stream': [ '1.0.8' ],
+22 silly audit   commander: [ '10.0.1' ],
+22 silly audit   'concat-stream': [ '1.6.2' ],
+22 silly audit   'content-disposition': [ '1.0.1' ],
+22 silly audit   'content-type': [ '1.0.5' ],
+22 silly audit   cookie: [ '0.7.2' ],
+22 silly audit   'cookie-signature': [ '1.2.2', '1.0.7' ],
+22 silly audit   'core-util-is': [ '1.0.3' ],
+22 silly audit   cors: [ '2.8.5' ],
+22 silly audit   dayjs: [ '1.11.19' ],
+22 silly audit   debug: [ '4.4.3', '2.6.9' ],
+22 silly audit   decamelize: [ '1.2.0' ],
+22 silly audit   'delayed-stream': [ '1.0.0' ],
+22 silly audit   denque: [ '2.1.0' ],
+22 silly audit   depd: [ '2.0.0' ],
+22 silly audit   dotenv: [ '16.6.1' ],
+22 silly audit   'dunder-proto': [ '1.0.1' ],
+22 silly audit   'ecdsa-sig-formatter': [ '1.0.11' ],
+22 silly audit   'ee-first': [ '1.1.1' ],
+22 silly audit   encodeurl: [ '2.0.0' ],
+22 silly audit   'es-define-property': [ '1.0.1' ],
+22 silly audit   'es-errors': [ '1.3.0' ],
+22 silly audit   'es-object-atoms': [ '1.1.1' ],
+22 silly audit   'es-set-tostringtag': [ '2.1.0' ],
+22 silly audit   'escape-html': [ '1.0.3' ],
+22 silly audit   etag: [ '1.8.1' ],
+22 silly audit   'event-target-shim': [ '5.0.1' ],
+22 silly audit   eventemitter3: [ '4.0.7' ],
+22 silly audit   'expr-eval': [ '2.0.2' ],
+22 silly audit   express: [ '5.2.1' ],
+22 silly audit   'express-session': [ '1.18.2' ],
+22 silly audit   ms: [ '2.0.0', '2.1.3' ],
+22 silly audit   finalhandler: [ '2.1.1' ],
+22 silly audit   flat: [ '5.0.2' ],
+22 silly audit   'follow-redirects': [ '1.15.11' ],
+22 silly audit   'form-data': [ '4.0.5' ],
+22 silly audit   'form-data-encoder': [ '1.7.2' ],
+22 silly audit   'mime-db': [ '1.52.0', '1.54.0' ],
+22 silly audit   'mime-types': [ '2.1.35', '3.0.2' ],
+22 silly audit   'formdata-node': [ '4.4.1' ],
+22 silly audit   forwarded: [ '0.2.0' ],
+22 silly audit   fresh: [ '2.0.0' ],
+22 silly audit   'function-bind': [ '1.1.2' ],
+22 silly audit   'generate-function': [ '2.3.1' ],
+22 silly audit   'get-intrinsic': [ '1.3.0' ],
+22 silly audit   'get-proto': [ '1.0.1' ],
+22 silly audit   gopd: [ '1.2.0' ],
+22 silly audit   'has-symbols': [ '1.1.0' ],
+22 silly audit   'has-tostringtag': [ '1.0.2' ],
+22 silly audit   hasown: [ '2.0.2' ],
+22 silly audit   helmet: [ '8.1.0' ],
+22 silly audit   'http-errors': [ '2.0.1' ],
+22 silly audit   'https-proxy-agent': [ '5.0.1' ],
+22 silly audit   'humanize-ms': [ '1.2.1' ],
+22 silly audit   'iconv-lite': [ '0.7.0' ],
+22 silly audit   inherits: [ '2.0.4' ],
+22 silly audit   'ipaddr.js': [ '1.9.1' ],
+22 silly audit   'is-promise': [ '4.0.0' ],
+22 silly audit   'is-property': [ '1.0.2' ],
+22 silly audit   isarray: [ '1.0.0' ],
+22 silly audit   'js-tiktoken': [ '1.0.21' ],
+22 silly audit   'js-yaml': [ '4.1.1' ],
+22 silly audit   jsonpointer: [ '5.0.1' ],
+22 silly audit   jsonwebtoken: [ '9.0.3' ],
+22 silly audit   jwa: [ '2.0.1' ],
+22 silly audit   jws: [ '4.0.1' ],
+22 silly audit   kareem: [ '2.6.3' ],
+22 silly audit   langchain: [ '0.2.20' ],
+22 silly audit   langsmith: [ '0.1.68' ],
+22 silly audit   'lodash.includes': [ '4.3.0' ],
+22 silly audit   'lodash.isboolean': [ '3.0.3' ],
+22 silly audit   'lodash.isinteger': [ '4.0.4' ],
+22 silly audit   'lodash.isnumber': [ '3.0.3' ],
+22 silly audit   'lodash.isplainobject': [ '4.0.6' ],
+22 silly audit   'lodash.isstring': [ '4.0.1' ],
+22 silly audit   'lodash.once': [ '4.1.1' ],
+22 silly audit   long: [ '5.3.2' ],
+22 silly audit   'lru.min': [ '1.1.3' ],
+22 silly audit   'math-intrinsics': [ '1.1.0' ],
+22 silly audit   'media-typer': [ '1.1.0', '0.3.0' ],
+22 silly audit   'memory-pager': [ '1.5.0' ],
+22 silly audit   'merge-descriptors': [ '2.0.0' ],
+22 silly audit   minimist: [ '1.2.8' ],
+22 silly audit   mkdirp: [ '0.5.6' ],
+22 silly audit   mongodb: [ '6.20.0' ],
+22 silly audit   'mongodb-connection-string-url': [ '3.0.2' ],
+22 silly audit   mongoose: [ '8.20.2' ],
+22 silly audit   mpath: [ '0.9.0' ],
+22 silly audit   mquery: [ '5.0.0' ],
+22 silly audit   multer: [ '1.4.5-lts.2' ],
+22 silly audit   'type-is': [ '1.6.18', '2.0.1' ],
+22 silly audit   mustache: [ '4.2.0' ],
+22 silly audit   mysql2: [ '3.15.3' ],
+22 silly audit   'named-placeholders': [ '1.1.4' ],
+22 silly audit   negotiator: [ '1.0.0' ],
+22 silly audit   'node-domexception': [ '1.0.0' ],
+22 silly audit   'node-fetch': [ '2.7.0' ],
+22 silly audit   tr46: [ '0.0.3', '5.1.1' ],
+22 silly audit   'webidl-conversions': [ '3.0.1', '7.0.0' ],
+22 silly audit   'whatwg-url': [ '5.0.0', '14.2.0' ],
+22 silly audit   nodemailer: [ '6.10.1' ],
+22 silly audit   oauth: [ '0.10.2' ],
+22 silly audit   'object-assign': [ '4.1.1' ],
+22 silly audit   'object-inspect': [ '1.13.4' ],
+22 silly audit   'on-finished': [ '2.4.1' ],
+22 silly audit   'on-headers': [ '1.1.0' ],
+22 silly audit   once: [ '1.4.0' ],
+22 silly audit   openai: [ '4.104.0' ],
+22 silly audit   'openapi-types': [ '12.1.3' ],
+22 silly audit   'p-finally': [ '1.0.0' ],
+22 silly audit   'p-queue': [ '6.6.2' ],
+22 silly audit   'p-retry': [ '4.6.2' ],
+22 silly audit   'p-timeout': [ '3.2.0' ],
+22 silly audit   parseurl: [ '1.3.3' ],
+22 silly audit   passport: [ '0.7.0' ],
+22 silly audit   'passport-google-oauth20': [ '2.0.0' ],
+22 silly audit   'passport-microsoft': [ '1.1.0' ],
+22 silly audit   'passport-oauth2': [ '1.8.0' ],
+22 silly audit   'passport-strategy': [ '1.0.0' ],
+22 silly audit   'path-to-regexp': [ '8.3.0' ],
+22 silly audit   pause: [ '0.0.1' ],
+22 silly audit   'process-nextick-args': [ '2.0.1' ],
+22 silly audit   'proxy-addr': [ '2.0.7' ],
+22 silly audit   'proxy-from-env': [ '1.1.0' ],
+22 silly audit   punycode: [ '2.3.1' ],
+22 silly audit   qs: [ '6.14.0' ],
+22 silly audit   'random-bytes': [ '1.0.0' ],
+22 silly audit   'range-parser': [ '1.2.1' ],
+22 silly audit   'raw-body': [ '3.0.2' ],
+22 silly audit   'readable-stream': [ '2.3.8' ],
+22 silly audit   'safe-buffer': [ '5.1.2', '5.2.1' ],
+22 silly audit   retry: [ '0.13.1' ],
+22 silly audit   router: [ '2.2.0' ],
+22 silly audit   'safer-buffer': [ '2.1.2' ],
+22 silly audit   scmp: [ '2.1.0' ],
+22 silly audit   semver: [ '7.7.3' ],
+22 silly audit   send: [ '1.2.0' ],
+22 silly audit   'seq-queue': [ '0.0.5' ],
+22 silly audit   'serve-static': [ '2.2.0' ],
+22 silly audit   setprototypeof: [ '1.2.0' ],
+22 silly audit   'side-channel': [ '1.1.0' ],
+22 silly audit   'side-channel-list': [ '1.0.0' ],
+22 silly audit   'side-channel-map': [ '1.0.1' ],
+22 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+22 silly audit   sift: [ '17.1.3' ],
+22 silly audit   'sparse-bitfield': [ '3.0.3' ],
+22 silly audit   sqlstring: [ '2.3.3' ],
+22 silly audit   statuses: [ '2.0.2' ],
+22 silly audit   streamsearch: [ '1.1.0' ],
+22 silly audit   string_decoder: [ '1.1.1' ],
+22 silly audit   toidentifier: [ '1.0.1' ],
+22 silly audit   twilio: [ '5.10.7' ],
+22 silly audit   typedarray: [ '0.0.6' ],
+22 silly audit   'uid-safe': [ '2.1.5' ],
+22 silly audit   uid2: [ '0.0.4' ],
+22 silly audit   'undici-types': [ '5.26.5' ],
+22 silly audit   unpipe: [ '1.0.0' ],
+22 silly audit   'util-deprecate': [ '1.0.2' ],
+22 silly audit   'utils-merge': [ '1.0.1' ],
+22 silly audit   uuid: [ '10.0.0' ],
+22 silly audit   vary: [ '1.1.2' ],
+22 silly audit   'web-streams-polyfill': [ '4.0.0-beta.3' ],
+22 silly audit   wrappy: [ '1.0.2' ],
+22 silly audit   xmlbuilder: [ '13.0.2' ],
+22 silly audit   xtend: [ '4.0.2' ],
+22 silly audit   yaml: [ '2.8.2' ],
+22 silly audit   zod: [ '3.25.76' ],
+22 silly audit   'zod-to-json-schema': [ '3.25.0' ]
+22 silly audit }
+23 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 531ms
+24 silly audit report {
+24 silly audit report   '@langchain/community': [
+24 silly audit report     {
+24 silly audit report       id: 1100326,
+24 silly audit report       url: 'https://github.com/advisories/GHSA-6m59-8fmv-m5f9',
+24 silly audit report       title: '@langchain/community SQL Injection vulnerability',
+24 silly audit report       severity: 'low',
+24 silly audit report       vulnerable_versions: '<0.3.3',
+24 silly audit report       cwe: [Array],
+24 silly audit report       cvss: [Object]
+24 silly audit report     }
+24 silly audit report   ],
+24 silly audit report   'expr-eval': [
+24 silly audit report     {
+24 silly audit report       id: 1111287,
+24 silly audit report       url: 'https://github.com/advisories/GHSA-jc85-fpwf-qm7x',
+24 silly audit report       title: 'expr-eval does not restrict functions passed to the evaluate function',
+24 silly audit report       severity: 'high',
+24 silly audit report       vulnerable_versions: '<=2.0.2',
+24 silly audit report       cwe: [Array],
+24 silly audit report       cvss: [Object]
+24 silly audit report     },
+24 silly audit report     {
+24 silly audit report       id: 1109807,
+24 silly audit report       url: 'https://github.com/advisories/GHSA-8gw3-rxh4-v6jx',
+24 silly audit report       title: 'expr-eval vulnerable to Prototype Pollution',
+24 silly audit report       severity: 'high',
+24 silly audit report       vulnerable_versions: '<=2.0.2',
+24 silly audit report       cwe: [Array],
+24 silly audit report       cvss: [Object]
+24 silly audit report     }
+24 silly audit report   ],
+24 silly audit report   nodemailer: [
+24 silly audit report     {
+24 silly audit report       id: 1111074,
+24 silly audit report       url: 'https://github.com/advisories/GHSA-rcmh-qjqh-p98v',
+24 silly audit report       title: 'Nodemailer’s addressparser is vulnerable to DoS caused by recursive calls',
+24 silly audit report       severity: 'low',
+24 silly audit report       vulnerable_versions: '<=7.0.10',
+24 silly audit report       cwe: [Array],
+24 silly audit report       cvss: [Object]
+24 silly audit report     },
+24 silly audit report     {
+24 silly audit report       id: 1109804,
+24 silly audit report       url: 'https://github.com/advisories/GHSA-mm7p-fcc7-pg87',
+24 silly audit report       title: 'Nodemailer: Email to an unintended domain can occur due to Interpretation Conflict',
+24 silly audit report       severity: 'moderate',
+24 silly audit report       vulnerable_versions: '<7.0.7',
+24 silly audit report       cwe: [Array],
+24 silly audit report       cvss: [Object]
+24 silly audit report     }
+24 silly audit report   ]
+24 silly audit report }
+25 silly packumentCache corgi:https://registry.npmjs.org/@langchain%2fcommunity cache-miss
+26 silly packumentCache corgi:https://registry.npmjs.org/expr-eval cache-miss
+27 silly packumentCache corgi:https://registry.npmjs.org/nodemailer cache-miss
+28 http cache https://registry.npmjs.org/@langchain%2fcommunity 10ms (cache hit)
+29 silly packumentCache corgi:https://registry.npmjs.org/@langchain%2fcommunity set size:2095987 disposed:false
+30 http cache https://registry.npmjs.org/expr-eval 27ms (cache hit)
+31 silly packumentCache corgi:https://registry.npmjs.org/expr-eval set size:17585 disposed:false
+32 http cache https://registry.npmjs.org/nodemailer 28ms (cache hit)
+33 silly packumentCache corgi:https://registry.npmjs.org/nodemailer set size:301569 disposed:false
+34 silly REMOVE node_modules/@langchain/tavily
+35 verbose cwd /Users/dheerajrangu/LMS-MALD/backend
+36 verbose os Darwin 25.1.0
+37 verbose node v24.10.0
+38 verbose npm  v11.6.0
+39 verbose exit 0
+40 info ok

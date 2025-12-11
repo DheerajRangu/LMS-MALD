@@ -1,0 +1,35 @@
+'Log files:
+/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-08T15_00_45_540Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: istruzione-f-backend@1.0.0
+Found: @langchain/core@0.2.23
+node_modules/@langchain/core
+  @langchain/core@"0.2.23" from the root project
+  peerOptional @langchain/core@">=0.1.29 <0.4.0" from @getzep/zep-cloud@1.0.12
+  node_modules/@getzep/zep-cloud
+    peerOptional @getzep/zep-cloud@"^1.0.6" from @langchain/community@1.0.7
+    node_modules/@langchain/community
+      @langchain/community@"^1.0.7" from the root project
+      peerOptional @langchain/community@"*" from langchain@0.2.17
+      node_modules/langchain
+        langchain@"0.2.17" from the root project
+        peerOptional langchain@">=0.1.19 <0.4.0" from @getzep/zep-cloud@1.0.12
+  @langchain/core@">=0.2.21 <0.3.0" from langchain@0.2.17
+  node_modules/langchain
+    langchain@"0.2.17" from the root project
+    peerOptional langchain@">=0.1.19 <0.4.0" from @getzep/zep-cloud@1.0.12
+
+Could not resolve dependency:
+peer @langchain/core@"^1.0.0" from @langchain/community@1.0.7
+node_modules/@langchain/community
+  @langchain/community@"^1.0.7" from the root project
+  peerOptional @langchain/community@"*" from langchain@0.2.17
+  node_modules/langchain
+    langchain@"0.2.17" from the root project
+    peerOptional langchain@">=0.1.19 <0.4.0" from @getzep/zep-cloud@1.0.12
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.

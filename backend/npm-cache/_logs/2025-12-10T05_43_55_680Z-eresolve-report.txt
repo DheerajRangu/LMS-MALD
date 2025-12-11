@@ -1,0 +1,53 @@
+'Log files:
+/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_43_55_680Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: @langchain/tavily@1.0.1
+Found: @langchain/core@0.2.36
+node_modules/@langchain/core
+  @langchain/core@">=0.2.21 <0.3.0" from @langchain/community@0.2.33
+  node_modules/@langchain/community
+    @langchain/community@"^0.2.31" from the root project
+  @langchain/core@">=0.2.26 <0.3.0" from @langchain/openai@0.2.11
+  node_modules/@langchain/openai
+    @langchain/openai@">=0.2.0 <0.3.0" from @langchain/community@0.2.33
+    node_modules/@langchain/community
+      @langchain/community@"^0.2.31" from the root project
+    @langchain/openai@">=0.1.0 <0.3.0" from langchain@0.2.20
+    node_modules/langchain
+      langchain@"~0.2.3" from @langchain/community@0.2.33
+      node_modules/@langchain/community
+        @langchain/community@"^0.2.31" from the root project
+      langchain@"^0.2.17" from the root project
+    @langchain/openai@"^0.2.5" from the root project
+  @langchain/core@">0.2.0 <0.3.0" from @langchain/textsplitters@0.0.3
+  node_modules/@langchain/textsplitters
+    @langchain/textsplitters@"~0.0.0" from langchain@0.2.20
+    node_modules/langchain
+      langchain@"~0.2.3" from @langchain/community@0.2.33
+      node_modules/@langchain/community
+        @langchain/community@"^0.2.31" from the root project
+      langchain@"^0.2.17" from the root project
+  @langchain/core@">=0.2.21 <0.3.0" from langchain@0.2.20
+  node_modules/langchain
+    langchain@"~0.2.3" from @langchain/community@0.2.33
+    node_modules/@langchain/community
+      @langchain/community@"^0.2.31" from the root project
+    langchain@"^0.2.17" from the root project
+  @langchain/core@"^0.2.23" from the root project
+
+Could not resolve dependency:
+peer @langchain/core@"^1.0.0" from @langchain/tavily@1.0.1
+node_modules/@langchain/tavily
+  @langchain/tavily@"^1.0.1" from the root project
+
+Conflicting peer dependency: @langchain/core@1.1.4
+node_modules/@langchain/core
+  peer @langchain/core@"^1.0.0" from @langchain/tavily@1.0.1
+  node_modules/@langchain/tavily
+    @langchain/tavily@"^1.0.1" from the root project
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.

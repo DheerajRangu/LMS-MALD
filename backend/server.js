@@ -1,56 +1,146 @@
+// server.js
+require('dotenv').config(); // Must be at the very top
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const morgan = require('morgan');
 
-// Initialize Express app
+// Optional: LangChain / OpenAI related imports (Tommy)
+let ChatOpenAI, TavilySearchResults, initializeAgentExecutorWithOptions, BufferMemory;
+try {
+    ChatOpenAI = require("@langchain/openai").ChatOpenAI;
+    TavilySearchResults = require("@langchain/community/tools/tavily_search").TavilySearchResults;
+    initializeAgentExecutorWithOptions = require("langchain/agents").initializeAgentExecutorWithOptions;
+    BufferMemory = require("langchain/memory").BufferMemory;
+} catch (e) {
+    // Not fatal — we will guard Tommy route if libs or keys missing
+    console.warn("LangChain/OpenAI libs not present or failed to import. Tommy route will be disabled.", e.message);
+}
+
+// ---------- CONFIG ----------
+const APP_NAME = process.env.APP_NAME || 'lms_mald';
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/lms_mald';
+const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret_in_prod';
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || '10', 10);
+
+// ---------- EXPRESS SETUP ----------
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Security & logging
+app.use(helmet());
+app.use(morgan('dev'));
+
+// Rate limiter (basic)
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 120
+});
+app.use(limiter);
+
+// Body parsers
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// MongoDB Connection
-require('dotenv').config();
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/lms_mald';
+// --------- MONGOOSE CONNECTION with RETRY ----------
+mongoose.set('strictQuery', true);
 
-mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+const mongooseOptions = {
+    // modern options
+    autoIndex: true,
+    maxPoolSize: 15,
+    minPoolSize: 2,
+    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 30000,
+    connectTimeoutMS: 30000,
+    family: 4
+};
 
-// Define Schemas
+let connectionAttempts = 0;
+const maxConnectionAttempts = 5;
+
+const connectToDatabase = async () => {
+    try {
+        connectionAttempts++;
+        console.log(`[${APP_NAME}] MongoDB connection attempt ${connectionAttempts}/${maxConnectionAttempts}...`);
+        await mongoose.connect(MONGO_URI, mongooseOptions);
+        console.log(`✓ Connected to MongoDB`);
+        connectionAttempts = 0;
+    } catch (err) {
+        console.error('✗ MongoDB connection error:', err.message);
+        if (connectionAttempts < maxConnectionAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, connectionAttempts - 1), 30000);
+            console.log(`Retrying in ${delay}ms...`);
+            setTimeout(connectToDatabase, delay);
+        } else {
+            console.error('✗ Failed to connect to MongoDB after', maxConnectionAttempts, 'attempts');
+            process.exit(1);
+        }
+    }
+};
+
+connectToDatabase();
+
+mongoose.connection.on('connected', () => console.log('Mongoose connected'));
+mongoose.connection.on('disconnected', () => console.log('Mongoose disconnected'));
+mongoose.connection.on('error', (err) => console.error('Mongoose error:', err.message));
+
+// ---------- UTILS ----------
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+const handleDbError = (error) => {
+    if (!error) return null;
+    if (error.name === 'MongoServerSelectionError' || error.name === 'MongoTimeoutError' || (error.message && error.message.includes('buffering timed out'))) {
+        return { status: 503, message: 'Database connection timeout. Please try again in a moment.' };
+    }
+    if (error.name === 'MongoNetworkError') {
+        return { status: 503, message: 'Database network error. Please check your connection.' };
+    }
+    return null;
+};
+
+const ensureUploadsDir = (subfolder = '') => {
+    const dir = path.join(__dirname, 'uploads', subfolder);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    return dir;
+};
+
+// ---------- MONGOOSE SCHEMAS ----------
 const Schema = mongoose.Schema;
 
-// User Schema (base for Student and Teacher)
-const UserSchema = new Schema({
+const UserBase = {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true }, // hashed
     createdAt: { type: Date, default: Date.now }
-});
+};
 
-// Student Schema
+const UserSchema = new Schema(UserBase, { discriminatorKey: 'kind', timestamps: true });
+
 const StudentSchema = new Schema({
-    ...UserSchema.obj,
+    ...UserBase,
     enrolledCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
     institution: { type: String },
     major: { type: String },
     yearLevel: { type: String },
     profilePicture: { type: String }
-});
+}, { timestamps: true });
 
-// Teacher Schema
 const TeacherSchema = new Schema({
-    ...UserSchema.obj,
+    ...UserBase,
     institution: { type: String },
     department: { type: String },
     position: { type: String },
@@ -59,11 +149,9 @@ const TeacherSchema = new Schema({
     bio: { type: String },
     profilePicture: { type: String },
     courses: [{ type: Schema.Types.ObjectId, ref: 'Course' }]
-});
+}, { timestamps: true });
 
-// Course Schema
 const CourseSchema = new Schema({
-    // Basic Information
     title: { type: String, required: true },
     code: { type: String, required: true, unique: true },
     description: { type: String, required: true },
@@ -71,8 +159,6 @@ const CourseSchema = new Schema({
     difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'expert'], required: true },
     duration: { type: String, required: true },
     language: { type: String, default: 'english' },
-    
-    // Course Settings
     price: { type: Number, default: 0 },
     maxStudents: { type: Number, default: null },
     prerequisites: { type: String, default: '' },
@@ -80,45 +166,17 @@ const CourseSchema = new Schema({
     isPublic: { type: Boolean, default: true },
     allowDiscussions: { type: Boolean, default: true },
     publishOption: { type: String, enum: ['publish', 'draft'], default: 'draft' },
-    
-    // Media Files
-    thumbnail: {
-        filename: { type: String },
-        originalname: { type: String },
-        path: { type: String },
-        mimetype: { type: String },
-        size: { type: Number }
-    },
-    introductionVideo: {
-        filename: { type: String },
-        originalname: { type: String },
-        path: { type: String },
-        mimetype: { type: String },
-        size: { type: Number }
-    },
-    
-    // Course Materials
-    materials: [{
-        filename: { type: String },
-        originalname: { type: String },
-        path: { type: String },
-        uploadDate: { type: Date, default: Date.now },
-        mimetype: { type: String },
-        size: { type: Number }
-    }],
-    
-    // Relationships
+    thumbnail: { filename: String, originalname: String, path: String, mimetype: String, size: Number },
+    introductionVideo: { filename: String, originalname: String, path: String, mimetype: String, size: Number },
+    materials: [{ filename: String, originalname: String, path: String, uploadDate: Date, mimetype: String, size: Number }],
     teacherId: { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
     students: [{ type: Schema.Types.ObjectId, ref: 'Student' }],
-    
-    // Metadata
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     publishedAt: { type: Date },
     status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' }
-});
+}, { timestamps: true });
 
-// Assignment Schema
 const AssignmentSchema = new Schema({
     title: { type: String, required: true },
     description: { type: String },
@@ -126,9 +184,8 @@ const AssignmentSchema = new Schema({
     dueDate: { type: Date },
     points: { type: Number, default: 100 },
     createdAt: { type: Date, default: Date.now }
-});
+}, { timestamps: true });
 
-// Submission Schema
 const SubmissionSchema = new Schema({
     assignmentId: { type: Schema.Types.ObjectId, ref: 'Assignment', required: true },
     studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true },
@@ -137,9 +194,8 @@ const SubmissionSchema = new Schema({
     submittedAt: { type: Date, default: Date.now },
     grade: { type: Number },
     feedback: { type: String }
-});
+}, { timestamps: true });
 
-// Message Schema
 const MessageSchema = new Schema({
     senderId: { type: Schema.Types.ObjectId, required: true },
     senderRole: { type: String, enum: ['student', 'teacher'], required: true },
@@ -149,9 +205,8 @@ const MessageSchema = new Schema({
     content: { type: String, required: true },
     read: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
-});
+}, { timestamps: true });
 
-// Notification Schema
 const NotificationSchema = new Schema({
     userId: { type: Schema.Types.ObjectId, required: true },
     userRole: { type: String, enum: ['student', 'teacher'], required: true },
@@ -160,9 +215,10 @@ const NotificationSchema = new Schema({
     type: { type: String, enum: ['assignment', 'material', 'grade', 'message'], required: true },
     read: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
-});
+}, { timestamps: true });
 
-// Create models
+/* Models */
+const BaseUser = mongoose.model('User', UserSchema);
 const Student = mongoose.model('Student', StudentSchema);
 const Teacher = mongoose.model('Teacher', TeacherSchema);
 const Course = mongoose.model('Course', CourseSchema);
@@ -171,933 +227,420 @@ const Submission = mongoose.model('Submission', SubmissionSchema);
 const Message = mongoose.model('Message', MessageSchema);
 const Notification = mongoose.model('Notification', NotificationSchema);
 
-// Get notifications for a user
-app.get('/api/notifications/:userRole/:userId', async (req, res) => {
-    try {
-        const userId = req.params.userId;
-        const userRole = req.params.userRole;
-        
-        const notifications = await Notification.find({ 
-            userId: userId,
-            userRole: userRole
-        }).sort({ createdAt: -1 });
-        
-        res.status(200).json(notifications);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Mark notification as read
-app.put('/api/notifications/:notificationId/read', async (req, res) => {
-    try {
-        const notification = await Notification.findByIdAndUpdate(
-            req.params.notificationId,
-            { read: true },
-            { new: true }
-        );
-        
-        if (!notification) {
-            return res.status(404).json({ message: 'Notification not found' });
-        }
-        
-        res.status(200).json(notification);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Configure multer storage for file uploads
+// ---------- MULTER (file uploads) ----------
 const createStorage = (subfolder) => {
+    ensureUploadsDir(subfolder);
     return multer.diskStorage({
         destination: (req, file, cb) => {
             const uploadDir = path.join(__dirname, 'uploads', subfolder);
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
+            if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
             cb(null, uploadDir);
         },
         filename: (req, file, cb) => {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-            cb(null, `${uniqueSuffix}-${file.originalname}`);
+            const safeName = file.originalname.replace(/\s+/g, '_');
+            cb(null, `${uniqueSuffix}-${safeName}`);
         }
     });
 };
 
-// File filter function
 const fileFilter = (req, file, cb) => {
-    // Allow all file types for now, but you can add restrictions here
+    // Accept all for now; you can whitelist mime types if desired
     cb(null, true);
 };
 
-// Create different upload configurations
-const upload = multer({ 
+const upload = multer({
     storage: createStorage('general'),
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 100 * 1024 * 1024 // 100MB limit
-    }
+    fileFilter,
+    limits: { fileSize: 200 * 1024 * 1024 } // up to 200MB files
 });
 
-const uploadThumbnail = multer({ 
-    storage: createStorage('thumbnails'),
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed for thumbnails'), false);
-        }
-    },
-    limits: {
-        fileSize: 10 * 1024 * 1024 // 10MB limit for thumbnails
-    }
-});
+// ---------- AUTH HELPERS ----------
+const signJwt = (payload) => jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+const verifyJwt = (token) => jwt.verify(token, JWT_SECRET);
 
-const uploadVideo = multer({ 
-    storage: createStorage('videos'),
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('video/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only video files are allowed'), false);
-        }
-    },
-    limits: {
-        fileSize: 500 * 1024 * 1024 // 500MB limit for videos
-    }
-});
-
-const uploadMaterials = multer({ 
-    storage: createStorage('materials'),
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 100 * 1024 * 1024 // 100MB limit for materials
-    }
-});
-
-// Authentication Routes
-// Login route
-app.post('/api/login', async (req, res) => {
+// Auth middleware (expects Authorization: Bearer <token>)
+const authMiddleware = asyncHandler(async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ message: 'Unauthorized' });
+    const token = authHeader.split(' ')[1];
     try {
-        const { email, password, role } = req.body;
-        
-        let user;
-        if (role === 'student') {
-            user = await Student.findOne({ email });
-        } else if (role === 'teacher') {
-            user = await Teacher.findOne({ email });
-        }
-        
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        
-        // In a real app, you would compare hashed passwords
-        if (user.password !== password) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-        
-        const responseData = {
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            role
-        };
-        
-        // Add student-specific fields
-        if (role === 'student') {
-            responseData.program = user.major;
-            responseData.institution = user.institution;
-            responseData.yearLevel = user.yearLevel;
-            responseData.profilePicture = user.profilePicture;
-        }
-        
-        // Add teacher-specific fields
-        if (role === 'teacher') {
-            responseData.institution = user.institution;
-            responseData.department = user.department;
-            responseData.position = user.position;
-            responseData.experience = user.experience;
-            responseData.subjects = user.subjects;
-            responseData.bio = user.bio;
-            responseData.profilePicture = user.profilePicture;
-        }
-        
-        res.status(200).json(responseData);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        const decoded = verifyJwt(token);
+        req.user = decoded;
+        next();
+    } catch (e) {
+        return res.status(401).json({ message: 'Invalid token' });
     }
 });
 
-// Register route
-app.post('/api/register', async (req, res) => {
+// Role guard
+const requireRole = (role) => (req, res, next) => {
+    if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+    if (req.user.role !== role) return res.status(403).json({ message: 'Forbidden' });
+    next();
+};
+
+// ---------- ROUTES ----------
+
+// Root
+app.get('/', (req, res) => res.json({ success: true, app: APP_NAME }));
+
+// ----- AUTH -----
+app.post('/api/register', asyncHandler(async (req, res) => {
+    const { firstName, lastName, email, password, role, ...rest } = req.body;
+    if (!firstName || !lastName || !email || !password || !role) return res.status(400).json({ message: 'Missing fields' });
+    const existing = await BaseUser.findOne({ email }).lean();
+    if (existing) return res.status(400).json({ message: 'User already exists' });
+
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+    let newUser;
+    if (role === 'student') {
+        newUser = new Student({ firstName, lastName, email, password: hashed, ...rest });
+    } else if (role === 'teacher') {
+        newUser = new Teacher({ firstName, lastName, email, password: hashed, ...rest });
+    } else {
+        return res.status(400).json({ message: 'Invalid role' });
+    }
+    await newUser.save();
+
+    const token = signJwt({ id: newUser._id, role });
+    const payload = { id: newUser._id, firstName, lastName, email, role, token };
+    res.status(201).json(payload);
+}));
+
+app.post('/api/login', asyncHandler(async (req, res) => {
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) return res.status(400).json({ message: 'Missing fields' });
+
+    let user = null;
+    if (role === 'student') user = await Student.findOne({ email }).lean();
+    else if (role === 'teacher') user = await Teacher.findOne({ email }).lean();
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const pwdMatch = await bcrypt.compare(password, user.password);
+    if (!pwdMatch) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const token = signJwt({ id: user._id, role });
+    res.json({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, role, token });
+}));
+
+// ----- NOTIFICATIONS -----
+app.get('/api/notifications/:userRole/:userId', asyncHandler(async (req, res) => {
     try {
-        const { firstName, lastName, email, password, role, institution, department, major } = req.body;
-        
-        // Check if user already exists
-        let existingUser;
-        if (role === 'student') {
-            existingUser = await Student.findOne({ email });
-        } else if (role === 'teacher') {
-            existingUser = await Teacher.findOne({ email });
-        }
-        
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        
-        // Create new user
-        let newUser;
-        if (role === 'student') {
-            newUser = new Student({
-                firstName,
-                lastName,
-                email,
-                password, // In a real app, you would hash this password
-                institution,
-                major,
-                yearLevel: req.body.yearLevel || '',
-                profilePicture: ''
-            });
-        } else if (role === 'teacher') {
-            newUser = new Teacher({
-                firstName,
-                lastName,
-                email,
-                password, // In a real app, you would hash this password
-                institution,
-                department: req.body.department || '',
-                position: req.body.position || '',
-                experience: req.body.experience || '',
-                subjects: req.body.subjects || [],
-                bio: req.body.bio || '',
-                profilePicture: ''
-            });
-        }
-        
-        await newUser.save();
-        
-        res.status(201).json({
-            id: newUser._id,
-            firstName,
-            lastName,
-            email,
-            role
-        });
+        const { userId, userRole } = req.params;
+        const notifications = await Notification.find({ userId, userRole }).maxTimeMS(30000).sort({ createdAt: -1 });
+        res.status(200).json(notifications);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        const dbErr = handleDbError(error);
+        if (dbErr) return res.status(dbErr.status).json({ message: dbErr.message });
+        throw error;
     }
-});
+}));
 
-// Course Routes
-// Get all courses for a teacher
-app.get('/api/teacher/:teacherId/courses', async (req, res) => {
-    try {
-        const courses = await Course.find({ teacherId: req.params.teacherId });
-        courses.forEach((course, idx) => {
-            if (course.thumbnail) {
-                console.log(`Course ${idx + 1} (${course.title}) has thumbnail:`, {
-                    filename: course.thumbnail.filename,
-                    path: course.thumbnail.path
-                });
-            } else {
-                console.log(`Course ${idx + 1} (${course.title}) has no thumbnail`);
-            }
-        });
-        res.status(200).json(courses);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+app.put('/api/notifications/:notificationId/read', asyncHandler(async (req, res) => {
+    const notification = await Notification.findByIdAndUpdate(req.params.notificationId, { read: true }, { new: true });
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    res.status(200).json(notification);
+}));
 
-// Get all courses for a student
-app.get('/api/student/:studentId/courses', async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.studentId).populate('enrolledCourses');
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
-        res.status(200).json(student.enrolledCourses);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Update course status (publish/unpublish)
-app.put('/api/courses/:courseId/status', async (req, res) => {
-    try {
-        const { courseId } = req.params;
-        const { status } = req.body;
-        
-        if (!status || (status !== 'publish' && status !== 'draft')) {
-            return res.status(400).json({ 
-                success: false,
-                message: 'Invalid status. Must be "publish" or "draft".' 
-            });
-        }
-        
-        const course = await Course.findById(courseId);
-        if (!course) {
-            return res.status(404).json({ 
-                success: false,
-                message: 'Course not found' 
-            });
-        }
-        
-        course.status = status;
-        await course.save();
-        
-        res.status(200).json({ 
-            success: true,
-            message: `Course ${status === 'publish' ? 'published' : 'unpublished'} successfully`,
-            course
-        });
-    } catch (error) {
-        console.error('Error updating course status:', error);
-        res.status(500).json({ 
-            success: false,
-            message: error.message 
-        });
-    }
-});
-
-// Create a new course with comprehensive data and file uploads
+// ----- COURSES -----
 app.post('/api/courses', upload.fields([
     { name: 'thumbnail', maxCount: 1 },
     { name: 'introductionVideo', maxCount: 1 },
-    { name: 'materials', maxCount: 10 }
-]), async (req, res) => {
-    try {
-        const {
-            title, code, description, category, difficulty, duration, language,
-            price, maxStudents, prerequisites, learningOutcomes, isPublic,
-            allowDiscussions, publishOption, teacherId
-        } = req.body;
+    { name: 'materials', maxCount: 20 }
+]), asyncHandler(async (req, res) => {
+    const { title, code, description, category, difficulty, duration, language, price, maxStudents, prerequisites, learningOutcomes, isPublic, allowDiscussions, publishOption, teacherId } = req.body;
 
-        // Validate required fields
-        if (!title || !code || !description || !category || !difficulty || !duration || !teacherId) {
-            return res.status(400).json({ 
-                success: false,
-                message: 'Missing required fields: title, code, description, category, difficulty, duration, teacherId' 
-            });
-        }
-
-        // Parse learning outcomes if it's a JSON string
-        let parsedLearningOutcomes = [];
-        if (learningOutcomes) {
-            try {
-                parsedLearningOutcomes = JSON.parse(learningOutcomes);
-            } catch (e) {
-                parsedLearningOutcomes = Array.isArray(learningOutcomes) ? learningOutcomes : [learningOutcomes];
-            }
-        }
-
-        // Create course object
-        const courseData = {
-            title,
-            code,
-            description,
-            category,
-            difficulty,
-            duration,
-            language: language || 'english',
-            price: parseFloat(price) || 0,
-            maxStudents: maxStudents ? parseInt(maxStudents) : null,
-            prerequisites: prerequisites || '',
-            learningOutcomes: parsedLearningOutcomes,
-            isPublic: isPublic === 'true' || isPublic === true,
-            allowDiscussions: allowDiscussions === 'true' || allowDiscussions === true,
-            publishOption: publishOption || 'draft',
-            teacherId,
-            status: publishOption === 'publish' ? 'published' : 'draft'
-        };
-
-        // Handle thumbnail upload
-        if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
-            const thumbnailFile = req.files.thumbnail[0];
-            const thumbnailPath = `/uploads/general/${thumbnailFile.filename}`;
-            console.log('Thumbnail uploaded:', {filename: thumbnailFile.filename, originalname: thumbnailFile.originalname, path: thumbnailPath});
-            courseData.thumbnail = {
-                filename: thumbnailFile.filename,
-                originalname: thumbnailFile.originalname,
-                path: thumbnailPath,
-                mimetype: thumbnailFile.mimetype,
-                size: thumbnailFile.size
-            };
-            console.log('Saved thumbnail to courseData:', courseData.thumbnail);
-        } else {
-            console.log('No thumbnail uploaded. req.files:', req.files ? Object.keys(req.files) : 'undefined');
-        }
-
-        // Handle introduction video upload
-        if (req.files && req.files.introductionVideo && req.files.introductionVideo[0]) {
-            const videoFile = req.files.introductionVideo[0];
-            courseData.introductionVideo = {
-                filename: videoFile.filename,
-                originalname: videoFile.originalname,
-                path: `/uploads/general/${videoFile.filename}`,
-                mimetype: videoFile.mimetype,
-                size: videoFile.size
-            };
-        }
-
-        // Handle course materials upload
-        if (req.files && req.files.materials && req.files.materials.length > 0) {
-            courseData.materials = req.files.materials.map(file => ({
-                filename: file.filename,
-                originalname: file.originalname,
-                path: `/uploads/general/${file.filename}`,
-                mimetype: file.mimetype,
-                size: file.size,
-                uploadDate: new Date()
-            }));
-        }
-
-        // Set published date if publishing
-        if (publishOption === 'publish') {
-            courseData.publishedAt = new Date();
-        }
-
-        // Create the course
-        const newCourse = new Course(courseData);
-        await newCourse.save();
-
-        // Update teacher's courses array
-        await Teacher.findByIdAndUpdate(
-            teacherId,
-            { $push: { courses: newCourse._id } }
-        );
-
-        res.status(201).json({
-            success: true,
-            message: 'Course created successfully',
-            course: newCourse
-        });
-
-    } catch (error) {
-        console.error('Error creating course:', error);
-        
-        // Handle duplicate course code error
-        if (error.code === 11000 && error.keyPattern && error.keyPattern.code) {
-            return res.status(400).json({ 
-                success: false,
-                message: 'This course code is already in use. Please choose a different course code.' 
-            });
-        }
-        
-        res.status(500).json({ 
-            success: false,
-            message: error.message || 'Failed to create course' 
-        });
+    if (!title || !code || !description || !category || !difficulty || !duration || !teacherId) {
+        return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
-});
 
-// Get courses by query (search by code, etc.) and generate suggested codes
-app.get('/api/courses', async (req, res) => {
-    try {
-        const { code, suggestCode, published } = req.query;
-        let query = {};
-        
-        if (code) {
-            query.code = code;
-        }
-        
-        // If published=true, only get published courses
-        if (published === 'true') {
-            query.status = 'published';
-            query.isPublic = true;
-        }
-        
-        const courses = await Course.find(query).populate('teacherId', 'firstName lastName').populate('students');
-        
-        // If suggestCode is true and code is provided, generate alternative codes
-        if (suggestCode === 'true' && code) {
-            const existingCodes = courses.map(c => c.code);
-            const suggestedCodes = [];
-            
-            // Try incrementing numbers at the end of the code
-            let baseCode = code;
-            let counter = 1;
-            let match = code.match(/(\D+)(\d+)$/);
-            
-            if (match) {
-                baseCode = match[1];
-                counter = parseInt(match[2]) + 1;
-            }
-            
-            // Generate 3 suggestions
-            for (let i = 0; i < 5; i++) {
-                const suggestedCode = baseCode + (counter + i);
-                if (!existingCodes.includes(suggestedCode)) {
-                    suggestedCodes.push(suggestedCode);
-                    if (suggestedCodes.length === 3) break;
-                }
-            }
-            
-            return res.status(200).json({
-                exists: existingCodes.includes(code),
-                suggestedCodes: suggestedCodes
-            });
-        }
-        
-        res.status(200).json(courses);
-    } catch (error) {
-        console.error('Error fetching courses:', error);
-        res.status(500).json({ message: error.message });
+    let parsedLearningOutcomes = [];
+    if (learningOutcomes) {
+        try { parsedLearningOutcomes = JSON.parse(learningOutcomes); } catch (e) { parsedLearningOutcomes = [learningOutcomes]; }
     }
-});
 
-// Get course details
-app.get('/api/courses/:courseId', async (req, res) => {
-    try {
-        const course = await Course.findById(req.params.courseId)
-            .populate('teacherId', 'firstName lastName')
-            .populate('students', 'firstName lastName');
-            
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
-        
-        res.status(200).json(course);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    const courseData = {
+        title, code, description, category, difficulty, duration, language: language || 'english',
+        price: parseFloat(price) || 0,
+        maxStudents: maxStudents ? parseInt(maxStudents) : null,
+        prerequisites: prerequisites || '', learningOutcomes: parsedLearningOutcomes,
+        isPublic: isPublic === 'true' || isPublic === true, allowDiscussions: allowDiscussions === 'true' || allowDiscussions === true,
+        publishOption: publishOption || 'draft', teacherId, status: publishOption === 'publish' ? 'published' : 'draft'
+    };
+
+    if (req.files?.thumbnail?.[0]) {
+        const f = req.files.thumbnail[0];
+        courseData.thumbnail = { filename: f.filename, originalname: f.originalname, path: `/uploads/general/${f.filename}`, mimetype: f.mimetype, size: f.size };
     }
-});
-
-app.delete('/api/courses/:courseId', async (req, res) => {
-    try {
-        const { courseId } = req.params;
-        const teacherId = req.query.teacherId || req.body.teacherId;
-        if (!teacherId) {
-            return res.status(400).json({ success: false, message: 'teacherId is required' });
-        }
-        const course = await Course.findById(courseId);
-        if (!course) {
-            return res.status(404).json({ success: false, message: 'Course not found' });
-        }
-        if (course.teacherId.toString() !== teacherId.toString()) {
-            return res.status(403).json({ success: false, message: 'Not authorized to delete this course' });
-        }
-        await Course.findByIdAndDelete(courseId);
-        await Teacher.findByIdAndUpdate(teacherId, { $pull: { courses: courseId } });
-        res.status(200).json({ success: true, message: 'Course deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    if (req.files?.introductionVideo?.[0]) {
+        const f = req.files.introductionVideo[0];
+        courseData.introductionVideo = { filename: f.filename, originalname: f.originalname, path: `/uploads/general/${f.filename}`, mimetype: f.mimetype, size: f.size };
     }
-});
-
-// Upload course material
-app.post('/api/courses/:courseId/materials', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded' });
-        }
-        
-        const course = await Course.findById(req.params.courseId);
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
-        
-        const material = {
-            filename: req.file.filename,
-            originalname: req.file.originalname,
-            path: req.file.path,
-            mimetype: req.file.mimetype
-        };
-        
-        course.materials.push(material);
-        await course.save();
-        
-        // Create notifications for all students in the course
-        const notifications = course.students.map(studentId => ({
-            userId: studentId,
-            userRole: 'student',
-            message: `New material added to ${course.title}: ${req.file.originalname}`,
-            courseId: course._id,
-            type: 'material'
+    if (req.files?.materials?.length > 0) {
+        courseData.materials = req.files.materials.map(file => ({
+            filename: file.filename, originalname: file.originalname, path: `/uploads/general/${file.filename}`, mimetype: file.mimetype, size: file.size, uploadDate: new Date()
         }));
-        
-        if (notifications.length > 0) {
-            await Notification.insertMany(notifications);
-        }
-        
-        res.status(201).json(material);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
     }
-});
 
-// Get course materials
-app.get('/api/courses/:courseId/materials', async (req, res) => {
-    try {
-        const course = await Course.findById(req.params.courseId);
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
-        
-        res.status(200).json(course.materials);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+    const course = new Course(courseData);
+    await course.save();
+    await Teacher.findByIdAndUpdate(teacherId, { $push: { courses: course._id } });
+    res.status(201).json({ success: true, message: 'Course created successfully', course });
+}));
 
-// Assignment Routes
-// Create assignment
-app.post('/api/courses/:courseId/assignments', async (req, res) => {
-    try {
-        const { title, description, dueDate, points } = req.body;
-        
-        const course = await Course.findById(req.params.courseId);
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
-        
-        const newAssignment = new Assignment({
-            title,
-            description,
-            courseId: req.params.courseId,
-            dueDate,
-            points
+app.get('/api/courses', asyncHandler(async (req, res) => {
+    const { code, published } = req.query;
+    let query = {};
+    if (code) query.code = code;
+    if (published === 'true') { query.status = 'published'; query.isPublic = true; }
+
+    const courses = await Course.find(query).populate('teacherId', 'firstName lastName').populate('students');
+    res.status(200).json(courses);
+}));
+
+app.get('/api/courses/:courseId', asyncHandler(async (req, res) => {
+    const course = await Course.findById(req.params.courseId).populate('teacherId', 'firstName lastName').populate('students', 'firstName lastName');
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.status(200).json(course);
+}));
+
+app.delete('/api/courses/:courseId', asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const teacherId = req.query.teacherId || req.body.teacherId;
+    if (!teacherId) return res.status(400).json({ success: false, message: 'teacherId is required' });
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
+    if (course.teacherId.toString() !== teacherId.toString()) return res.status(403).json({ success: false, message: 'Not authorized' });
+
+    // 1. Delete course doc
+    await Course.findByIdAndDelete(courseId);
+
+    // 2. Remove course from teacher.courses array
+    await Teacher.findByIdAndUpdate(teacherId, { $pull: { courses: courseId } });
+
+    // 3. Remove course from students' enrolledCourses
+    await Student.updateMany(
+        { enrolledCourses: courseId },
+        { $pull: { enrolledCourses: courseId } }
+    );
+
+    // 4. Optionally delete related assignments, submissions, notifications, messages
+    await Assignment.deleteMany({ courseId });
+    await Submission.deleteMany({ assignmentId: { $in: (await Assignment.find({ courseId })).map(a => a._id) } });
+    await Notification.deleteMany({ courseId });
+
+    res.status(200).json({ success: true, message: 'Course deleted' });
+}));
+
+// Enroll / Unenroll endpoints
+app.post('/api/courses/:courseId/enroll', asyncHandler(async (req, res) => {
+    const { studentId } = req.body;
+    const { courseId } = req.params;
+    if (!studentId) return res.status(400).json({ message: 'studentId is required' });
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    if (course.maxStudents && course.students.length >= course.maxStudents) return res.status(400).json({ message: 'Course full' });
+
+    await Course.findByIdAndUpdate(courseId, { $addToSet: { students: studentId } });
+    await Student.findByIdAndUpdate(studentId, { $addToSet: { enrolledCourses: courseId } });
+
+    res.status(200).json({ message: 'Enrolled' });
+}));
+
+app.post('/api/courses/:courseId/unenroll', asyncHandler(async (req, res) => {
+    const { studentId } = req.body;
+    const { courseId } = req.params;
+    if (!studentId) return res.status(400).json({ message: 'studentId is required' });
+
+    await Course.findByIdAndUpdate(courseId, { $pull: { students: studentId } });
+    await Student.findByIdAndUpdate(studentId, { $pull: { enrolledCourses: courseId } });
+
+    res.status(200).json({ message: 'Unenrolled' });
+}));
+
+// ----- ASSIGNMENTS -----
+app.post('/api/courses/:courseId/assignments', asyncHandler(async (req, res) => {
+    const { title, description, dueDate, points } = req.body;
+    const course = await Course.findById(req.params.courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const newAssignment = new Assignment({ title, description, courseId: req.params.courseId, dueDate, points });
+    await newAssignment.save();
+
+    // Create notifications for students
+    const notifications = course.students.map(studentId => ({
+        userId: studentId, userRole: 'student', message: `New assignment: ${title}`, courseId: course._id, type: 'assignment'
+    }));
+    if (notifications.length > 0) await Notification.insertMany(notifications);
+
+    res.status(201).json(newAssignment);
+}));
+
+app.get('/api/courses/:courseId/assignments', asyncHandler(async (req, res) => {
+    const assignments = await Assignment.find({ courseId: req.params.courseId });
+    res.status(200).json(assignments);
+}));
+
+app.get('/api/assignments/:assignmentId', asyncHandler(async (req, res) => {
+    const assignment = await Assignment.findById(req.params.assignmentId);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+    res.status(200).json(assignment);
+}));
+
+// Submit assignment (single file)
+app.post('/api/assignments/:assignmentId/submit', upload.single('file'), asyncHandler(async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    const { studentId } = req.body;
+    if (!studentId) return res.status(400).json({ message: 'studentId required' });
+
+    const assignment = await Assignment.findById(req.params.assignmentId);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+
+    let submission = await Submission.findOne({ assignmentId: req.params.assignmentId, studentId });
+
+    if (submission) {
+        submission.file = req.file.filename;
+        submission.originalFilename = req.file.originalname;
+        submission.submittedAt = Date.now();
+        await submission.save();
+    } else {
+        submission = new Submission({
+            assignmentId: req.params.assignmentId, studentId, file: req.file.filename, originalFilename: req.file.originalname
         });
-        
-        await newAssignment.save();
-        
-        // Create notifications for all students in the course
-        const notifications = course.students.map(studentId => ({
-            userId: studentId,
-            userRole: 'student',
-            message: `New assignment in ${course.title}: ${title}`,
-            courseId: course._id,
-            type: 'assignment'
-        }));
-        
-        if (notifications.length > 0) {
-            await Notification.insertMany(notifications);
-        }
-        
-        res.status(201).json(newAssignment);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+        await submission.save();
 
-// Get course assignments
-app.get('/api/courses/:courseId/assignments', async (req, res) => {
-    try {
-        const assignments = await Assignment.find({ courseId: req.params.courseId });
-        res.status(200).json(assignments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Submit assignment
-app.post('/api/assignments/:assignmentId/submit', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded' });
-        }
-        
-        const { studentId } = req.body;
-        
-        // Check if assignment exists
-        const assignment = await Assignment.findById(req.params.assignmentId);
-        if (!assignment) {
-            return res.status(404).json({ message: 'Assignment not found' });
-        }
-        
-        // Check if student has already submitted
-        const existingSubmission = await Submission.findOne({
-            assignmentId: req.params.assignmentId,
-            studentId
-        });
-        
-        if (existingSubmission) {
-            // Update existing submission
-            existingSubmission.file = req.file.filename;
-            existingSubmission.originalFilename = req.file.originalname;
-            existingSubmission.submittedAt = Date.now();
-            await existingSubmission.save();
-            
-            res.status(200).json(existingSubmission);
-        } else {
-            // Create new submission
-            const newSubmission = new Submission({
-                assignmentId: req.params.assignmentId,
-                studentId,
-                file: req.file.filename,
-                originalFilename: req.file.originalname
-            });
-            
-            await newSubmission.save();
-            
-            // Get course and teacher info for notification
-            const course = await Course.findById(assignment.courseId);
-            
-            // Create notification for teacher
-            const notification = new Notification({
-                userId: course.teacherId,
-                userRole: 'teacher',
-                message: `New submission for assignment: ${assignment.title}`,
-                courseId: course._id,
-                type: 'assignment'
-            });
-            
-            await notification.save();
-            
-            res.status(201).json(newSubmission);
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Get assignment submissions
-app.get('/api/assignments/:assignmentId/submissions', async (req, res) => {
-    try {
-        const submissions = await Submission.find({ assignmentId: req.params.assignmentId })
-            .populate('studentId', 'firstName lastName');
-            
-        res.status(200).json(submissions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Grade submission
-app.put('/api/submissions/:submissionId/grade', async (req, res) => {
-    try {
-        const { grade, feedback } = req.body;
-        
-        const submission = await Submission.findByIdAndUpdate(
-            req.params.submissionId,
-            { grade, feedback },
-            { new: true }
-        );
-        
-        if (!submission) {
-            return res.status(404).json({ message: 'Submission not found' });
-        }
-        
-        // Create notification for student
-        const assignment = await Assignment.findById(submission.assignmentId);
+        // Notify teacher
         const course = await Course.findById(assignment.courseId);
-        
         const notification = new Notification({
-            userId: submission.studentId,
-            userRole: 'student',
-            message: `Your submission for ${assignment.title} has been graded`,
-            courseId: course._id,
-            type: 'grade'
+            userId: course.teacherId, userRole: 'teacher', message: `New submission for: ${assignment.title}`, courseId: course._id, type: 'assignment'
         });
-        
         await notification.save();
-        
-        res.status(200).json(submission);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
     }
-});
 
-// Enroll student in course
-app.post('/api/courses/:courseId/enroll', async (req, res) => {
-    try {
-        const { studentId } = req.body;
-        
-        // Check if course exists
-        const course = await Course.findById(req.params.courseId);
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
-        }
-        
-        // Check if student exists
-        const student = await Student.findById(studentId);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
-        
-        // Check if student is already enrolled
-        if (course.students.includes(studentId)) {
-            return res.status(400).json({ message: 'Student already enrolled in this course' });
-        }
-        
-        // Add student to course
-        course.students.push(studentId);
-        await course.save();
-        
-        // Add course to student's enrolled courses
-        student.enrolledCourses.push(course._id);
-        await student.save();
-        
-        res.status(200).json({ message: 'Student enrolled successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+    res.status(200).json(submission);
+}));
 
-// Student Profile Routes
-// Update student profile
-app.put('/api/student/profile', async (req, res) => {
+// ----- PROFILE -----
+app.put('/api/student/profile', asyncHandler(async (req, res) => {
+    const { userId, ...updates } = req.body;
+    const student = await Student.findByIdAndUpdate(userId, updates, { new: true });
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    res.status(200).json({ message: 'Profile updated', student });
+}));
+
+app.get('/api/student/:studentId/profile', asyncHandler(async (req, res) => {
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    res.status(200).json(student);
+}));
+
+// ----- MESSAGES -----
+app.post('/api/messages', asyncHandler(async (req, res) => {
+    const { senderId, senderRole, recipientId, recipientRole, subject, content } = req.body;
+    if (!senderId || !senderRole || !recipientId || !recipientRole || !content) return res.status(400).json({ message: 'Missing fields' });
+    const msg = new Message({ senderId, senderRole, recipientId, recipientRole, subject, content });
+    await msg.save();
+
+    // Create notification for recipient
+    const notification = new Notification({
+        userId: recipientId, userRole: recipientRole, message: `New message: ${subject || 'No subject'}`, type: 'message'
+    });
+    await notification.save();
+
+    res.status(201).json(msg);
+}));
+
+app.get('/api/messages/:userId', asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const messages = await Message.find({ $or: [{ senderId: userId }, { recipientId: userId }] }).sort({ createdAt: -1 });
+    res.json(messages);
+}));
+
+// ----- TOMMY AI CHATBOT (optional) -----
+const chatHistories = {}; // simple in-memory sessions; replace with Redis for production
+
+app.post('/api/chat', asyncHandler(async (req, res) => {
     try {
-        const { userId, firstName, lastName, email, program, institution, yearLevel, profilePicture } = req.body;
-        
-        // Find and update student
-        const student = await Student.findById(userId);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
+        const { message, userId } = req.body;
+
+        // Validate API keys
+        if (!process.env.OPENAI_API_KEY || !process.env.TAVILY_API_KEY || !ChatOpenAI || !TavilySearchResults || !initializeAgentExecutorWithOptions || !BufferMemory) {
+            console.error("Missing AI libs or API Keys for Tommy.");
+            return res.status(500).json({ response: "⚠️ System configuration error: AI Keys or libs missing." });
         }
-        
-        // Update student fields
-        student.firstName = firstName || student.firstName;
-        student.lastName = lastName || student.lastName;
-        student.email = email || student.email;
-        student.major = program || student.major;
-        student.institution = institution || student.institution;
-        student.yearLevel = yearLevel || student.yearLevel;
-        student.profilePicture = profilePicture || student.profilePicture;
-        
-        await student.save();
-        
-        res.status(200).json({
-            message: 'Profile updated successfully',
-            student: {
-                id: student._id,
-                firstName: student.firstName,
-                lastName: student.lastName,
-                email: student.email,
-                program: student.major,
-                institution: student.institution,
-                yearLevel: student.yearLevel,
-                profilePicture: student.profilePicture
-            }
+
+        // Build model
+        const model = new ChatOpenAI({
+            modelName: process.env.OPENAI_MODEL || "gpt-4o",
+            temperature: 0,
+            openAIApiKey: process.env.OPENAI_API_KEY
         });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
 
-// Get student profile
-app.get('/api/student/:studentId/profile', async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.studentId);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
+        const tools = [
+            new TavilySearchResults({
+                maxResults: 3,
+                apiKey: process.env.TAVILY_API_KEY
+            })
+        ];
+
+        const sessionId = userId || 'anonymous';
+        if (!chatHistories[sessionId]) {
+            chatHistories[sessionId] = new BufferMemory({
+                memoryKey: "chat_history",
+                returnMessages: true,
+            });
         }
-        
-        res.status(200).json({
-            id: student._id,
-            firstName: student.firstName,
-            lastName: student.lastName,
-            email: student.email,
-            program: student.major,
-            institution: student.institution,
-            yearLevel: student.yearLevel,
-            profilePicture: student.profilePicture
+        const memory = chatHistories[sessionId];
+
+        const executor = await initializeAgentExecutorWithOptions(tools, model, {
+            agentType: "openai-functions",
+            verbose: true,
+            memory: memory,
+            handleParsingErrors: true
         });
+
+        const result = await executor.invoke({ input: message });
+
+        return res.json({ response: result.output });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Tommy Error:", error);
+        return res.status(500).json({ response: "Tommy is having trouble right now." });
     }
+}));
+
+// ---------- GLOBAL ERROR HANDLER ----------
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    const dbErr = handleDbError(err);
+    if (dbErr) return res.status(dbErr.status).json({ message: dbErr.message });
+    res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
 });
 
-// Upload profile picture
-app.post('/api/student/:studentId/profile-picture', upload.single('profilePicture'), async (req, res) => {
+// ---------- START SERVER ----------
+const server = app.listen(PORT, () => {
+    console.log(`🚀 ${APP_NAME} running on port ${PORT}`);
+});
+
+// Graceful shutdown
+const shutdown = async () => {
+    console.log('Shutting down...');
+    server.close(() => {
+        console.log('HTTP server closed.');
+    });
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded' });
-        }
-        
-        const student = await Student.findById(req.params.studentId);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
-        
-        // Update student's profile picture path
-        student.profilePicture = `/uploads/${req.file.filename}`;
-        await student.save();
-        
-        res.status(200).json({
-            message: 'Profile picture uploaded successfully',
-            profilePicture: student.profilePicture
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        await mongoose.disconnect();
+        console.log('Mongo disconnected.');
+    } catch (e) {
+        console.error('Error during Mongo disconnect', e);
     }
-});
+    process.exit(0);
+};
 
-// Update teacher profile
-app.put('/api/teacher/profile', async (req, res) => {
-    try {
-        const { userId, firstName, lastName, email, phone, institution, department, position, experience, subjects, bio, profilePicture } = req.body;
-        const teacher = await Teacher.findById(userId);
-        if (!teacher) {
-            return res.status(404).json({ message: 'Teacher not found' });
-        }
-        
-        teacher.firstName = firstName || teacher.firstName;
-        teacher.lastName = lastName || teacher.lastName;
-        teacher.email = email || teacher.email;
-        teacher.phone = phone || teacher.phone;
-        teacher.institution = institution || teacher.institution;
-        teacher.department = department || teacher.department;
-        teacher.position = position || teacher.position;
-        teacher.experience = experience || teacher.experience;
-        teacher.subjects = subjects || teacher.subjects;
-        teacher.bio = bio || teacher.bio;
-        teacher.profilePicture = profilePicture || teacher.profilePicture;
-        
-        await teacher.save();
-        
-        res.status(200).json({
-            message: 'Profile updated successfully',
-            teacher: {
-                id: teacher._id,
-                firstName: teacher.firstName,
-                lastName: teacher.lastName,
-                email: teacher.email,
-                phone: teacher.phone,
-                institution: teacher.institution,
-                department: teacher.department,
-                position: teacher.position,
-                experience: teacher.experience,
-                subjects: teacher.subjects,
-                bio: teacher.bio,
-                profilePicture: teacher.profilePicture
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
-// Get teacher profile
-app.get('/api/teacher/:teacherId/profile', async (req, res) => {
-    try {
-        const teacher = await Teacher.findById(req.params.teacherId);
-        if (!teacher) {
-            return res.status(404).json({ message: 'Teacher not found' });
-        }
-        
-        res.status(200).json({
-            id: teacher._id,
-            firstName: teacher.firstName,
-            lastName: teacher.lastName,
-            email: teacher.email,
-            phone: teacher.phone,
-            institution: teacher.institution,
-            department: teacher.department,
-            position: teacher.position,
-            experience: teacher.experience,
-            subjects: teacher.subjects,
-            bio: teacher.bio,
-            profilePicture: teacher.profilePicture
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+module.exports = app;

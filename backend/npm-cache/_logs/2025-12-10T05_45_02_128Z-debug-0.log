@@ -1,0 +1,94 @@
+0 verbose cli /opt/homebrew/Cellar/node/24.10.0/bin/node /opt/homebrew/bin/npm
+1 info using npm@11.6.0
+2 info using node@v24.10.0
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/dheerajrangu/LMS-MALD/backend/.npmrc
+5 silly config load:file:/Users/dheerajrangu/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm install express-rate-limit
+8 verbose argv "install" "express-rate-limit"
+9 verbose logfile logs-max:10 dir:/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_45_02_128Z-
+10 verbose logfile /Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_45_02_128Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly packumentCache heap:2348810240 maxSize:587202560 maxEntrySize:293601280
+13 silly logfile done cleaning log files
+14 silly idealTree buildDeps
+15 silly fetch manifest express-rate-limit@*
+16 silly packumentCache full:https://registry.npmjs.org/express-rate-limit cache-miss
+17 http cache https://registry.npmjs.org/express-rate-limit 28ms (cache hit)
+18 silly packumentCache full:https://registry.npmjs.org/express-rate-limit set size:399017 disposed:false
+19 silly fetch manifest express@^5.2.1
+20 silly packumentCache full:https://registry.npmjs.org/express cache-miss
+21 http cache https://registry.npmjs.org/express 4ms (cache hit)
+22 silly packumentCache full:https://registry.npmjs.org/express set size:801170 disposed:false
+23 silly placeDep ROOT express-rate-limit@8.2.1 OK for: istruzione-f-backend@1.0.0 want: *
+24 silly fetch manifest ip-address@10.0.1
+25 silly packumentCache full:https://registry.npmjs.org/ip-address cache-miss
+26 http cache https://registry.npmjs.org/ip-address 7ms (cache hit)
+27 silly packumentCache full:https://registry.npmjs.org/ip-address set size:135050 disposed:false
+28 silly fetch manifest @langchain/core@^1.0.0
+29 silly packumentCache full:https://registry.npmjs.org/@langchain%2fcore cache-miss
+30 http cache https://registry.npmjs.org/@langchain%2fcore 7ms (cache hit)
+31 silly packumentCache full:https://registry.npmjs.org/@langchain%2fcore set size:3808684 disposed:false
+32 verbose stack Error: could not resolve
+32 verbose stack     at PlaceDep.failPeerConflict (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/place-dep.js:503:25)
+32 verbose stack     at new PlaceDep (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/place-dep.js:157:21)
+32 verbose stack     at #buildDepStep (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:933:18)
+32 verbose stack     at async Arborist.buildIdealTree (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:182:7)
+32 verbose stack     at async Promise.all (index 1)
+32 verbose stack     at async Arborist.reify (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:126:5)
+32 verbose stack     at async Install.exec (/opt/homebrew/lib/node_modules/npm/lib/commands/install.js:150:5)
+32 verbose stack     at async Npm.exec (/opt/homebrew/lib/node_modules/npm/lib/npm.js:208:9)
+32 verbose stack     at async module.exports (/opt/homebrew/lib/node_modules/npm/lib/cli/entry.js:67:5)
+33 error code ERESOLVE
+34 error ERESOLVE could not resolve
+35 error
+36 error While resolving: @langchain/tavily@1.0.1
+36 error Found: @langchain/core@0.2.36[2m[22m
+36 error [2mnode_modules/@langchain/core[22m
+36 error   @langchain/core@">=0.2.21 <0.3.0" from @langchain/community@0.2.33[2m[22m
+36 error   [2mnode_modules/@langchain/community[22m
+36 error     @langchain/community@"^0.2.31" from the root project
+36 error   @langchain/core@">=0.2.26 <0.3.0" from @langchain/openai@0.2.11[2m[22m
+36 error   [2mnode_modules/@langchain/openai[22m
+36 error     @langchain/openai@">=0.2.0 <0.3.0" from @langchain/community@0.2.33[2m[22m
+36 error     [2mnode_modules/@langchain/community[22m
+36 error       @langchain/community@"^0.2.31" from the root project
+36 error     @langchain/openai@">=0.1.0 <0.3.0" from langchain@0.2.20[2m[22m
+36 error     [2mnode_modules/langchain[22m
+36 error       langchain@"~0.2.3" from @langchain/community@0.2.33[2m[22m
+36 error       [2mnode_modules/@langchain/community[22m
+36 error         @langchain/community@"^0.2.31" from the root project
+36 error       1 more (the root project)
+36 error     1 more (the root project)
+36 error   3 more (@langchain/textsplitters, langchain, the root project)
+36 error
+36 error Could not resolve dependency:
+36 error [95mpeer[39m @langchain/core@"^1.0.0" from @langchain/tavily@1.0.1[2m[22m
+36 error [2mnode_modules/@langchain/tavily[22m
+36 error   @langchain/tavily@"^1.0.1" from the root project
+36 error
+36 error Conflicting peer dependency: @langchain/core@1.1.4[2m[22m
+36 error [2mnode_modules/@langchain/core[22m
+36 error   [95mpeer[39m @langchain/core@"^1.0.0" from @langchain/tavily@1.0.1[2m[22m
+36 error   [2mnode_modules/@langchain/tavily[22m
+36 error     @langchain/tavily@"^1.0.1" from the root project
+36 error
+36 error Fix the upstream dependency conflict, or retry
+36 error this command with --force or --legacy-peer-deps
+36 error to accept an incorrect (and potentially broken) dependency resolution.
+37 error
+37 error
+37 error For a full report see:
+37 error /Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_45_02_128Z-eresolve-report.txt
+38 silly unfinished npm timer reify 1765345502432
+39 silly unfinished npm timer reify:loadTrees 1765345502435
+40 silly unfinished npm timer idealTree:buildDeps 1765345502482
+41 silly unfinished npm timer idealTree:node_modules/@langchain/tavily 1765345502538
+42 verbose cwd /Users/dheerajrangu/LMS-MALD/backend
+43 verbose os Darwin 25.1.0
+44 verbose node v24.10.0
+45 verbose npm  v11.6.0
+46 verbose exit 1
+47 verbose code 1
+48 error A complete log of this run can be found in: /Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_45_02_128Z-debug-0.log

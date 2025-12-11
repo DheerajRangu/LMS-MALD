@@ -1,0 +1,50 @@
+'Log files:
+/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-08T15_02_19_778Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: istruzione-f-backend@1.0.0
+Found: ignore@7.0.5
+node_modules/ignore
+  peerOptional ignore@"*" from langchain@0.2.17
+  node_modules/langchain
+    langchain@"0.2.17" from the root project
+    langchain@"~0.2.3" from @langchain/community@0.2.31
+    node_modules/@langchain/community
+      @langchain/community@"0.2.31" from the root project
+      peerOptional @langchain/community@"*" from langchain@0.2.17
+    peerOptional langchain@">=0.1.19 <0.4.0" from @getzep/zep-cloud@1.0.12
+    node_modules/@getzep/zep-cloud
+      peerOptional @getzep/zep-cloud@"^1.0.6" from @langchain/community@0.2.31
+      node_modules/@langchain/community
+        @langchain/community@"0.2.31" from the root project
+        peerOptional @langchain/community@"*" from langchain@0.2.17
+  ignore@"^7.0.4" from node-llama-cpp@3.14.2
+  node_modules/node-llama-cpp
+    peerOptional node-llama-cpp@"*" from @langchain/community@0.2.31
+    node_modules/@langchain/community
+      @langchain/community@"0.2.31" from the root project
+      peerOptional @langchain/community@"*" from langchain@0.2.17
+    peerOptional node-llama-cpp@"*" from langchain@0.2.17
+    node_modules/langchain
+      langchain@"0.2.17" from the root project
+      langchain@"~0.2.3" from @langchain/community@0.2.31
+      node_modules/@langchain/community
+        @langchain/community@"0.2.31" from the root project
+        peerOptional @langchain/community@"*" from langchain@0.2.17
+      peerOptional langchain@">=0.1.19 <0.4.0" from @getzep/zep-cloud@1.0.12
+      node_modules/@getzep/zep-cloud
+        peerOptional @getzep/zep-cloud@"^1.0.6" from @langchain/community@0.2.31
+        node_modules/@langchain/community
+          @langchain/community@"0.2.31" from the root project
+          peerOptional @langchain/community@"*" from langchain@0.2.17
+
+Could not resolve dependency:
+peerOptional ignore@"^5.2.0" from @langchain/community@0.2.31
+node_modules/@langchain/community
+  @langchain/community@"0.2.31" from the root project
+  peerOptional @langchain/community@"*" from langchain@0.2.17
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.
