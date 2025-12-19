@@ -7,7 +7,13 @@
 6 silly config load:file:/opt/homebrew/etc/npmrc
 7 verbose title npm start
 8 verbose argv "start"
-9 verbose logfile logs-max:10 dir:/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_47_33_227Z-
-10 verbose logfile /Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-10T05_47_33_227Z-debug-0.log
+9 verbose logfile logs-max:10 dir:/Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-19T06_48_19_435Z-
+10 verbose logfile /Users/dheerajrangu/LMS-MALD/backend/npm-cache/_logs/2025-12-19T06_48_19_435Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly logfile done cleaning log files
+13 verbose cwd /Users/dheerajrangu/LMS-MALD/backend
+14 verbose os Darwin 25.1.0
+15 verbose node v24.10.0
+16 verbose npm  v11.6.0
+17 verbose exit 0
+18 info ok

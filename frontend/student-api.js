@@ -1,7 +1,7 @@
 // student-api.js - API functions for student interface
 
 // API Base URL (configurable for production)
-const DEFAULT_LOCAL_API = 'http://localhost:3000/api';
+const DEFAULT_LOCAL_API = 'http://localhost:5001/api';
 const CONFIG_API =
     localStorage.getItem('API_BASE') ||
     (window.APP_CONFIG && window.APP_CONFIG.API_BASE) ||

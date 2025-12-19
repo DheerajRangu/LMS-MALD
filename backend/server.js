@@ -54,6 +54,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Serve uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve frontend files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// SPA fallback: serve index.html for unknown routes
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
 // --------- MONGOOSE CONNECTION with RETRY ----------
 mongoose.set('strictQuery', true);
 
@@ -901,8 +909,8 @@ const server = app.listen(PORT, () => {
 });
 
 // Graceful shutdown
-const shutdown = async () => {
-    console.log('Shutting down...');
+const shutdown = async (reason) => {
+    console.log('Shutting down...' + (reason ? ` Reason: ${reason}` : ''));
     server.close(() => {
         console.log('HTTP server closed.');
     });
@@ -915,7 +923,26 @@ const shutdown = async () => {
     process.exit(0);
 };
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+process.on('SIGINT', () => {
+    console.log('SIGINT received');
+    shutdown('SIGINT');
+});
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received');
+    shutdown('SIGTERM');
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught exception:', err);
+    shutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled rejection:', reason);
+});
+
+process.on('exit', (code) => {
+    console.log('Process exit with code', code);
+});
 
 module.exports = app;

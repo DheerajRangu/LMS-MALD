@@ -745,7 +745,7 @@
                 };
 
                 try {
-                    const res = await fetch('http://localhost:3000/api/register', {
+                    const res = await fetch('http://localhost:5001/api/register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -799,7 +799,7 @@ function submitStudentData() {
         newsletter: document.getElementById('newsletter').checked
     };
 
-    fetch('http://localhost:5000/register-student', {
+    fetch('http://localhost:5001/register-student', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(studentData)

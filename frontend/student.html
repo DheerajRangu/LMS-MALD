@@ -2201,7 +2201,7 @@
         // Load published courses for students
         async function loadAvailableCourses() {
             try {
-                const response = await fetch('http://localhost:3000/api/courses?published=true');
+                const response = await fetch('http://localhost:5001/api/courses?published=true');
                 const courses = await response.json();
                 
                 const coursesGrid = document.getElementById('available-courses-grid');
@@ -2228,9 +2228,9 @@
                     if (course.thumbnail) {
                         if (course.thumbnail.path) {
                             thumbnailUrl = course.thumbnail.path.startsWith('http') ? 
-                                course.thumbnail.path : `http://localhost:3000${course.thumbnail.path}`;
+                                course.thumbnail.path : `http://localhost:5001${course.thumbnail.path}`;
                         } else if (course.thumbnail.filename) {
-                            thumbnailUrl = `http://localhost:3000/uploads/general/${course.thumbnail.filename}`;
+                            thumbnailUrl = `http://localhost:5001/uploads/general/${course.thumbnail.filename}`;
                         }
                     }
                     
@@ -2295,7 +2295,7 @@
         
         async function getStudentEnrolledCourses(studentId) {
             try {
-                const response = await fetch(`http://localhost:3000/api/student/${studentId}/courses`);
+                const response = await fetch(`http://localhost:5001/api/student/${studentId}/courses`);
                 const courses = await response.json();
                 return Array.isArray(courses) ? courses.map(c => c._id || c) : [];
             } catch (error) {
@@ -2320,7 +2320,7 @@
                     return;
                 }
 
-                const response = await fetch('http://localhost:3000/api/courses');
+                const response = await fetch('http://localhost:5001/api/courses');
                 const allCourses = await response.json();
                 
                 const myCourses = allCourses.filter(course => enrolledIds.includes(course._id));
@@ -2338,9 +2338,9 @@
                     if (course.thumbnail) {
                         if (course.thumbnail.path) {
                             thumbnailUrl = course.thumbnail.path.startsWith('http') ? 
-                                course.thumbnail.path : `http://localhost:3000${course.thumbnail.path}`;
+                                course.thumbnail.path : `http://localhost:5001${course.thumbnail.path}`;
                         } else if (course.thumbnail.filename) {
-                            thumbnailUrl = `http://localhost:3000/uploads/general/${course.thumbnail.filename}`;
+                            thumbnailUrl = `http://localhost:5001/uploads/general/${course.thumbnail.filename}`;
                         }
                     }
                     
@@ -2414,7 +2414,7 @@
         // Enroll in a course
         async function enrollCourse(courseId, studentId, courseCard) {
             try {
-                const response = await fetch(`http://localhost:3000/api/courses/${courseId}/enroll`, {
+                const response = await fetch(`http://localhost:5001/api/courses/${courseId}/enroll`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ studentId })
@@ -2602,9 +2602,9 @@
                     profilePicture: profilePictureData ? 'Base64 data present' : 'No data'
                 });
                 
-                console.log('Making API request to:', 'http://localhost:3000/api/student/profile');
+                console.log('Making API request to:', 'http://localhost:5001/api/student/profile');
                 
-                const response = await fetch('http://localhost:3000/api/student/profile', {
+                const response = await fetch('http://localhost:5001/api/student/profile', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2657,7 +2657,7 @@
             // 3. Test server connectivity
             console.log('3. Testing server connectivity...');
             try {
-                const testResponse = await fetch('http://localhost:3000/api/login', {
+                const testResponse = await fetch('http://localhost:5001/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: 'test@example.com', password: 'password123', role: 'student' })
@@ -2671,7 +2671,7 @@
             if (userData.id) {
                 console.log('4. Testing database save...');
                 try {
-                    const response = await fetch('http://localhost:3000/api/student/profile', {
+                    const response = await fetch('http://localhost:5001/api/student/profile', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -2705,7 +2705,7 @@
         window.testServerConnection = async function() {
             console.log('Testing server connection...');
             try {
-                const response = await fetch('http://localhost:3000/api/login', {
+                const response = await fetch('http://localhost:5001/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: 'test@example.com', password: 'password123', role: 'student' })

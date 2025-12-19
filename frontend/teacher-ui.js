@@ -95,7 +95,7 @@ function loadUserInfo() {
         const courseSummaryEl = document.getElementById('teacherCourseSummary');
         if (courseSummaryEl && window.currentUserId) {
             try {
-                fetch(`http://localhost:3000/api/teacher/${window.currentUserId}/courses`)
+                fetch(`http://localhost:5001/api/teacher/${window.currentUserId}/courses`)
                     .then(r => r.ok ? r.json() : [])
                     .then(list => {
                         const count = Array.isArray(list) ? list.length : 0;
@@ -125,7 +125,7 @@ function loadUserInfo() {
 
     // Prefer fetching fresh data from DB
     if (window.currentUserId) {
-        fetch(`http://localhost:3000/api/teacher/${window.currentUserId}/profile`)
+        fetch(`http://localhost:5001/api/teacher/${window.currentUserId}/profile`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch teacher profile');
                 return res.json();
@@ -164,7 +164,7 @@ function updateDashboardStats() {
     const teacherId = window.currentUserId || teacherData.id || teacherData._id;
     if (!teacherId) return;
     
-    fetch(`http://localhost:3000/api/teacher/${teacherId}/courses`)
+    fetch(`http://localhost:5001/api/teacher/${teacherId}/courses`)
         .then(r => r.ok ? r.json() : [])
         .then(courses => {
             if (!Array.isArray(courses)) courses = [];
@@ -378,7 +378,7 @@ async function updateTeacherProfile() {
         const userData = JSON.parse(localStorage.getItem('istruzioneF_teacher') || '{}');
 
         // Persist to backend
-        const response = await fetch('http://localhost:3000/api/teacher/profile', {
+        const response = await fetch('http://localhost:5001/api/teacher/profile', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -655,7 +655,7 @@ function viewCourse(courseId) {
     courseDetails.style.display = 'block';
     courseDetails.innerHTML = '<div class="loading">Loading course details...</div>';
     
-    fetch(`http://localhost:3000/api/courses/${courseId}`)
+    fetch(`http://localhost:5001/api/courses/${courseId}`)
         .then(response => {
             if (!response.ok) throw new Error('Failed to fetch course details');
             return response.json();
@@ -783,10 +783,10 @@ function loadCourseMaterials(courseId) {
                         <p><span class="file-type">${fileInfo.type}</span> • Uploaded on ${uploadDate}</p>
                     </div>
                     <div class="material-actions">
-                        <a href="http://localhost:3000/uploads/${material.filename}" target="_blank" class="view-material">
+                        <a href="http://localhost:5001/uploads/${material.filename}" target="_blank" class="view-material">
                             <i class="fas fa-download"></i> Download
                         </a>
-                        <button class="preview-material" data-file="http://localhost:3000/uploads/${material.filename}" 
+                        <button class="preview-material" data-file="http://localhost:5001/uploads/${material.filename}" 
                                 data-type="${fileInfo.type.toLowerCase()}" data-name="${material.originalname}">
                             <i class="fas fa-eye"></i> Preview
                         </button>
