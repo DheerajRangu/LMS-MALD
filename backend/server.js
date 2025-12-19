@@ -561,54 +561,329 @@ app.get('/api/messages/:userId', asyncHandler(async (req, res) => {
 }));
 
 // ----- TOMMY AI CHATBOT (optional) -----
-const chatHistories = {}; // simple in-memory sessions; replace with Redis for production
+const TommyChatSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    userRole: { type: String, enum: ['student', 'teacher'] },
+    message: { type: String, required: true },
+    response: { type: String, required: true },
+    sessionId: { type: String },
+    createdAt: { type: Date, default: Date.now }
+}, { timestamps: true });
 
-app.post('/api/chat', asyncHandler(async (req, res) => {
+const TommyChat = mongoose.model('TommyChat', TommyChatSchema);
+
+const chatHistories = {};
+
+const validateTommyConfig = () => {
+    const hasKeys = process.env.OPENAI_API_KEY && process.env.TAVILY_API_KEY;
+    const hasLibs = ChatOpenAI && TavilySearchResults && initializeAgentExecutorWithOptions && BufferMemory;
+    return hasKeys && hasLibs;
+};
+
+const TOMMY_SYSTEM_PROMPT = `You are Tommy, an advanced AI assistant capable of helping with any topic - from general knowledge and creative writing to technical questions, coding help, math, science, history, and more.
+
+Your capabilities:
+- Answer questions on virtually any topic with accuracy and depth
+- Provide detailed explanations, examples, and context
+- Help with creative tasks, brainstorming, and problem-solving
+- Assist with coding, debugging, and technical explanations
+- Discuss current events and provide research-backed information
+- Adapt your tone based on the user's needs (professional, casual, educational, etc.)
+
+Guidelines:
+- Be helpful, accurate, and honest
+- If you're unsure about something, say so and explain what you'd need to verify it
+- Use web search (when available) for current information, recent events, or factual queries
+- Provide well-structured, clear responses
+- When answering LMS-related questions, use the available database tools
+- For coding questions, provide working examples when relevant
+- Break down complex topics into understandable parts
+- Be conversational and engaging while remaining professional`;
+
+const tommyHelpers = {
+    searchCourses: async (query, userRole = 'student') => {
+        try {
+            const filter = {};
+            if (userRole === 'student') {
+                filter.isPublic = true;
+                filter.status = 'published';
+            }
+            
+            const courses = await Course.find({
+                ...filter,
+                $or: [
+                    { title: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } },
+                    { code: { $regex: query, $options: 'i' } }
+                ]
+            }).select('title code category difficulty duration learningOutcomes').limit(5).lean();
+            
+            if (courses.length === 0) {
+                return `No courses found for "${query}". Browse all available courses to discover more!`;
+            }
+            
+            return courses.map(c => 
+                `**${c.title}** (${c.code})\n• Category: ${c.category}\n• Level: ${c.difficulty}\n• Duration: ${c.duration}`
+            ).join('\n\n');
+        } catch (error) {
+            return `Error searching courses: ${error.message}`;
+        }
+    },
+    
+    getStudentEnrollments: async (userId) => {
+        try {
+            const student = await Student.findById(userId)
+                .populate('enrolledCourses', 'title code category');
+            
+            if (!student || student.enrolledCourses.length === 0) {
+                return "You haven't enrolled in any courses yet. Search for courses to get started!";
+            }
+            
+            return `You're enrolled in:\n${student.enrolledCourses
+                .map(c => `• **${c.title}** (${c.code})`)
+                .join('\n')}`;
+        } catch (error) {
+            return `Error fetching enrollments: ${error.message}`;
+        }
+    },
+    
+    getUpcomingAssignments: async (studentId) => {
+        try {
+            const student = await Student.findById(studentId)
+                .populate('enrolledCourses', '_id');
+            
+            if (!student) return "Student not found";
+            
+            const enrolledIds = student.enrolledCourses.map(c => c._id);
+            const assignments = await Assignment.find({
+                courseId: { $in: enrolledIds },
+                dueDate: { $gte: new Date() }
+            }).sort({ dueDate: 1 }).limit(5).lean();
+            
+            if (assignments.length === 0) {
+                return "No upcoming assignments! Keep up the great work.";
+            }
+            
+            return `Your upcoming assignments:\n${assignments
+                .map(a => `• **${a.title}** - Due: ${new Date(a.dueDate).toLocaleDateString()}`)
+                .join('\n')}`;
+        } catch (error) {
+            return `Error fetching assignments: ${error.message}`;
+        }
+    },
+    
+    getCourseInfo: async (courseCode) => {
+        try {
+            const course = await Course.findOne({ code: courseCode })
+                .select('title description category difficulty duration learningOutcomes').lean();
+            
+            if (!course) return `Course "${courseCode}" not found.`;
+            
+            const outcomes = course.learningOutcomes.slice(0, 3).join('\n• ');
+            return `**${course.title}**\n• Category: ${course.category}\n• Level: ${course.difficulty}\n• Duration: ${course.duration}\n\nKey Learning Outcomes:\n• ${outcomes}`;
+        } catch (error) {
+            return `Error fetching course info: ${error.message}`;
+        }
+    }
+};
+
+app.post('/api/tommy/chat', asyncHandler(async (req, res) => {
     try {
-        const { message, userId } = req.body;
+        const { message, userId, userRole, includeWebSearch = true } = req.body;
 
-        // Validate API keys
-        if (!process.env.OPENAI_API_KEY || !process.env.TAVILY_API_KEY || !ChatOpenAI || !TavilySearchResults || !initializeAgentExecutorWithOptions || !BufferMemory) {
-            console.error("Missing AI libs or API Keys for Tommy.");
-            return res.status(500).json({ response: "⚠️ System configuration error: AI Keys or libs missing." });
+        if (!message || !message.trim()) {
+            return res.status(400).json({ error: "Message cannot be empty" });
         }
 
-        // Build model
+        const hasAIConfig = process.env.OPENAI_API_KEY && process.env.TAVILY_API_KEY;
+        const hasTommyLibs = ChatOpenAI && TavilySearchResults && initializeAgentExecutorWithOptions && BufferMemory;
+        
+        if (!hasAIConfig || !hasTommyLibs) {
+            return res.status(503).json({ 
+                error: "Tommy AI service not fully configured. Please add OPENAI_API_KEY and TAVILY_API_KEY to environment.",
+                fallback: true 
+            });
+        }
+
         const model = new ChatOpenAI({
             modelName: process.env.OPENAI_MODEL || "gpt-4o",
-            temperature: 0,
-            openAIApiKey: process.env.OPENAI_API_KEY
+            temperature: 0.8,
+            openAIApiKey: process.env.OPENAI_API_KEY,
+            maxTokens: 4096,
+            topP: 0.95,
+            frequencyPenalty: 0.5,
+            presencePenalty: 0.5
         });
 
-        const tools = [
-            new TavilySearchResults({
-                maxResults: 3,
-                apiKey: process.env.TAVILY_API_KEY
-            })
-        ];
+        const tools = [];
+        
+        if (includeWebSearch && process.env.TAVILY_API_KEY) {
+            tools.push(
+                new TavilySearchResults({
+                    maxResults: 5,
+                    apiKey: process.env.TAVILY_API_KEY,
+                    searchDepth: "advanced"
+                })
+            );
+        }
 
-        const sessionId = userId || 'anonymous';
+        const sessionId = userId || 'anonymous-' + Date.now();
         if (!chatHistories[sessionId]) {
             chatHistories[sessionId] = new BufferMemory({
                 memoryKey: "chat_history",
                 returnMessages: true,
+                humanPrefix: "User",
+                aiPrefix: "Tommy"
             });
         }
         const memory = chatHistories[sessionId];
 
+        const systemMessage = TOMMY_SYSTEM_PROMPT + 
+            (userRole === 'teacher' ? '\n\nNote: This user is a teacher. Provide educational and professional context when relevant.' : 
+             '\n\nNote: This user is a student. Provide educational context and learning support when relevant.');
+
         const executor = await initializeAgentExecutorWithOptions(tools, model, {
             agentType: "openai-functions",
-            verbose: true,
+            agentArgs: {
+                systemMessage: systemMessage,
+                prefix: "",
+                suffix: "",
+                inputVariables: ["input", "chat_history", "agent_scratchpad"]
+            },
+            verbose: false,
             memory: memory,
-            handleParsingErrors: true
+            handleParsingErrors: true,
+            maxIterations: 10,
+            earlyStoppingMethod: "generate",
+            returnIntermediateSteps: false
         });
 
-        const result = await executor.invoke({ input: message });
+        const result = await executor.invoke({ 
+            input: message,
+            chat_history: memory.chatHistory || []
+        });
+        
+        let response = result.output || "I couldn't process that request.";
+        response = response.trim();
 
-        return res.json({ response: result.output });
+        if (!response) {
+            response = "I've thought about your question, but I need you to ask it differently or provide more context. Could you rephrase or give me more details?";
+        }
+
+        if (userId) {
+            try {
+                const chatRecord = new TommyChat({
+                    userId,
+                    userRole: userRole || 'student',
+                    message: message.substring(0, 5000),
+                    response: response.substring(0, 10000),
+                    sessionId
+                });
+                await chatRecord.save();
+            } catch (dbError) {
+                console.warn("Failed to save Tommy chat to database:", dbError.message);
+            }
+        }
+
+        return res.json({ 
+            response, 
+            sessionId, 
+            timestamp: new Date(),
+            model: process.env.OPENAI_MODEL || "gpt-4o",
+            webSearchEnabled: tools.length > 0
+        });
     } catch (error) {
-        console.error("Tommy Error:", error);
-        return res.status(500).json({ response: "Tommy is having trouble right now." });
+        console.error("Tommy Error:", error.message);
+        
+        let errorResponse = "I encountered an error processing your request.";
+        if (error.message.includes('rate limit')) {
+            errorResponse = "I'm getting too many requests. Please try again in a moment.";
+        } else if (error.message.includes('quota')) {
+            errorResponse = "API quota exceeded. Please try again later.";
+        } else if (error.message.includes('invalid')) {
+            errorResponse = "There was a validation error. Please check your message and try again.";
+        }
+        
+        return res.status(500).json({ error: errorResponse, details: error.message });
+    }
+}));
+
+app.get('/api/tommy/history/:userId', authMiddleware, asyncHandler(async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const history = await TommyChat.find({ userId })
+            .sort({ createdAt: -1 })
+            .limit(50)
+            .lean();
+        
+        res.json({ history, count: history.length });
+    } catch (error) {
+        console.error("Error fetching Tommy history:", error);
+        return res.status(500).json({ error: "Failed to retrieve conversation history" });
+    }
+}));
+
+app.delete('/api/tommy/history/:userId', authMiddleware, asyncHandler(async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const result = await TommyChat.deleteMany({ userId });
+        
+        if (chatHistories[userId]) {
+            delete chatHistories[userId];
+        }
+        
+        res.json({ message: "Conversation history cleared", deletedCount: result.deletedCount });
+    } catch (error) {
+        console.error("Error clearing Tommy history:", error);
+        return res.status(500).json({ error: "Failed to clear conversation history" });
+    }
+}));
+
+app.get('/api/tommy/search-courses', asyncHandler(async (req, res) => {
+    try {
+        const { query } = req.query;
+        const userRole = req.query.role || 'student';
+        
+        if (!query) {
+            return res.status(400).json({ error: "Search query required" });
+        }
+        
+        const result = await tommyHelpers.searchCourses(query, userRole);
+        res.json({ result });
+    } catch (error) {
+        console.error("Error searching courses via Tommy:", error);
+        return res.status(500).json({ error: "Failed to search courses" });
+    }
+}));
+
+app.get('/api/tommy/my-enrollments', authMiddleware, asyncHandler(async (req, res) => {
+    try {
+        const result = await tommyHelpers.getStudentEnrollments(req.user.id);
+        res.json({ result });
+    } catch (error) {
+        console.error("Error fetching enrollments via Tommy:", error);
+        return res.status(500).json({ error: "Failed to fetch enrollments" });
+    }
+}));
+
+app.get('/api/tommy/upcoming-assignments', authMiddleware, asyncHandler(async (req, res) => {
+    try {
+        const result = await tommyHelpers.getUpcomingAssignments(req.user.id);
+        res.json({ result });
+    } catch (error) {
+        console.error("Error fetching assignments via Tommy:", error);
+        return res.status(500).json({ error: "Failed to fetch assignments" });
+    }
+}));
+
+app.get('/api/tommy/course-info/:courseCode', asyncHandler(async (req, res) => {
+    try {
+        const { courseCode } = req.params;
+        const result = await tommyHelpers.getCourseInfo(courseCode);
+        res.json({ result });
+    } catch (error) {
+        console.error("Error fetching course info via Tommy:", error);
+        return res.status(500).json({ error: "Failed to fetch course information" });
     }
 }));
 

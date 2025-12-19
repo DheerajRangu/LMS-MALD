@@ -34,35 +34,102 @@
             scroll-behavior: smooth;
         }
 
-        /* --- SPLASH SCREEN & LOGO --- */
+        /* --- SPLASH SCREEN & LOGO REFACTOR --- */
         .splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
             background: var(--gradient-soft); display: flex; justify-content: center; align-items: center;
-            z-index: 1000; animation: fadeOut 0.5s ease-in-out 2.5s forwards;
+            z-index: 1000; 
+            /* Updated fadeOut delay to match the new drawing sequence (~3.6s total) */
+            animation: fadeOut 0.5s ease-in-out 3.6s forwards;
         }
-        .splash-content { text-align: center; animation: float 2s ease-in-out infinite; }
+        .splash-content { text-align: center; animation: none; /* Removed float */ }
         
-        .dinosaur-logo { margin: 0 auto 2rem; width: 120px; height: 100px; position: relative; }
-        .dino-body { position: relative; width: 80px; height: 40px; background: linear-gradient(135deg, var(--grok-green), var(--primary-color)); border-radius: 20px 20px 8px 8px; margin: 0 auto; }
-        .dino-head { position: absolute; top: -15px; left: 60px; width: 30px; height: 25px; background: linear-gradient(135deg, var(--grok-green), var(--primary-color)); border-radius: 50% 50% 40% 40%; animation: headBob 2s ease-in-out infinite; }
-        .dino-eye { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; background: white; border-radius: 50%; }
-        .dino-neck { position: absolute; top: 5px; left: -10px; width: 15px; height: 15px; background: linear-gradient(135deg, var(--grok-green), var(--primary-color)); border-radius: 50%; }
-        .dino-back { position: absolute; top: -5px; left: 20px; width: 20px; height: 15px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 30% 40% 40% 30%; }
-        .dino-tail { position: absolute; top: 10px; left: -15px; width: 20px; height: 8px; background: linear-gradient(135deg, var(--secondary-color), var(--primary-color)); border-radius: 50% 0 0 50%; animation: tailWag 1s ease-in-out infinite; }
-        .dino-leg { position: absolute; bottom: -10px; width: 8px; height: 15px; background: var(--primary-color); border-radius: 4px; }
-        .front-leg { left: 20px; animation: legMove 0.6s ease-in-out infinite; }
-        .back-leg { left: 50px; animation: legMove 0.6s ease-in-out infinite 0.3s; }
+        /* Base container for the geometric logo */
+        .dinosaur-logo { 
+            margin: 0 auto 2rem; 
+            width: 120px; 
+            height: 100px; 
+            position: relative; 
+            animation: none; 
+        }
 
+        /* New CSS for the line drawing effect */
+        .dino-line-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: scale(0.8); /* Shrink for better fit */
+        }
+
+        /* Generic Line Styles - Using a thin border to represent a line stroke */
+        .dino-line {
+            position: absolute;
+            height: 0;
+            width: 0;
+            border: 2px solid white; /* Line color */
+            border-radius: 2px;
+            /* Use cubic-bezier for the sleek drawing effect */
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+
+        /* Specific component geometry (Tail, Body, Neck, Head, Legs) */
+        .dino-tail {
+            top: 50px; left: 10px;
+            transform: rotate(-15deg);
+            border-width: 0 0 2px 0; 
+            animation: drawLineX 0.4s ease-out 1.0s forwards;
+        }
+        .dino-body-top {
+            top: 40px; left: 38px; 
+            border-width: 2px 0 0 0; 
+            animation: drawLineX 0.5s ease-out 1.4s forwards;
+        }
+        .dino-neck-up {
+            top: 25px; left: 78px;
+            border-width: 0 0 0 2px; 
+            animation: drawLineY 0.3s ease-out 1.9s forwards;
+        }
+        .dino-head-top {
+            top: 25px; left: 78px;
+            border-width: 2px 0 0 0;
+            transform: skewX(-20deg); 
+            animation: drawLineX 0.3s ease-out 2.2s forwards;
+        }
+        .dino-leg-back, .dino-leg-front {
+            top: 60px;
+            border-width: 0 0 0 2px;
+            animation: drawLineY 0.3s ease-out forwards;
+        }
+        .dino-leg-back { left: 55px; animation-delay: 2.5s; }
+        .dino-leg-front { left: 25px; animation-delay: 2.7s; }
+        .dino-ground {
+            top: 70px; left: 20px;
+            border-width: 2px 0 0 0;
+            animation: drawLineX 0.6s ease-out 2.9s forwards;
+        }
+
+
+        /* KEYFRAMES for drawing lines */
+        @keyframes drawLineX {
+            from { width: 0; }
+            to { width: var(--final-width, 100%); } 
+        }
+
+        @keyframes drawLineY {
+            from { height: 0; }
+            to { height: var(--final-height, 100%); }
+        }
+
+        /* Remaining Splash Screen Styling */
         .logo-text h1 { font-size: 3.5rem; font-weight: 700; color: white; margin-bottom: 0.5rem; }
         .f-accent { color: var(--grok-green); font-style: italic; margin-left: 4px; }
         .tagline { color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; letter-spacing: 0.5px; }
-
         .loading-dots { display: flex; justify-content: center; gap: 8px; margin-top: 2rem; }
         .dot { width: 8px; height: 8px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; animation: dotPulse 1.4s ease-in-out infinite both; }
         .dot:nth-child(2) { animation-delay: 0.2s; }
         .dot:nth-child(3) { animation-delay: 0.4s; }
 
-        /* --- LAYOUT --- */
+        /* --- LAYOUT --- (Unchanged) */
         .main-content { opacity: 0; animation: fadeIn 0.8s ease-in-out forwards; }
         .header { position: fixed; top: 0; width: 100%; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0, 0, 0, 0.1); z-index: 100; }
         .header-content { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
@@ -75,7 +142,7 @@
         .nav-button { background: var(--gradient); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; transition: transform 0.3s ease; }
         .nav-button:hover { transform: translateY(-2px); }
 
-        /* --- HERO --- */
+        /* --- HERO --- (Unchanged) */
         .hero { padding: 120px 2rem 80px; max-width: 1200px; margin: 0 auto; }
         .hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
         .hero-text h1 { font-size: 3.5rem; font-weight: 700; line-height: 1.1; margin-bottom: 1.5rem; }
@@ -87,12 +154,10 @@
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3); }
         .btn-secondary { background: var(--background-secondary); color: var(--text-primary); }
         .btn-secondary:hover { background: #e5e5e7; transform: translateY(-2px); }
-        
         .hero-stats { display: flex; gap: 2rem; }
         .stat { text-align: center; }
         .stat-number { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.25rem; }
         .stat-label { font-size: 0.9rem; color: var(--text-secondary); }
-
         .hero-visual { position: relative; height: 400px; display: flex; justify-content: center; align-items: center; }
         .ai-orb { width: 200px; height: 200px; background: var(--gradient); border-radius: 50%; filter: blur(40px); opacity: 0.3; animation: pulse 4s ease-in-out infinite; }
         .floating-card { position: absolute; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); animation: float 3s ease-in-out infinite; }
@@ -101,7 +166,7 @@
         .card-3 { bottom: 20%; left: 20%; animation-delay: 2s; }
         .card-icon { font-size: 1.25rem; }
 
-        /* --- FEATURES --- */
+        /* --- FEATURES --- (Unchanged) */
         .features { padding: 80px 2rem; background: var(--background-secondary); }
         .container { max-width: 1200px; margin: 0 auto; }
         .features h2 { text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem; color: var(--text-primary); }
@@ -112,7 +177,7 @@
         .feature-card h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
         .feature-card p { color: var(--text-secondary); line-height: 1.6; }
 
-        /* --- TOMMY SECTION --- */
+        /* --- TOMMY SECTION --- (Unchanged) */
         .tommy-section { padding: 80px 2rem; background: var(--background); }
         .tommy-content { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
         .tommy-visual { display: flex; justify-content: center; align-items: center; }
@@ -124,66 +189,218 @@
         .tommy-feature:hover { transform: translateX(10px); }
         .tommy-feature-icon { font-size: 2rem; width: 60px; height: 60px; background: var(--gradient); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
 
-        /* --- ADVANCED CHATBOT WIDGET (UPDATED) --- */
-        .chatbot-widget { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--gradient); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); z-index: 1000; transition: transform 0.3s ease; color: white; font-size: 1.5rem; }
+        /* --- NEW ADVANCED CHATBOT WIDGET --- (Replaced with LMS-MALD version) */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            color: white;
+            font-size: 1.5rem;
+        }
         .chatbot-widget:hover { transform: scale(1.1); }
-        
-        .chatbot-container { position: fixed; bottom: 100px; right: 30px; width: 400px; height: 600px; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2); z-index: 1000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e5e5e5; }
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 420px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
         .chatbot-container.active { display: flex; }
+        .chatbot-header {
+            padding: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .chatbot-avatar-small {
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .chatbot-info {
+            flex: 1;
+        }
+        .chatbot-info h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .chatbot-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .icon-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .icon-btn.active {
+            background: var(--accent-color);
+        }
+        .chatbot-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            background: var(--assistant-bg);
+        }
+        .chatbot-messages::-webkit-scrollbar {
+            display: none;
+        }
+        .message {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.5;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            font-size: 0.95rem;
+        }
+        .message-bot {
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            border-radius: 12px 12px 12px 4px;
+            align-self: flex-start;
+            color: #1D1D1F;
+        }
+        .message-user {
+            background: var(--user-bg);
+            color: white;
+            border-radius: 12px 12px 4px 12px;
+            align-self: flex-end;
+        }
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-self: flex-start;
+            padding: 1rem;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .chatbot-input-container {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #e5e5e5;
+            flex-shrink: 0;
+            background: white;
+        }
+        .chatbot-input {
+            display: flex;
+            gap: 0.75rem;
+            background: var(--background-secondary);
+            border-radius: 25px;
+            padding: 0.75rem;
+            border: 1px solid #e5e5e5;
+        }
+        .chatbot-input textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            resize: none;
+            max-height: 100px;
+            outline: none;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+        .chatbot-input textarea::placeholder {
+            color: var(--text-secondary);
+        }
+        .chatbot-input button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .chatbot-input button:hover:not(:disabled) {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .chatbot-input button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-        .chatbot-header { padding: 1rem; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 1rem; background: white; }
-        .chatbot-avatar-small { width: 32px; height: 32px; background: var(--gradient); border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1rem; color: white; }
-        .chatbot-info h3 { font-size: 1rem; margin-bottom: 0.1rem; font-weight: 600; }
-        .chatbot-info p { font-size: 0.75rem; opacity: 0.7; }
-        
-        /* New Header Actions */
-        .header-actions { margin-left: auto; display: flex; gap: 8px; }
-        .icon-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 4px; border-radius: 4px; transition: background 0.2s; color: var(--text-secondary); }
-        .icon-btn:hover { background: #f0f0f0; }
-        .icon-btn.active { color: var(--primary-color); }
-
-        .chatbot-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; background: var(--assistant-bg); }
-        .message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
-        .message-bot { background: white; align-self: flex-start; border: 1px solid #e5e5e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .message-user { background: var(--user-bg); color: white; align-self: flex-end; }
-        
-        /* Rich Text Styles inside Message */
-        .message strong { font-weight: 700; color: inherit; }
-        .message ul { padding-left: 20px; margin-top: 5px; }
-        .message li { margin-bottom: 4px; }
-        
-        .typing-indicator { display: flex; gap: 4px; padding: 12px 16px; background: white; border-radius: 12px; border: 1px solid #e5e5e5; align-self: flex-start; max-width: 60px; }
-        .typing-dot { width: 6px; height: 6px; background: var(--text-secondary); border-radius: 50%; animation: typingPulse 1.4s ease-in-out infinite both; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        .chatbot-input-container { padding: 1rem; border-top: 1px solid #e5e5e5; background: white; }
-        .chatbot-input { display: flex; gap: 0.5rem; align-items: flex-end; }
-        
-        /* Lead Mode Styles */
-        .input-mode-lead { border: 2px solid var(--accent-color) !important; }
-        .btn-mode-lead { background: var(--accent-color) !important; }
-
-        .chatbot-input textarea { flex: 1; padding: 0.75rem; border: 1px solid #e5e5e5; border-radius: 12px; outline: none; font-size: 0.9rem; font-family: inherit; resize: none; min-height: 40px; max-height: 120px; }
-        .chatbot-input button { background: var(--primary-color); color: white; border: none; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.3s ease; }
-        .chatbot-input button:hover { background: var(--secondary-color); }
-        .chatbot-input button:disabled { background: var(--text-secondary); cursor: not-allowed; }
-
+        /* --- FOOTER --- (Unchanged) */
         .footer { padding: 2rem; text-align: center; background: var(--background-secondary); color: var(--text-secondary); }
 
-        /* Animations */
+        /* Animations (Unchanged) */
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-        @keyframes headBob { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(5deg); } }
-        @keyframes tailWag { 0%, 100% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(-3px) rotate(-5deg); } }
-        @keyframes legMove { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        @keyframes dotPulse { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
-        @keyframes typingPulse { 0%, 60%, 100% { transform: scale(1); opacity: 0.5; } 30% { transform: scale(1.2); opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.1); opacity: 0.4; } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes dotPulse { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+        @keyframes typing { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }
 
-        /* Responsive */
+        /* Responsive (Unchanged) */
         @media (max-width: 768px) {
             .hero-content { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
             .hero-text h1 { font-size: 2.5rem; }
@@ -208,113 +425,584 @@
             window.location.href = 'role.html';
         };
 
-       // --- 🧠 REAL AI BRAIN (Connected to Server) ---
-        const tommyBrain = {
-            // Context tracking
-            context: {},
+        // ======================
+        // COMPREHENSIVE LMS-MALD VOICE ASSISTANT Q&A
+        // ======================
 
-            // Lead Gen Validation Logic
-            handleLeadCapture: (input) => {
-                const phoneRegex = /^[0-9\-\+\s\(\)]{8,}$/;
-                if (phoneRegex.test(input)) {
-                    return {
-                        text: "Perfect! 🌟 We have received your number (**" + input + "**). A specialist is reviewing your profile now and will call you shortly.",
-                        success: true
-                    };
-                } else {
-                    return {
-                        text: "That doesn't look like a valid phone number. Please try again (e.g. 555-0123).",
-                        success: false
-                    };
-                }
-            },
-
-            // ⚡ UPDATED: Talk to Port 3000
-            generateResponse: async function(input) {
-                try {
-                    const response = await fetch('http://localhost:5000/api/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ 
-                            message: input, 
-                            userId: "student_user_1" 
-                        }) 
-                    });
-
-                    const data = await response.json();
-                    
-                    if (!response.ok) {
-                        throw new Error("Server error");
-                    }
-
-                    // Check for action keywords
-                    let action = null;
-                    const lowerRes = data.response ? data.response.toLowerCase() : "";
-                    if (lowerRes.includes("scroll") || lowerRes.includes("features")) {
-                        action = "SCROLL_FEATURES";
-                    }
-
-                    return { 
-                        text: data.response, 
-                        action: action 
-                    };
-
-                } catch (error) {
-                    console.error("Connection Error:", error);
-                    return { 
-                        text: "⚠️ **Brain Freeze!** I cannot reach the server on port 5000. Is it running?", 
-                        action: null 
-                    };
-                }
-            }
-        }; // <-- Removed extra closing brace here
-
-        // --- 🎨 RICH TEXT COMPONENT ---
-        const MessageText = ({ text }) => {
-            if (!text) return null;
+        const lmsMaldQA = {
+            // GREETINGS & BASIC (1–15)
+            "hello": "Hello! Welcome to the LMS-MALD platform. How can I help you?",
+            "hi": "Hi there! What would you like to do today?",
+            "good morning": "Good morning! Ready to continue your learning?",
+            "good evening": "Good evening! How can I assist you?",
+            "who are you": "I am Tommy, your LMS-MALD voice assistant.",
+            "what can you do": "I can help with courses, assignments, login, and notifications.",
+            "can you help me": "Of course! Please tell me what you need.",
+            "are you online": "Yes, I'm here and ready to help.",
+            "start assistant": "Assistant started successfully.",
+            "wake up": "I'm active now.",
+            "help": "Sure! Tell me your issue.",
+            "talk to me": "I'm listening.",
+            "what is lms mald": "LMS-MALD is a full-stack learning management system.",
+            "is this a learning platform": "Yes, it supports online learning for students and teachers.",
+            "who uses this platform": "Students and teachers use this platform.",
             
-            // Helper to parse **bold**
-            const parseBold = (str) => {
-                const parts = str.split(/(\*\*.*?\*\*)/g);
-                return parts.map((part, i) => {
-                    if (part.startsWith('**') && part.endsWith('**')) {
-                        return React.createElement('strong', { key: i }, part.slice(2, -2));
-                    }
-                    return part;
-                });
-            };
-
-            // Handle Lists (newlines with dots or dashes)
-            const lines = text.split('\n');
-            const formatted = lines.map((line, i) => {
-                if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-                    return React.createElement('li', { key: i }, parseBold(line.replace(/^[•-]\s*/, '')));
-                }
-                // Handle empty lines or standard text
-                if (line.trim() === '') return React.createElement('br', { key: i });
-                return React.createElement('div', { key: i }, parseBold(line));
-            });
-
-            return React.createElement('div', null, formatted);
+            // AUTHENTICATION (16–35)
+            "login as student": "Use the student login option with your credentials.",
+            "login as teacher": "Select teacher login and enter your details.",
+            "register as student": "Choose student registration and fill the form.",
+            "register as teacher": "Select teacher registration and submit required details.",
+            "login separate": "Yes, both have separate authentication flows.",
+            "forgot password": "Use the reset password option to recover it.",
+            "change password": "Yes, from your profile settings.",
+            "authentication secure": "Yes, secure authentication is implemented.",
+            "role based access": "Users access features based on their role.",
+            "students create courses": "No, only teachers can create courses.",
+            "access teacher features": "You need to be logged in as a teacher.",
+            "update profile": "Yes, profile updates are supported.",
+            "email required": "Yes, email is mandatory.",
+            "log out": "Yes, you can log out anytime.",
+            "data safe": "Yes, user data is securely handled.",
+            "after registration": "You can log in and access your dashboard.",
+            "teachers need approval": "Yes, teachers may require verification.",
+            "switch roles": "No, roles are fixed per account.",
+            "login failed": "Please check your credentials.",
+            "authentication token": "Yes, token-based authentication is used.",
+            
+            // COURSE MANAGEMENT (36–60)
+            "create courses": "Only teachers can create courses.",
+            "create a course": "Teachers can use the course creation option.",
+            "edit courses": "Yes, courses can be updated anytime.",
+            "delete courses": "Yes, course management is supported.",
+            "view courses": "Yes, students can browse courses.",
+            "enroll in course": "Click the enroll button on the course page.",
+            "unenroll from course": "Yes, unenrollment is supported.",
+            "manage enrolled students": "Yes, teachers can manage enrollments.",
+            "course details": "Title, description, syllabus, and materials.",
+            "role restricted courses": "Yes, access depends on role.",
+            "enrolled courses": "Yes, from your dashboard.",
+            "course deadlines": "Yes, assignments include deadlines.",
+            "real time updates": "Yes, updates reflect immediately.",
+            "add announcements": "Yes, announcements are supported.",
+            "course updates": "Yes, via notifications.",
+            "search courses": "Yes, course search is available.",
+            "videos in courses": "Yes, videos are supported.",
+            "pdfs in courses": "Yes, PDFs are supported.",
+            "documents in courses": "Yes, multiple file types are allowed.",
+            "responsive courses": "Yes, courses work on all devices.",
+            "student progress": "Yes, progress tracking is available.",
+            "categorized courses": "Yes, courses can be organized.",
+            "resume course": "Yes, progress is saved.",
+            "complete course": "Yes, completion tracking is supported.",
+            "remove content": "Yes, content management is enabled.",
+            
+            // MATERIAL UPLOADS & PREVIEW (61–85)
+            "upload materials": "Teachers can upload materials.",
+            "supported file types": "PDFs, videos, images, and documents.",
+            "file uploads secure": "Yes, secure file handling is implemented.",
+            "download materials": "Yes, if permitted.",
+            "preview files": "Yes, built-in preview is available.",
+            "preview pdfs": "Yes, PDF preview is supported.",
+            "preview videos": "Yes, videos play inside the platform.",
+            "preview images": "Yes, image preview is available.",
+            "download files": "No, preview works without download.",
+            "file size limit": "Yes, limits are applied for security.",
+            "update materials": "Yes, materials can be replaced.",
+            "delete materials": "Yes, file removal is allowed.",
+            "file visibility": "Yes, access is role-based.",
+            "course specific materials": "Yes, materials are linked to courses.",
+            "secure storage": "Yes, secure storage is used.",
+            "videos on mobile": "Yes, the UI is responsive.",
+            "slow loading": "Optimized loading is implemented.",
+            "unsupported files": "Yes, only allowed formats work.",
+            "preview uploads": "Yes, preview is available.",
+            "instant visibility": "Yes, updates are real time.",
+            "comment materials": "That feature may be added later.",
+            "file protection": "Yes, access controls are applied.",
+            "update materials later": "Yes, teachers can update anytime.",
+            "stream videos": "Yes, video streaming is supported.",
+            "hide files": "Yes, teachers control visibility.",
+            
+            // ASSIGNMENTS & NOTIFICATIONS (86–120)
+            "create assignments": "Teachers create assignments.",
+            "submit assignments": "Yes, submission is supported.",
+            "assignment deadlines": "Yes, deadlines are enforced.",
+            "upload assignment files": "Yes, file upload is available.",
+            "view submissions": "Yes, teachers can review them.",
+            "grade assignments": "Yes, grading is supported.",
+            "view grades": "Yes, grades are visible.",
+            "resubmit assignments": "If allowed by the teacher.",
+            "assignment notifications": "Yes, real-time notifications are sent.",
+            "notification triggers": "New courses, assignments, and grades.",
+            "real time notifications": "Yes, instant updates are provided.",
+            "disable notifications": "Notification settings can be managed.",
+            "submission alerts": "Yes, teachers are notified.",
+            "assignment status": "Yes, submission status is visible.",
+            "late submissions": "Depends on teacher settings.",
+            "update assignments": "Yes, teachers can update them.",
+            "view deadlines": "Yes, deadlines are shown clearly.",
+            "grade notifications": "Yes, grade notifications are sent.",
+            "role based notifications": "Yes, notifications depend on role.",
+            "course updates notifications": "Yes, updates trigger alerts.",
+            "notification history": "Yes, notification history is available.",
+            "send announcements": "Yes, announcements are supported.",
+            "announcement notifications": "Yes, students receive alerts.",
+            "miss updates": "Notifications help avoid missing updates.",
+            "secure notifications": "Yes, notifications are protected.",
+            "read notifications later": "Yes, unread notifications remain.",
+            "fast notifications": "Yes, they are real time.",
+            "assignment preview": "Yes, file preview works.",
+            "download submissions": "Yes, downloads are allowed.",
+            "timestamped submissions": "Yes, submission time is recorded.",
+            "reject submissions": "Yes, based on criteria.",
+            "track progress": "Yes, progress tracking is enabled.",
+            "deadline notifications": "Yes, reminders are supported.",
+            "device friendly notifications": "Yes, they work across devices.",
+            "engagement notifications": "Yes, they keep users informed.",
+            
+            // DEVELOPMENT & CHALLENGES (121–150)
+            "backend used": "Node.js with Express.",
+            "frontend used": "A responsive web interface.",
+            "api design": "Yes, APIs were designed early.",
+            "full stack": "Yes, it's a full-stack application.",
+            "development step": "Database and API design.",
+            "roles planned": "Yes, role separation was planned.",
+            "authentication challenging": "Yes, role-based access was complex.",
+            "file upload difficult": "Yes, handling multiple file types was challenging.",
+            "ui responsiveness": "Yes, multiple devices were considered.",
+            "previews difficult": "Yes, secure previews were complex.",
+            "testing conducted": "Yes, extensive testing was done.",
+            "visibility issues fixed": "Yes, access control issues were resolved.",
+            "real time notification hard": "Yes, it required careful integration.",
+            "platform scalable": "Yes, it is designed to scale.",
+            "future features": "Yes, it is extensible.",
+            "role based access secure": "Yes, strict access control is used.",
+            "error handling": "Yes, error handling is implemented.",
+            "content visibility controlled": "Yes, permissions are enforced.",
+            "real use cases": "Yes, it's built for real-world learning.",
+            "interview ready": "Yes, it demonstrates strong full-stack skills.",
+            "backend skills": "Yes, Node.js and API design are showcased.",
+            "frontend skills": "Yes, responsive UI is implemented.",
+            "system design": "Yes, architecture planning is demonstrated.",
+            "file security": "Yes, secure uploads are implemented.",
+            "multiple users": "Yes, students and teachers.",
+            "real time data": "Yes, notifications are real time.",
+            "teamwork involved": "Yes, it was a team project.",
+            "lms mald proves": "Strong full-stack development capability.",
+            "production ready": "Yes, core production features exist.",
+            "expand further": "Yes, it's built for future growth."
         };
 
-        // --- APP COMPONENTS ---
+        // ======================
+        // ENHANCED KEYWORD MAPPING FOR LMS-MALD
+        // ======================
 
+        const keywordDatabase = {
+            // GREETINGS & BASIC
+            "hello": ["hello", "hi", "hey", "greetings"],
+            "help": ["help", "assist", "support", "guide"],
+            "about": ["what is", "about platform", "lms mald", "learning platform"],
+            
+            // AUTHENTICATION
+            "login": ["log in", "sign in", "login", "access", "authenticate"],
+            "register": ["sign up", "register", "create account", "new user"],
+            "password": ["password", "credentials", "forgot password", "reset password"],
+            "role": ["role", "student", "teacher", "admin", "permissions"],
+            "security": ["secure", "safe", "protection", "authentication"],
+            
+            // COURSE MANAGEMENT
+            "courses": ["courses", "classes", "subjects", "modules"],
+            "enroll": ["enroll", "join", "register for", "sign up for"],
+            "create course": ["create course", "new course", "course creation"],
+            "manage course": ["edit course", "update course", "modify course", "delete course"],
+            "course content": ["content", "materials", "lessons", "syllabus"],
+            
+            // MATERIALS & UPLOADS
+            "upload": ["upload", "add files", "submit materials", "upload files"],
+            "preview": ["preview", "view", "see", "open file"],
+            "file types": ["file types", "formats", "pdf", "video", "image"],
+            "download": ["download", "save", "get files", "export"],
+            
+            // ASSIGNMENTS
+            "assignments": ["assignments", "homework", "projects", "tasks"],
+            "submit assignment": ["submit", "upload assignment", "hand in"],
+            "deadlines": ["deadline", "due date", "submission date", "time limit"],
+            "grades": ["grades", "marks", "scores", "results", "grading"],
+            
+            // NOTIFICATIONS
+            "notifications": ["notifications", "alerts", "updates", "reminders"],
+            "settings": ["settings", "preferences", "configuration", "options"],
+            
+            // DEVELOPMENT
+            "backend": ["backend", "node.js", "express", "api"],
+            "frontend": ["frontend", "ui", "interface", "responsive"],
+            "challenges": ["challenge", "difficult", "problem", "issue"],
+            "team": ["team", "teamwork", "collaboration", "group project"]
+        };
+
+        // ======================
+        // TOMMY VOICE ASSISTANT ENGINE
+        // ======================
+
+        const tommyBrain = {
+            // Enhanced keyword matching with priority scoring
+            detectIntent(question) {
+                const q = question.toLowerCase().trim();
+                let bestMatch = null;
+                let highestScore = 0;
+                
+                // First, check for exact matches in the Q&A database
+                for (const [key] of Object.entries(lmsMaldQA)) {
+                    if (q === key || q.includes(key)) {
+                        return key;
+                    }
+                }
+                
+                // Score each keyword category
+                for (const [intent, keywords] of Object.entries(keywordDatabase)) {
+                    let score = 0;
+                    
+                    // Check for exact keyword matches
+                    for (const keyword of keywords) {
+                        if (q.includes(keyword)) {
+                            score += 10; // High score for exact match
+                        }
+                    }
+                    
+                    // Check for partial matches
+                    const words = q.split(' ');
+                    for (const word of words) {
+                        if (word.length > 3) { // Only consider meaningful words
+                            for (const keyword of keywords) {
+                                if (keyword.includes(word) || word.includes(keyword)) {
+                                    score += 5; // Medium score for partial match
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Update best match if this category has higher score
+                    if (score > highestScore) {
+                        highestScore = score;
+                        bestMatch = intent;
+                    }
+                }
+                
+                // Return best match if score is significant
+                if (highestScore >= 5 && bestMatch) {
+                    // Find the most relevant Q&A based on the intent
+                    for (const [key, answer] of Object.entries(lmsMaldQA)) {
+                        if (key.includes(bestMatch) || bestMatch.includes(key)) {
+                            return key;
+                        }
+                    }
+                }
+                
+                // Fallback to general category detection
+                if (q.includes('how') || q.includes('what') || q.includes('where') || q.includes('when') || q.includes('why')) {
+                    // Try to match based on common patterns
+                    if (q.includes('login') || q.includes('log in')) return "login as student";
+                    if (q.includes('register') || q.includes('sign up')) return "register as student";
+                    if (q.includes('course') && q.includes('create')) return "create a course";
+                    if (q.includes('course') && q.includes('view')) return "view courses";
+                    if (q.includes('assignment') && q.includes('submit')) return "submit assignments";
+                    if (q.includes('grade') || q.includes('mark')) return "view grades";
+                    if (q.includes('notification')) return "assignment notifications";
+                    if (q.includes('upload') || q.includes('file')) return "upload materials";
+                    if (q.includes('preview')) return "preview files";
+                    if (q.includes('deadline')) return "assignment deadlines";
+                }
+                
+                // Check for common greetings
+                if (q.includes('hello') || q.includes('hi') || q.includes('hey')) return "hello";
+                if (q.includes('help')) return "help";
+                if (q.includes('what is') || q.includes('about')) return "what is lms mald";
+                
+                return null;
+            },
+
+            // Generate voice-friendly response
+            generateResponse(question) {
+                const intent = this.detectIntent(question);
+                
+                if (intent && lmsMaldQA[intent]) {
+                    return lmsMaldQA[intent];
+                } else {
+                    return "I understand you're asking about: \"" + question + "\"\n\nI'm Tommy, your LMS-MALD voice assistant. I can help you with:\n• Login and registration\n• Course enrollment and management\n• Assignment submission and grading\n• File uploads and previews\n• Notifications and updates\n• Platform features and development\n\nPlease ask me a specific question about LMS-MALD features!";
+                }
+            }
+        };
+
+        // ======================================
+        // TOMMY VOICE ASSISTANT WIDGET
+        // ======================================
+
+        const AdvancedChatbotWidget = () => {
+            const [isOpen, setIsOpen] = React.useState(false);
+            const [isTyping, setIsTyping] = React.useState(false);
+            const [inputValue, setInputValue] = React.useState('');
+            const [messages, setMessages] = React.useState([]);
+            const [voiceEnabled, setVoiceEnabled] = React.useState(true);
+            const messagesEndRef = React.useRef(null);
+            const textareaRef = React.useRef(null);
+            const synthRef = React.useRef(null);
+
+            // Initialize speech synthesis
+            React.useEffect(() => {
+                synthRef.current = window.speechSynthesis;
+                
+                if (!synthRef.current) {
+                    console.warn("Speech synthesis not supported");
+                } else {
+                    // Load voices when available
+                    const loadVoices = () => {
+                        const voices = synthRef.current.getVoices();
+                        if (voices.length > 0) {
+                            console.log("Voices loaded:", voices.length);
+                        }
+                    };
+                    
+                    synthRef.current.onvoiceschanged = loadVoices;
+                    loadVoices();
+                }
+            }, []);
+
+            // Load saved memory
+            React.useEffect(() => {
+                const saved = localStorage.getItem("tommy_assistant_chat");
+                if (saved) {
+                    setMessages(JSON.parse(saved));
+                } else {
+                    setMessages([
+                        {
+                            text: "👋 Hello! I'm Tommy, your Istruzione F Voice Assistant!\n\nI have answers for 150+ questions about:\n• Authentication & User Roles\n• Course Management\n• Material Uploads & Previews\n• Assignments & Grading\n• Notifications\n• Development & Technical Details\n\nAsk me anything about the Istruzione F platform!",
+                            isBot: true
+                        }
+                    ]);
+                }
+            }, []);
+
+            // Save memory + autoscroll
+            React.useEffect(() => {
+                if (messages.length > 0) {
+                    localStorage.setItem("tommy_assistant_chat", JSON.stringify(messages.slice(-50)));
+                }
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, [messages]);
+
+            // Enhanced voice output
+            const speak = (text) => {
+                if (!voiceEnabled || !synthRef.current) return;
+                
+                try {
+                    synthRef.current.cancel();
+                    
+                    const cleaned = text
+                        .replace(/\n/g, ". ")
+                        .replace(/[.*_\-]/g, "")
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    
+                    if (!cleaned || cleaned.length < 2) return;
+                    
+                    const utter = new SpeechSynthesisUtterance(cleaned);
+                    utter.rate = 1.1;
+                    utter.pitch = 1.05;
+                    utter.volume = 1;
+                    utter.lang = 'en-US';
+                    
+                    // Try to find a good voice
+                    const voices = synthRef.current.getVoices();
+                    if (voices.length > 0) {
+                        const maleVoice = voices.find(voice => 
+                            voice.name.includes('Male') || 
+                            voice.name.includes('male') ||
+                            voice.name.includes('Google UK English Male')
+                        ) || voices[0];
+                        utter.voice = maleVoice;
+                    }
+                    
+                    setTimeout(() => {
+                        synthRef.current.speak(utter);
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error("Speech synthesis error:", error);
+                }
+            };
+
+            // Handle message send
+            const handleSendMessage = () => {
+                if (!inputValue.trim() || isTyping) return;
+
+                const userMessage = { text: inputValue, isBot: false };
+                setMessages(prev => [...prev, userMessage]);
+
+                const messageText = inputValue;
+                setInputValue('');
+                setIsTyping(true);
+
+                if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+                setTimeout(() => {
+                    const response = tommyBrain.generateResponse(messageText);
+                    const botMessage = { text: response, isBot: true };
+
+                    setMessages(prev => [...prev, botMessage]);
+                    
+                    if (voiceEnabled) {
+                        speak(response);
+                    }
+                    
+                    setIsTyping(false);
+                }, 500);
+            };
+
+            const handleTextareaChange = (e) => {
+                setInputValue(e.target.value);
+                if (textareaRef.current) {
+                    textareaRef.current.style.height = "auto";
+                    textareaRef.current.style.height =
+                        Math.min(textareaRef.current.scrollHeight, 100) + "px";
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            };
+
+            return (
+                <>
+                    {/* Floating Button */}
+                    <div
+                        className="chatbot-widget"
+                        onClick={() => setIsOpen(true)}
+                        title="Tommy - Istruzione F Voice Assistant"
+                    >
+                        💬
+                    </div>
+
+                    {/* Chatbot Window */}
+                    <div className={`chatbot-container ${isOpen ? "active" : ""}`}>
+
+                        {/* Header */}
+                        <div className="chatbot-header">
+                            <div className="chatbot-avatar-small">
+                                T
+                            </div>
+
+                            <div className="chatbot-info">
+                                <h3>Tommy</h3>
+                                <p>Istruzione F Voice Assistant</p>
+                            </div>
+
+                            <div className="header-actions">
+                                <button
+                                    className={`icon-btn ${voiceEnabled ? "active" : ""}`}
+                                    onClick={() => {
+                                        const newState = !voiceEnabled;
+                                        setVoiceEnabled(newState);
+                                        if (newState) {
+                                            speak("Voice activated!");
+                                        }
+                                    }}
+                                    title={voiceEnabled ? "Voice ON - Click to mute" : "Voice OFF - Click to unmute"}
+                                >
+                                    {voiceEnabled ? '🔊' : '🔇'}
+                                </button>
+
+                                <button
+                                    className="icon-btn"
+                                    onClick={() => {
+                                        if (window.confirm("Clear conversation history?")) {
+                                            localStorage.removeItem("tommy_assistant_chat");
+                                            setMessages([{
+                                                text: "👋 Hello! I'm Tommy, your Istruzione F Voice Assistant!\n\nI have answers for 150+ questions about:\n• Authentication & User Roles\n• Course Management\n• Material Uploads & Previews\n• Assignments & Grading\n• Notifications\n• Development & Technical Details\n\nAsk me anything about the Istruzione F platform!",
+                                                isBot: true
+                                            }]);
+                                        }
+                                    }}
+                                    title="Clear History"
+                                >
+                                    🗑️
+                                </button>
+
+                                <button
+                                    className="icon-btn"
+                                    onClick={() => setIsOpen(false)}
+                                    title="Close"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Messages */}
+                        <div className="chatbot-messages">
+                            {messages.map((msg, i) => (
+                                <div
+                                    key={i}
+                                    className={`message ${
+                                        msg.isBot ? "message-bot" : "message-user"
+                                    }`}
+                                >
+                                    {msg.text}
+                                </div>
+                            ))}
+
+                            {isTyping && (
+                                <div className="typing-indicator">
+                                    <div className="typing-dot"></div>
+                                    <div className="typing-dot"></div>
+                                    <div className="typing-dot"></div>
+                                </div>
+                            )}
+
+                            <div ref={messagesEndRef}></div>
+                        </div>
+
+                        {/* Input Box */}
+                        <div className="chatbot-input-container">
+                            <div className="chatbot-input">
+                                <textarea
+                                    ref={textareaRef}
+                                    placeholder="Ask Tommy about Istruzione F... (Enter to send)"
+                                    value={inputValue}
+                                    onChange={handleTextareaChange}
+                                    onKeyPress={handleKeyPress}
+                                    rows={1}
+                                />
+
+                                <button
+                                    onClick={handleSendMessage}
+                                    disabled={!inputValue.trim() || isTyping}
+                                    title="Send Message"
+                                >
+                                    ↑
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        };
+
+        // --- REST OF REACT COMPONENTS (Unchanged) ---
         const SplashScreen = () => {
             return React.createElement('div', { className: 'splash-screen' },
                 React.createElement('div', { className: 'splash-content' },
                     React.createElement('div', { className: 'dinosaur-logo' },
-                        React.createElement('div', { className: 'dino-body' },
-                            React.createElement('div', { className: 'dino-head' },
-                                React.createElement('div', { className: 'dino-eye' })
-                            ),
-                            React.createElement('div', { className: 'dino-neck' }),
-                            React.createElement('div', { className: 'dino-back' }),
-                            React.createElement('div', { className: 'dino-tail' }),
-                            React.createElement('div', { className: 'dino-leg front-leg' }),
-                            React.createElement('div', { className: 'dino-leg back-leg' })
+                        React.createElement('div', { className: 'dino-line-container' },
+                            React.createElement('div', { className: 'dino-line dino-tail', style: { '--final-width': '30px' } }),
+                            React.createElement('div', { className: 'dino-line dino-body-top', style: { '--final-width': '40px' } }),
+                            React.createElement('div', { className: 'dino-line dino-neck-up', style: { '--final-height': '15px' } }),
+                            React.createElement('div', { className: 'dino-line dino-head-top', style: { '--final-width': '20px' } }),
+                            React.createElement('div', { className: 'dino-line dino-leg-back', style: { '--final-height': '10px' } }),
+                            React.createElement('div', { className: 'dino-line dino-leg-front', style: { '--final-height': '10px' } }),
+                            React.createElement('div', { className: 'dino-line dino-ground', style: { '--final-width': '70px' } })
                         )
                     ),
                     React.createElement('div', { className: 'logo-text' },
@@ -499,202 +1187,6 @@
             );
         };
 
-        // --- 🤖 ADVANCED WIDGET (REBUILT) ---
-        const AdvancedChatbotWidget = () => {
-            const [isOpen, setIsOpen] = useState(false);
-            const [isTyping, setIsTyping] = useState(false);
-            const [inputValue, setInputValue] = useState('');
-            
-            // 🧠 1. MEMORY STATE
-            const [messages, setMessages] = useState([]);
-            
-            // 📝 4. LEAD GEN STATE
-            const [isLeadMode, setIsLeadMode] = useState(false);
-            
-            // 🗣️ 5. VOICE STATE
-            const [voiceEnabled, setVoiceEnabled] = useState(false);
-
-            const messagesEndRef = useRef(null);
-            const textareaRef = useRef(null);
-
-            // Load Memory on Mount
-            useEffect(() => {
-                const saved = localStorage.getItem('tommy_history');
-                if (saved) {
-                    setMessages(JSON.parse(saved));
-                } else {
-                    setMessages([{ 
-                        text: "Hello! I'm **Tommy**. I remember our chats. Ask me about **features** or ask for a **human**.", 
-                        isBot: true 
-                    }]);
-                }
-            }, []);
-
-            // Save Memory on Update
-            useEffect(() => {
-                if(messages.length > 0) {
-                    localStorage.setItem('tommy_history', JSON.stringify(messages));
-                }
-                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            }, [messages]);
-
-            // 🗣️ VOICE FUNCTION
-            const speak = (text) => {
-                if (!voiceEnabled || !window.speechSynthesis) return;
-                window.speechSynthesis.cancel(); // Stop previous
-                // Remove markdown symbols for speech
-                const cleanText = text.replace(/\*\*/g, '').replace(/•/g, ''); 
-                const utterance = new SpeechSynthesisUtterance(cleanText);
-                utterance.rate = 1.1;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
-            };
-
-            // ⚡ ACTION EXECUTOR
-            const executeAction = (action) => {
-                if (action === "SCROLL_FEATURES" || action === "SCROLL_PRICING") {
-                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                }
-                if (action === "ACTIVATE_LEAD_GEN") {
-                    setIsLeadMode(true);
-                }
-                if (action === "CLEAR_MEMORY") {
-                    localStorage.removeItem('tommy_history');
-                    setMessages([{ text: "Memory wiped. Starting fresh!", isBot: true }]);
-                }
-            };
-
-            // --- MAIN SEND FUNCTION (Updated to be Async) ---
-            const handleSendMessage = async () => {
-                if (!inputValue.trim() || isTyping) return;
-
-                const userText = inputValue;
-                setMessages(prev => [...prev, { text: userText, isBot: false }]);
-                setInputValue('');
-                setIsTyping(true);
-
-                // Auto-resize textarea back
-                if (textareaRef.current) {
-                    textareaRef.current.style.height = 'auto';
-                }
-
-                // --- 📝 LEAD GEN LOGIC (Local) ---
-                if (isLeadMode) {
-                    setTimeout(() => {
-                        const result = tommyBrain.handleLeadCapture(userText);
-                        const botMsg = { text: result.text, isBot: true };
-                        setMessages(prev => [...prev, botMsg]);
-                        speak(result.text);
-                        setIsTyping(false);
-                        if (result.success) setIsLeadMode(false);
-                    }, 800);
-                    return;
-                }
-
-                // --- 🧠 SERVER LOGIC (Async Fetch) ---
-                try {
-                    const response = await tommyBrain.generateResponse(userText);
-                    
-                    const botMsg = { text: response.text, isBot: true };
-                    setMessages(prev => [...prev, botMsg]);
-                    
-                    setIsTyping(false);
-                    speak(response.text);
-                    if (response.action) executeAction(response.action);
-                } catch (err) {
-                    setIsTyping(false);
-                    setMessages(prev => [...prev, { text: "Error contacting Tommy's brain.", isBot: true }]);
-                }
-            };
-
-            const handleTextareaChange = (e) => {
-                setInputValue(e.target.value);
-                // Auto-resize
-                if (textareaRef.current) {
-                    textareaRef.current.style.height = 'auto';
-                    textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
-                }
-            };
-
-            const handleKeyPress = (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                }
-            };
-
-            return React.createElement(React.Fragment, null,
-                React.createElement('div', { 
-                    className: 'chatbot-widget',
-                    onClick: () => setIsOpen(true)
-                },
-                    React.createElement('div', { className: 'chatbot-icon' }, '💬')
-                ),
-                React.createElement('div', { 
-                    className: `chatbot-container ${isOpen ? 'active' : ''}` 
-                },
-                    // HEADER
-                    React.createElement('div', { className: 'chatbot-header' },
-                        React.createElement('div', { className: 'chatbot-avatar-small' }, 'T'),
-                        React.createElement('div', { className: 'chatbot-info' },
-                            React.createElement('h3', null, 'Tommy'),
-                            React.createElement('p', null, 'Advanced Assistant')
-                        ),
-                        React.createElement('div', { className: 'header-actions' },
-                            React.createElement('button', { 
-                                className: `icon-btn ${voiceEnabled ? 'active' : ''}`, 
-                                onClick: () => setVoiceEnabled(!voiceEnabled),
-                                title: "Toggle Voice"
-                            }, voiceEnabled ? '🔊' : '🔇'),
-                            React.createElement('button', { 
-                                className: 'icon-btn', 
-                                onClick: () => { localStorage.removeItem('tommy_history'); setMessages([]); },
-                                title: "Clear Chat"
-                            }, '🗑️'),
-                            React.createElement('button', { 
-                                className: 'icon-btn', 
-                                onClick: () => setIsOpen(false)
-                            }, '×')
-                        )
-                    ),
-                    // MESSAGES
-                    React.createElement('div', { className: 'chatbot-messages' },
-                        messages.map((message, index) =>
-                            React.createElement('div', {
-                                key: index,
-                                className: `message ${message.isBot ? 'message-bot' : 'message-user'}`
-                            }, React.createElement(MessageText, { text: message.text }))
-                        ),
-                        isTyping && React.createElement('div', { className: 'typing-indicator' },
-                            React.createElement('div', { className: 'typing-dot' }),
-                            React.createElement('div', { className: 'typing-dot' }),
-                            React.createElement('div', { className: 'typing-dot' })
-                        ),
-                        React.createElement('div', { ref: messagesEndRef })
-                    ),
-                    // INPUT
-                    React.createElement('div', { className: 'chatbot-input-container' },
-                        React.createElement('div', { className: 'chatbot-input' },
-                            React.createElement('textarea', {
-                                ref: textareaRef,
-                                className: isLeadMode ? "input-mode-lead" : "",
-                                placeholder: isLeadMode ? "Enter phone number (e.g. 555-0199)..." : "Message Tommy...",
-                                value: inputValue,
-                                onChange: handleTextareaChange,
-                                onKeyPress: handleKeyPress,
-                                rows: 1
-                            }),
-                            React.createElement('button', { 
-                                className: isLeadMode ? "btn-mode-lead" : "",
-                                onClick: handleSendMessage,
-                                disabled: !inputValue.trim() || isTyping
-                            }, isLeadMode ? '📞' : '↑')
-                        )
-                    )
-                )
-            );
-        };
-
         const Footer = () => {
             return React.createElement('footer', { className: 'footer' },
                 React.createElement('div', { className: 'container' },
@@ -723,7 +1215,7 @@
                 const timer = setTimeout(() => {
                     setShowSplash(false);
                     setTimeout(() => setShowContent(true), 500);
-                }, 3000);
+                }, 4100); 
 
                 return () => clearTimeout(timer);
             }, []);
